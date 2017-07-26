@@ -5,7 +5,7 @@
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 
-	<title>Offirmo's Online Adventures</title>
+	<title>Offirmo's Online Adventures: The npm RPG</title>
 
 	<!-- thank you https://realfavicongenerator.net/ -->
 	<link rel="apple-touch-icon" sizes="57x57" href="./assets/favicons/apple-touch-icon-57x57.png?v=20151025">
@@ -33,13 +33,18 @@
 
 	<!-- http://bettermotherfuckingwebsite.com/ -->
 	<style type="text/css">
+		@font-face {
+			font-family: 'PixAntiqua';
+			src:url('assets/pixantiqua-webfont.woff') format('woff');
+		}
+
 		body {
 			margin: 40px auto;
-			font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+			font-family: "Consolas", "Lucida console", monospace;
 			color: #333;
 			max-width: 650px;
 			line-height: 1.6;
-			font-size: 18px;
+			font-size: 20px;
 			padding: 0 10px
 		}
 		h1, h2, h3 {
@@ -49,21 +54,26 @@
 </head>
 
 <header>
-	<img src="assets/profile_800x800.png" width="650">
-	<h1>...</h1>
-	<aside>Welcome, traveller. Let me tell you of high adventure...</aside>
+	<h1>The npm RPG ⚔🛡💰</h1>
+	<aside>A console game in node.</aside>
 </header>
 
-<ul>
-	<li><a href="./the-npm-rpg.html">The npm RPG</a></li>
-	<li>(hopefully coming soon) The Boring RPG reloaded</li>
-</ul>
+<p>
+	The simplest RPG ever! Just run it, and something will happen at each execution.
+</p>
+<p>
+	Inspired by the defunct web game "The Boring RPG". It's so simple that it won't consume your precious mind power!
+</p>
 
 <footer>
-	<a href="https://github.com/Offirmo/ama">Find me on GitHub</a>
+	<ul>
+		<li><a href="https://www.npmjs.com/package/the-npm-rpg">The game on npm</a></li>
+		<li><a href="https://github.com/online-adventures/oh-my-rpg/issues">Report an issue or ask for a feature</a></li>
+		<li><a href="https://github.com/online-adventures/oh-my-rpg">Fork me on GitHub</a></li>
+	</ul>
+	<a href="./index.html">Home</a>
 </footer>
 <script>
-	document.querySelector('h1').textContent = document.title
 	Array.prototype.forEach.call(document.querySelectorAll('a'), function(el) {
 		el.href || (el.href = el.text)
 	})
