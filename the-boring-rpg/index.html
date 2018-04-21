@@ -1,32 +1,86 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <!-- html5_006 : WTE micro template -->
-<html lang="en">
+
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 
-	<title>The Boring RPG, reloaded</title>
+	<title>Offirmo's Online Adventures: The boring RPG, reloaded</title>
 
 	<!-- thank you https://realfavicongenerator.net/ -->
-	<link rel="apple-touch-icon" sizes="180x180" href="assets/favicons/apple-touch-icon.png?v=yyapgPk479">
-	<link rel="icon" type="image/png" sizes="32x32" href="assets/favicons/favicon-32x32.png?v=yyapgPk479">
-	<link rel="icon" type="image/png" sizes="16x16" href="assets/favicons/favicon-16x16.png?v=yyapgPk479">
-	<link rel="manifest" href="assets/favicons/site.webmanifest?v=yyapgPk479">
-	<link rel="mask-icon" href="assets/favicons/safari-pinned-tab.svg?v=yyapgPk479" color="#543d46">
-	<link rel="shortcut icon" href="assets/favicons/favicon.ico?v=yyapgPk479">
-	<meta name="msapplication-TileColor" content="#543d46">
-	<meta name="msapplication-config" content="assets/favicons/browserconfig.xml?v=yyapgPk479">
-	<meta name="theme-color" content="#543d46">
+	<link rel="apple-touch-icon" sizes="57x57" href="../assets/favicons/apple-touch-icon-57x57.png?v=20151025">
+	<link rel="apple-touch-icon" sizes="60x60" href="../assets/favicons/apple-touch-icon-60x60.png?v=20151025">
+	<link rel="apple-touch-icon" sizes="72x72" href="../assets/favicons/apple-touch-icon-72x72.png?v=20151025">
+	<link rel="apple-touch-icon" sizes="76x76" href="../assets/favicons/apple-touch-icon-76x76.png?v=20151025">
+	<link rel="apple-touch-icon" sizes="114x114" href="../assets/favicons/apple-touch-icon-114x114.png?v=20151025">
+	<link rel="apple-touch-icon" sizes="120x120" href="../assets/favicons/apple-touch-icon-120x120.png?v=20151025">
+	<link rel="apple-touch-icon" sizes="144x144" href="../assets/favicons/apple-touch-icon-144x144.png?v=20151025">
+	<link rel="apple-touch-icon" sizes="152x152" href="../assets/favicons/apple-touch-icon-152x152.png?v=20151025">
+	<link rel="apple-touch-icon" sizes="180x180" href="../assets/favicons/apple-touch-icon-180x180.png?v=20151025">
+	<link rel="icon" type="image/png" href="../assets/favicons/favicon-32x32.png?v=20151025" sizes="32x32">
+	<link rel="icon" type="image/png" href="../assets/favicons/favicon-194x194.png?v=20151025" sizes="194x194">
+	<link rel="icon" type="image/png" href="../assets/favicons/favicon-96x96.png?v=20151025" sizes="96x96">
+	<link rel="icon" type="image/png" href="../assets/favicons/android-chrome-192x192.png?v=20151025" sizes="192x192">
+	<link rel="icon" type="image/png" href="../assets/favicons/favicon-16x16.png?v=20151025" sizes="16x16">
+	<link rel="manifest" href="../assets/favicons/manifest.json?v=20151025">
+	<link rel="mask-icon" href="../assets/favicons/safari-pinned-tab.svg?v=20151025" color="#543d46">
+	<link rel="shortcut icon" href="../assets/favicons/favicon.ico?v=20151025">
+	<meta name="msapplication-TileColor" content="#da532c">
+	<meta name="msapplication-TileImage" content="../assets/favicons/mstile-144x144.png?v=20151025">
+	<meta name="msapplication-config" content="../assets/favicons/browserconfig.xml?v=20151025">
+	<!-- removed some -->
+
 
 	<!-- http://bettermotherfuckingwebsite.com/ -->
 	<style type="text/css">
+		@font-face {
+			font-family: 'PixAntiqua';
+			src:url('../assets/pixantiqua-webfont.woff') format('woff');
+		}
+
 		body {
-			background-image: url('assets/naturalcrit/background.jpg');
+			margin: 0 auto 33px auto;
+			font-family: "Consolas", "Lucida console", monospace;
+			color: #333;
+			max-width: 650px;
+			line-height: 1.6;
+			font-size: 16px;
+			padding: 0 10px
+		}
+		h1, h2, h3 {
+			line-height: 1.2
+		}
+		img {
+			image-rendering: -webkit-optimize-contrast;
 		}
 	</style>
-<link href="assets/normalize.css?d4c8555bc329fe98b743" rel="stylesheet"><link href="assets/index.css?d4c8555bc329fe98b743" rel="stylesheet"></head>
+</head>
 
-<body class="top-container">
-<div id="root" class="top-container"></div>
-<script type="text/javascript" src="index_bundle.js?d4c8555bc329fe98b743"></script></body>
-</html>
+<header>
+	<img src="../assets/the-npm-rpg-800x419.jpg" width="100%">
+	<h1>The boring RPG, reloaded ⚔🛡💰</h1>
+	<aside>A rebirth of a good old browser RPG</aside>
+</header>
+
+<p>
+	The simplest RPG ever! Just run it, and something will happen at each execution.
+</p>
+<p>
+	An attempt to replicate the defunct web game "The Boring RPG". It's so simple that it won't consume your precious mind power!
+</p>
+
+<footer>
+	<ul>
+		<li><a href="/apps/the-boring-rpg">play now</a></li>
+		<li><a href="https://github.com/Offirmo/offirmo-monorepo/issues">Report an issue or ask for a feature</a></li>
+		<li><a href="https://github.com/Offirmo/offirmo-monorepo">Fork me on GitHub</a></li>
+	</ul>
+	<a href="../index.html">Home</a>
+</footer>
+<script>
+	Array.prototype.forEach.call(document.querySelectorAll('a'), function(el) {
+		el.href || (el.href = el.text)
+	})
+</script>
+
+
