@@ -8366,7 +8366,7 @@ var GameInstanceProvider = function (_React$Component) {
 		key: 'getChildContext',
 		value: function getChildContext() {
 			return {
-				instance: this.props.instance
+				instance: this.props.game_instance
 			};
 		}
 	}, {
@@ -8399,7 +8399,7 @@ function with_game_instance(WrappedComponent) {
 		_createClass(WithGameInstance, [{
 			key: 'render',
 			value: function render() {
-				var instance = this.context.instance;
+				var instance = this.context.game_instance;
 
 				return _react2.default.createElement(WrappedComponent, _extends({
 					instance: instance,
@@ -9298,7 +9298,7 @@ module.exports = function deepFreeze (o) {
       deepFreeze(o[prop]);
     }
   });
-  
+
   return o;
 };
 
@@ -10677,7 +10677,7 @@ module.exports = function (COLLECTION) {
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * 
+ *
  */
 
 function makeEmptyFunction(arg) {
@@ -28353,7 +28353,7 @@ module.exports = getActiveElement;
  * LICENSE file in the root directory of this source tree.
  *
  * @typechecks
- * 
+ *
  */
 
 /*eslint-disable no-self-compare */
@@ -28425,7 +28425,7 @@ module.exports = shallowEqual;
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * 
+ *
  */
 
 var isTextNode = __webpack_require__(488);
@@ -37581,13 +37581,13 @@ Script.prototype.runInContext = function (context) {
     if (!(context instanceof Context)) {
         throw new TypeError("needs a 'context' argument.");
     }
-    
+
     var iframe = document.createElement('iframe');
     if (!iframe.style) iframe.style = {};
     iframe.style.display = 'none';
-    
+
     document.body.appendChild(iframe);
-    
+
     var win = iframe.contentWindow;
     var wEval = win.eval, wExecScript = win.execScript;
 
@@ -37596,7 +37596,7 @@ Script.prototype.runInContext = function (context) {
         wExecScript.call(win, 'null');
         wEval = win.eval;
     }
-    
+
     forEach(Object_keys(context), function (key) {
         win[key] = context[key];
     });
@@ -37605,11 +37605,11 @@ Script.prototype.runInContext = function (context) {
             win[key] = context[key];
         }
     });
-    
+
     var winKeys = Object_keys(win);
 
     var res = wEval.call(win, this.code);
-    
+
     forEach(Object_keys(win), function (key) {
         // Avoid copying circular objects like `top` and `window` by only
         // updating existing context properties or new properties in the `win`
@@ -37624,9 +37624,9 @@ Script.prototype.runInContext = function (context) {
             defineProp(context, key, win[key]);
         }
     });
-    
+
     document.body.removeChild(iframe);
-    
+
     return res;
 };
 
@@ -39092,7 +39092,7 @@ module.exports = function privateDecrypt(private_key, enc, reverse) {
   } else {
     padding = 4;
   }
-  
+
   var key = parseKeys(private_key);
   var k = key.modulus.byteLength();
   if (enc.length > k || new bn(enc).cmp(key.modulus) >= 0) {
@@ -45769,7 +45769,7 @@ var HomeBase = function (_React$Component) {
 		key: 'componentWillMount',
 		value: function componentWillMount() {
 			console.info('~~ HomeBase componentWillMount');
-			this.props.instance.set_client_state(function (client_state) {
+			this.props.game_instance.set_client_state(function (client_state) {
 				return {
 					mode: 'base'
 				};
@@ -45787,7 +45787,7 @@ var HomeBase = function (_React$Component) {
 					switch (_context2.prev = _context2.next) {
 						case 0:
 							console.info('~~ gen_next_step');
-							instance = this.props.instance;
+							instance = this.props.game_instance;
 							_loop = /*#__PURE__*/regeneratorRuntime.mark(function _loop() {
 								var steps, state, ui_state, last_adventure, good_click_count, $doc, msg_main, tip_doc;
 								return regeneratorRuntime.wrap(function _loop$(_context) {
@@ -45928,7 +45928,7 @@ var HomeBase = function (_React$Component) {
 		value: function render() {
 			var _this3 = this;
 
-			var client_state = this.props.instance.get_client_state();
+			var client_state = this.props.game_instance.get_client_state();
 			return _react2.default.createElement(
 				'div',
 				{ className: 'page page--home flex-column overflow-y⁚auto' },
@@ -45936,7 +45936,7 @@ var HomeBase = function (_React$Component) {
 					initial_bubbles: client_state.home_bubbles,
 					gen_next_step: this.gen_next_step(),
 					on_unmount: function on_unmount(bubbles) {
-						_this3.props.instance.set_client_state(function (client_state) {
+						_this3.props.game_instance.set_client_state(function (client_state) {
 							return {
 								home_bubbles: bubbles
 							};
@@ -47001,7 +47001,7 @@ var _actionButton = __webpack_require__(681);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function TBRPGElementBase(_ref) {
-	var instance = _ref.instance,
+	var instance = _ref.game_instance,
 	    state = _ref.state,
 	    children = _ref.children,
 	    uuid = _ref.uuid;
@@ -47067,7 +47067,7 @@ var ACTION_TYPE_TO_CTA = {
 if (Object.keys(_stateTheBoringRpg.ActionType).join(';') !== Object.keys(ACTION_TYPE_TO_CTA).join(';')) throw new Error('Internal error: ACTION_TYPE_TO_CTA needs an update!');
 
 function ActionButtonBase(_ref) {
-	var instance = _ref.instance,
+	var instance = _ref.game_instance,
 	    state = _ref.state,
 	    action = _ref.action;
 
@@ -47132,7 +47132,7 @@ var InventoryBase = function (_React$Component) {
 		value: function componentWillMount() {
 			console.info('~~ InventoryBase componentWillMount');
 
-			this.props.instance.set_client_state(function (client_state) {
+			this.props.game_instance.set_client_state(function (client_state) {
 				return {
 					mode: 'inventory'
 				};
@@ -47145,7 +47145,7 @@ var InventoryBase = function (_React$Component) {
 
 			console.info('~~ InventoryBase componentDidMount');
 			// subscribe to future state changes
-			this.unsubscribe = this.props.instance.subscribe(function () {
+			this.unsubscribe = this.props.game_instance.subscribe(function () {
 				return _this2.forceUpdate();
 			});
 		}
@@ -47158,7 +47158,7 @@ var InventoryBase = function (_React$Component) {
 	}, {
 		key: 'render',
 		value: function render() {
-			var instance = this.props.instance;
+			var instance = this.props.game_instance;
 
 			var state = instance.get_latest_state();
 
@@ -47242,7 +47242,7 @@ var CharacterSheetBase = function (_React$Component) {
 		key: 'componentWillMount',
 		value: function componentWillMount() {
 			console.info('~~ CharacterSheetBase componentWillMount');
-			this.props.instance.set_client_state(function () {
+			this.props.game_instance.set_client_state(function () {
 				return {
 					mode: 'inventory'
 				};
@@ -47257,7 +47257,7 @@ var CharacterSheetBase = function (_React$Component) {
 					switch (_context.prev = _context.next) {
 						case 0:
 							console.info('~~ gen_next_step');
-							instance = this.props.instance;
+							instance = this.props.game_instance;
 
 						case 2:
 							steps = [];
@@ -47367,7 +47367,7 @@ var CharacterSheetBase = function (_React$Component) {
 
 			console.info('~~ CharacterSheetBase componentDidMount');
 			// subscribe to future state changes
-			this.unsubscribe = this.props.instance.subscribe(function () {
+			this.unsubscribe = this.props.game_instance.subscribe(function () {
 				return _this2.forceUpdate();
 			});
 		}
@@ -47382,7 +47382,7 @@ var CharacterSheetBase = function (_React$Component) {
 		value: function render() {
 			var _this3 = this;
 
-			var instance = this.props.instance;
+			var instance = this.props.game_instance;
 
 			var state = instance.get_latest_state();
 			var doc = (0, _viewRichText.render_character_sheet)(state.avatar);
@@ -47500,7 +47500,7 @@ var AboutBase = function (_React$Component) {
 		key: 'componentWillMount',
 		value: function componentWillMount() {
 			console.info('~~ AboutBase componentWillMount');
-			this.props.instance.set_client_state(function () {
+			this.props.game_instance.set_client_state(function () {
 				return {
 					mode: 'about'
 				};
@@ -47515,7 +47515,7 @@ var AboutBase = function (_React$Component) {
 					switch (_context.prev = _context.next) {
 						case 0:
 							console.info('~~ gen_next_step');
-							instance = this.props.instance;
+							instance = this.props.game_instance;
 
 						case 2:
 							steps = [];
@@ -47646,7 +47646,7 @@ var AboutBase = function (_React$Component) {
 
 			console.info('~~ AboutBase componentDidMount');
 			// subscribe to future state changes
-			this.unsubscribe = this.props.instance.subscribe(function () {
+			this.unsubscribe = this.props.game_instance.subscribe(function () {
 				return _this2.forceUpdate();
 			});
 		}
@@ -47659,7 +47659,7 @@ var AboutBase = function (_React$Component) {
 	}, {
 		key: 'render',
 		value: function render() {
-			var instance = this.props.instance;
+			var instance = this.props.game_instance;
 
 			var state = instance.get_latest_state();
 
@@ -47733,7 +47733,7 @@ var ExportSavegameBase = function (_React$Component) {
 	}, {
 		key: 'render',
 		value: function render() {
-			var instance = this.props.instance;
+			var instance = this.props.game_instance;
 
 			var state = instance.get_latest_state();
 
