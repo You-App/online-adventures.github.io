@@ -1,5 +1,12 @@
 # Redirects from what the browser requests to what we serve
 # https://www.netlify.com/docs/redirects/
 
-apps/the-boring-rpg/*   apps/the-boring-rpg/   200
-apps/clicker/*          apps/clicker/          200
+# webapps
+apps/the-boring-rpg/*   apps/the-boring-rpg/index.html   200
+apps/clicker/*          apps/clicker/                    200
+
+# legacy (pages moved)
+/boringrpg              /the-boring-rpg
+
+# test
+apps/the-boring-rpg-test/*   apps/the-boring-rpg-test/   200
