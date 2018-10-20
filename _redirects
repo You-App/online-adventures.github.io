@@ -9,4 +9,4 @@ apps/clicker/*          apps/clicker/                    200
 /boringrpg/*              /the-boring-rpg/
 
 # test
-apps/the-boring-rpg-test/*   apps/the-boring-rpg-test/index.html   200
+apps/the-boring-rpg-preprod/*   apps/the-boring-rpg-preprod/index.html   200
