@@ -67,14 +67,19 @@
 		el.href || (el.href = el.text)
 	})
 
+	const current_url = new URL(window.location.href)
+	if (current_url.hash) {
+		// for help logging in dev
+		console.log(current_url.hash)
+	}
 	// redirect to the appropriate webapp if it was requested
+	// XXX may not be required at all!
 	const REDIRECT_LS_KEY = 'OA.pending_redirect'
 	let redirect_request = localStorage.getItem(REDIRECT_LS_KEY)
 	if (redirect_request) {
 		try {
 			redirect_request = JSON.parse(redirect_request)
 			console.warn('Seen redirect request!', redirect_request)
-			const current_url = new URL(window.location.href)
 			const target_url = new URL(redirect_request.url)
 			if (target_url.host !== current_url.host) {
 				// should never happen since LS is not cross domain, but could be an attack.
