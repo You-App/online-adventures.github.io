@@ -48,7 +48,7 @@
     "siteUrl": "undefined",
     "cookiesAlert": "",
     "gdpr": "",
-    "google-analytics": "",
+    "google-analytics": "<!-- Global site tag (gtag.js) - Google Analytics -->\r\n<script defer src=\"https://www.googletagmanager.com/gtag/js?id=UA-103238291-2\"></script>\r\n<script defer src=\"./index.js\"></script>\r\n<!-- netlify identity, hard to embed in the bundle (babel issues) -->\r\n<script defer type=\"text/javascript\" src=\"https://identity.netlify.com/v1/netlify-identity-widget.js\"></script>",
     "uniqCompNum": 39,
     "versionPublish": "4.9.7",
     "screenshot": "screenshot.png"
