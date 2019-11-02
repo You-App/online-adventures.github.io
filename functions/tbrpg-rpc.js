@@ -1,4 +1,116 @@
-!function(e,r){for(var t in r)e[t]=r[t]}(exports,function(e){var r={};function t(n){if(r[n])return r[n].exports;var o=r[n]={i:n,l:!1,exports:{}};return e[n].call(o.exports,o,o.exports,t),o.l=!0,o.exports}return t.m=e,t.c=r,t.d=function(e,r,n){t.o(e,r)||Object.defineProperty(e,r,{enumerable:!0,get:n})},t.r=function(e){"undefined"!=typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(e,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(e,"__esModule",{value:!0})},t.t=function(e,r){if(1&r&&(e=t(e)),8&r)return e;if(4&r&&"object"==typeof e&&e&&e.__esModule)return e;var n=Object.create(null);if(t.r(n),Object.defineProperty(n,"default",{enumerable:!0,value:e}),2&r&&"string"!=typeof e)for(var o in e)t.d(n,o,function(r){return e[r]}.bind(null,o));return n},t.n=function(e){var r=e&&e.__esModule?function(){return e.default}:function(){return e};return t.d(r,"a",r),r},t.o=function(e,r){return Object.prototype.hasOwnProperty.call(e,r)},t.p="",t(t.s=7)}([function(e,r,t){"use strict";function n(){for(var e=[],r=0;r<arguments.length;r++)e[r]=arguments[r];if("string"==typeof e[0]){for(var t={},n=0,o=e;n<o.length;n++){var u=o[n];t[u]=u}return t}return e[0]}Object.defineProperty(r,"__esModule",{value:!0}),r.Enum=n,function(e){function r(e){for(var r=[],t=0,n=Object.keys(e);t<n.length;t++){var o=n[t];r.push(e[o])}return r}e.ofKeys=function(e){for(var r={},t=0,n=Object.keys(e);t<n.length;t++){var o=n[t];r[o]=o}return r},e.keys=function(e){return Object.keys(e)},e.values=r,e.isType=function(e,t){return-1!==r(e).indexOf(t)}}(n=r.Enum||(r.Enum={}))},function(e,r,t){"use strict";Object.defineProperty(r,"__esModule",{value:!0});const n=t(13);r.create_error=function(e,r={}){const t=new Error(e);return Object.keys(r).forEach(e=>{n.COMMON_ERROR_FIELDS.has(e)&&"name"!==e&&"message"!==e&&"stack"!==e?t[e]=r[e]:(t.details=t.details||{},t.details[e]=r[e])}),t}},function(e,r,t){"use strict";t.r(r);var n=t(0);const o=Object(n.Enum)("play","equip_item","sell_item","rename_avatar","change_avatar_class","redeem_code","start_game","on_start_session","on_logged_in_refresh","acknowledge_engagement_msg_seen","update_to_now","hack");function u(){return n.Enum.keys(o)}const a=Object(n.Enum)("savegame","savegame-bkp","savegame-bkp-m1","savegame-bkp-m2","cloud.pending-actions"),c=Object(n.Enum)("echo","sync");t.d(r,"ActionType",(function(){return o})),t.d(r,"get_action_types",(function(){return u})),t.d(r,"StorageKey",(function(){return a})),t.d(r,"Method",(function(){return c}))},,,,,function(e,r,t){"use strict";Object.defineProperty(r,"__esModule",{value:!0});const n=t(0),o=t(8),u=t(1),a=t(2),c=t(9);r.handler=async(e,r)=>{if(console.log("\n******* handling a tbrpg-rpc… *******"),!r.clientContext)throw new Error("No/bad/outdated token!");if(!r.clientContext.user)throw new Error("No/bad/outdated token!");let t=500,i={jsonrpc:"2.0",id:"???",error:o.DEFAULT_JSONRPC_ERROR_PAYLOAD,result:void 0};try{i.error.code=o.JSONRPC_CODE.invalid_request,t=400,function(e){const{httpMethod:r,body:t,isBase64Encoded:n}=e;if("PUT"!==r)throw u.create_error("Wrong HTTP method!",{statusCode:405});if(n)throw u.create_error("Base 64 unexpected!",{statusCode:422});if(!t||t.length>3e4)throw u.create_error("Bad body!",{statusCode:413})}(e);const r=function(e,r){let t;try{t=JSON.parse(r.body)}catch(r){throw console.error(r),e.error.code=o.JSONRPC_CODE.parse_error,u.create_error("JSON.Parse error!",{statusCode:400})}if(Array.isArray(t))throw e.error.code=o.JSONRPC_CODE.parse_error,u.create_error("Batch RPC not implemented!",{statusCode:501});if("id,jsonrpc,method,params"!==Object.keys(t).sort().join(",")||"2.0"!==t.jsonrpc||!Number.isInteger(t.id)&&"string"!=typeof t.id)throw e.error.code=o.JSONRPC_CODE.invalid_request,u.create_error("Bad JSON-RPC structure!",{statusCode:400});if(e.id=t.id,e.error.data.method=t.method,Object.keys(t.params).length<1)throw e.error.code=o.JSONRPC_CODE.invalid_params,u.create_error("Invalid params!",{statusCode:400});if(!n.Enum.isType(a.Method,t.method))throw e.error.code=o.JSONRPC_CODE.method_not_found,u.create_error("Invalid RPC method!",{statusCode:400});return t}(i,e);if(i.error.code=o.JSONRPC_CODE.internal_error,i.error.message="Unknown internal error while processing the request!",t=500,(i=c.process_rpc(r,i)).error&&i.result)throw new Error("Internal error: unclear result after handling!");i.result&&(t=200)}catch(e){t=e.statusCode||t,i.error=e.jsonrpc_response?e.jsonrpc_response:i.error?i.error:o.DEFAULT_JSONRPC_ERROR_PAYLOAD,i.error.message=e.message,delete i.result}return{statusCode:t,body:JSON.stringify(i)}}},function(e,r,t){"use strict";Object.defineProperty(r,"__esModule",{value:!0});const n={parse_error:-32700,invalid_request:-32600,method_not_found:-32601,invalid_params:-32602,internal_error:-32603};r.JSONRPC_CODE=n;const o={code:n.internal_error,message:"Internal error!",data:{}};r.DEFAULT_JSONRPC_ERROR_PAYLOAD=o},function(e,r,t){"use strict";Object.defineProperty(r,"__esModule",{value:!0});const n=t(10),o=t(1),u=t(2),a=n.__importDefault(t(11)),c=n.__importDefault(t(12));r.process_rpc=function(e,r){const{method:t}=e;switch(t){case u.Method.echo:return a.default(e,r);case u.Method.sync:return c.default(e,r);default:throw o.create_error("RPC method not implemented!",{method:t,statusCode:501})}}},function(e,r,t){"use strict";t.r(r),t.d(r,"__extends",(function(){return o})),t.d(r,"__assign",(function(){return u})),t.d(r,"__rest",(function(){return a})),t.d(r,"__decorate",(function(){return c})),t.d(r,"__param",(function(){return i})),t.d(r,"__metadata",(function(){return s})),t.d(r,"__awaiter",(function(){return f})),t.d(r,"__generator",(function(){return l})),t.d(r,"__exportStar",(function(){return d})),t.d(r,"__values",(function(){return _})),t.d(r,"__read",(function(){return p})),t.d(r,"__spread",(function(){return y})),t.d(r,"__spreadArrays",(function(){return h})),t.d(r,"__await",(function(){return m})),t.d(r,"__asyncGenerator",(function(){return b})),t.d(r,"__asyncDelegator",(function(){return v})),t.d(r,"__asyncValues",(function(){return O})),t.d(r,"__makeTemplateObject",(function(){return g})),t.d(r,"__importStar",(function(){return w})),t.d(r,"__importDefault",(function(){return P}));
+(function(e, a) { for(var i in a) e[i] = a[i]; }(exports, /******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId]) {
+/******/ 			return installedModules[moduleId].exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// define getter function for harmony exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		if(!__webpack_require__.o(exports, name)) {
+/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
+/******/ 		}
+/******/ 	};
+/******/
+/******/ 	// define __esModule on exports
+/******/ 	__webpack_require__.r = function(exports) {
+/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 		}
+/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 	};
+/******/
+/******/ 	// create a fake namespace object
+/******/ 	// mode & 1: value is a module id, require it
+/******/ 	// mode & 2: merge all properties of value into the ns
+/******/ 	// mode & 4: return value when already ns object
+/******/ 	// mode & 8|1: behave like require
+/******/ 	__webpack_require__.t = function(value, mode) {
+/******/ 		if(mode & 1) value = __webpack_require__(value);
+/******/ 		if(mode & 8) return value;
+/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
+/******/ 		var ns = Object.create(null);
+/******/ 		__webpack_require__.r(ns);
+/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
+/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
+/******/ 		return ns;
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "";
+/******/
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 104);
+/******/ })
+/************************************************************************/
+/******/ ({
+
+/***/ 0:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__extends", function() { return __extends; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__assign", function() { return __assign; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__rest", function() { return __rest; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__decorate", function() { return __decorate; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__param", function() { return __param; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__metadata", function() { return __metadata; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__awaiter", function() { return __awaiter; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__generator", function() { return __generator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__exportStar", function() { return __exportStar; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__values", function() { return __values; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__read", function() { return __read; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__spread", function() { return __spread; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__spreadArrays", function() { return __spreadArrays; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__await", function() { return __await; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__asyncGenerator", function() { return __asyncGenerator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__asyncDelegator", function() { return __asyncDelegator; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__asyncValues", function() { return __asyncValues; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__makeTemplateObject", function() { return __makeTemplateObject; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__importStar", function() { return __importStar; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "__importDefault", function() { return __importDefault; });
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation. All rights reserved.
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
@@ -13,4 +125,662 @@ MERCHANTABLITY OR NON-INFRINGEMENT.
 See the Apache Version 2.0 License for specific language governing permissions
 and limitations under the License.
 ***************************************************************************** */
-var n=function(e,r){return(n=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(e,r){e.__proto__=r}||function(e,r){for(var t in r)r.hasOwnProperty(t)&&(e[t]=r[t])})(e,r)};function o(e,r){function t(){this.constructor=e}n(e,r),e.prototype=null===r?Object.create(r):(t.prototype=r.prototype,new t)}var u=function(){return(u=Object.assign||function(e){for(var r,t=1,n=arguments.length;t<n;t++)for(var o in r=arguments[t])Object.prototype.hasOwnProperty.call(r,o)&&(e[o]=r[o]);return e}).apply(this,arguments)};function a(e,r){var t={};for(var n in e)Object.prototype.hasOwnProperty.call(e,n)&&r.indexOf(n)<0&&(t[n]=e[n]);if(null!=e&&"function"==typeof Object.getOwnPropertySymbols){var o=0;for(n=Object.getOwnPropertySymbols(e);o<n.length;o++)r.indexOf(n[o])<0&&Object.prototype.propertyIsEnumerable.call(e,n[o])&&(t[n[o]]=e[n[o]])}return t}function c(e,r,t,n){var o,u=arguments.length,a=u<3?r:null===n?n=Object.getOwnPropertyDescriptor(r,t):n;if("object"==typeof Reflect&&"function"==typeof Reflect.decorate)a=Reflect.decorate(e,r,t,n);else for(var c=e.length-1;c>=0;c--)(o=e[c])&&(a=(u<3?o(a):u>3?o(r,t,a):o(r,t))||a);return u>3&&a&&Object.defineProperty(r,t,a),a}function i(e,r){return function(t,n){r(t,n,e)}}function s(e,r){if("object"==typeof Reflect&&"function"==typeof Reflect.metadata)return Reflect.metadata(e,r)}function f(e,r,t,n){return new(t||(t=Promise))((function(o,u){function a(e){try{i(n.next(e))}catch(e){u(e)}}function c(e){try{i(n.throw(e))}catch(e){u(e)}}function i(e){e.done?o(e.value):new t((function(r){r(e.value)})).then(a,c)}i((n=n.apply(e,r||[])).next())}))}function l(e,r){var t,n,o,u,a={label:0,sent:function(){if(1&o[0])throw o[1];return o[1]},trys:[],ops:[]};return u={next:c(0),throw:c(1),return:c(2)},"function"==typeof Symbol&&(u[Symbol.iterator]=function(){return this}),u;function c(u){return function(c){return function(u){if(t)throw new TypeError("Generator is already executing.");for(;a;)try{if(t=1,n&&(o=2&u[0]?n.return:u[0]?n.throw||((o=n.return)&&o.call(n),0):n.next)&&!(o=o.call(n,u[1])).done)return o;switch(n=0,o&&(u=[2&u[0],o.value]),u[0]){case 0:case 1:o=u;break;case 4:return a.label++,{value:u[1],done:!1};case 5:a.label++,n=u[1],u=[0];continue;case 7:u=a.ops.pop(),a.trys.pop();continue;default:if(!(o=(o=a.trys).length>0&&o[o.length-1])&&(6===u[0]||2===u[0])){a=0;continue}if(3===u[0]&&(!o||u[1]>o[0]&&u[1]<o[3])){a.label=u[1];break}if(6===u[0]&&a.label<o[1]){a.label=o[1],o=u;break}if(o&&a.label<o[2]){a.label=o[2],a.ops.push(u);break}o[2]&&a.ops.pop(),a.trys.pop();continue}u=r.call(e,a)}catch(e){u=[6,e],n=0}finally{t=o=0}if(5&u[0])throw u[1];return{value:u[0]?u[1]:void 0,done:!0}}([u,c])}}}function d(e,r){for(var t in e)r.hasOwnProperty(t)||(r[t]=e[t])}function _(e){var r="function"==typeof Symbol&&e[Symbol.iterator],t=0;return r?r.call(e):{next:function(){return e&&t>=e.length&&(e=void 0),{value:e&&e[t++],done:!e}}}}function p(e,r){var t="function"==typeof Symbol&&e[Symbol.iterator];if(!t)return e;var n,o,u=t.call(e),a=[];try{for(;(void 0===r||r-- >0)&&!(n=u.next()).done;)a.push(n.value)}catch(e){o={error:e}}finally{try{n&&!n.done&&(t=u.return)&&t.call(u)}finally{if(o)throw o.error}}return a}function y(){for(var e=[],r=0;r<arguments.length;r++)e=e.concat(p(arguments[r]));return e}function h(){for(var e=0,r=0,t=arguments.length;r<t;r++)e+=arguments[r].length;var n=Array(e),o=0;for(r=0;r<t;r++)for(var u=arguments[r],a=0,c=u.length;a<c;a++,o++)n[o]=u[a];return n}function m(e){return this instanceof m?(this.v=e,this):new m(e)}function b(e,r,t){if(!Symbol.asyncIterator)throw new TypeError("Symbol.asyncIterator is not defined.");var n,o=t.apply(e,r||[]),u=[];return n={},a("next"),a("throw"),a("return"),n[Symbol.asyncIterator]=function(){return this},n;function a(e){o[e]&&(n[e]=function(r){return new Promise((function(t,n){u.push([e,r,t,n])>1||c(e,r)}))})}function c(e,r){try{(t=o[e](r)).value instanceof m?Promise.resolve(t.value.v).then(i,s):f(u[0][2],t)}catch(e){f(u[0][3],e)}var t}function i(e){c("next",e)}function s(e){c("throw",e)}function f(e,r){e(r),u.shift(),u.length&&c(u[0][0],u[0][1])}}function v(e){var r,t;return r={},n("next"),n("throw",(function(e){throw e})),n("return"),r[Symbol.iterator]=function(){return this},r;function n(n,o){r[n]=e[n]?function(r){return(t=!t)?{value:m(e[n](r)),done:"return"===n}:o?o(r):r}:o}}function O(e){if(!Symbol.asyncIterator)throw new TypeError("Symbol.asyncIterator is not defined.");var r,t=e[Symbol.asyncIterator];return t?t.call(e):(e=_(e),r={},n("next"),n("throw"),n("return"),r[Symbol.asyncIterator]=function(){return this},r);function n(t){r[t]=e[t]&&function(r){return new Promise((function(n,o){(function(e,r,t,n){Promise.resolve(n).then((function(r){e({value:r,done:t})}),r)})(n,o,(r=e[t](r)).done,r.value)}))}}}function g(e,r){return Object.defineProperty?Object.defineProperty(e,"raw",{value:r}):e.raw=r,e}function w(e){if(e&&e.__esModule)return e;var r={};if(null!=e)for(var t in e)Object.hasOwnProperty.call(e,t)&&(r[t]=e[t]);return r.default=e,r}function P(e){return e&&e.__esModule?e:{default:e}}},function(e,r,t){"use strict";Object.defineProperty(r,"__esModule",{value:!0}),r.default=function(e,r){const{method:t,params:n}=e;return r.result={method:t,params:n},delete r.error,r}},function(e,r,t){"use strict";Object.defineProperty(r,"__esModule",{value:!0}),r.default=function(e,r){return r.error.message="not implemented!",r}},function(e,r,t){"use strict";function n(){return new Set(["name","message","stack","code","statusCode","shouldRedirect","framesToPop","details","SEC","_temp"])}t.r(r);const o=n();t.d(r,"COMMON_ERROR_FIELDS",(function(){return o})),t.d(r,"create",(function(){return n}))}]));
+/* global Reflect, Promise */
+
+var extendStatics = function(d, b) {
+    extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return extendStatics(d, b);
+};
+
+function __extends(d, b) {
+    extendStatics(d, b);
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
+
+var __assign = function() {
+    __assign = Object.assign || function __assign(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+        }
+        return t;
+    }
+    return __assign.apply(this, arguments);
+}
+
+function __rest(s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+}
+
+function __decorate(decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+}
+
+function __param(paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+}
+
+function __metadata(metadataKey, metadataValue) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
+}
+
+function __awaiter(thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+}
+
+function __generator(thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+}
+
+function __exportStar(m, exports) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+
+function __values(o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+}
+
+function __read(o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+}
+
+function __spread() {
+    for (var ar = [], i = 0; i < arguments.length; i++)
+        ar = ar.concat(__read(arguments[i]));
+    return ar;
+}
+
+function __spreadArrays() {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
+
+function __await(v) {
+    return this instanceof __await ? (this.v = v, this) : new __await(v);
+}
+
+function __asyncGenerator(thisArg, _arguments, generator) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var g = generator.apply(thisArg, _arguments || []), i, q = [];
+    return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i;
+    function verb(n) { if (g[n]) i[n] = function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]) > 1 || resume(n, v); }); }; }
+    function resume(n, v) { try { step(g[n](v)); } catch (e) { settle(q[0][3], e); } }
+    function step(r) { r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r); }
+    function fulfill(value) { resume("next", value); }
+    function reject(value) { resume("throw", value); }
+    function settle(f, v) { if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]); }
+}
+
+function __asyncDelegator(o) {
+    var i, p;
+    return i = {}, verb("next"), verb("throw", function (e) { throw e; }), verb("return"), i[Symbol.iterator] = function () { return this; }, i;
+    function verb(n, f) { i[n] = o[n] ? function (v) { return (p = !p) ? { value: __await(o[n](v)), done: n === "return" } : f ? f(v) : v; } : f; }
+}
+
+function __asyncValues(o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator], i;
+    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+}
+
+function __makeTemplateObject(cooked, raw) {
+    if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
+    return cooked;
+};
+
+function __importStar(mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result.default = mod;
+    return result;
+}
+
+function __importDefault(mod) {
+    return (mod && mod.__esModule) ? mod : { default: mod };
+}
+
+
+/***/ }),
+
+/***/ 10:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+function Enum() {
+    var values = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        values[_i] = arguments[_i];
+    }
+    if (typeof values[0] === "string") {
+        var result = {};
+        for (var _a = 0, values_1 = values; _a < values_1.length; _a++) {
+            var value = values_1[_a];
+            result[value] = value;
+        }
+        return result;
+    }
+    else {
+        return values[0];
+    }
+}
+exports.Enum = Enum;
+(function (Enum) {
+    function ofKeys(e) {
+        var result = {};
+        for (var _i = 0, _a = Object.keys(e); _i < _a.length; _i++) {
+            var key = _a[_i];
+            result[key] = key;
+        }
+        return result;
+    }
+    Enum.ofKeys = ofKeys;
+    function keys(e) {
+        return Object.keys(e);
+    }
+    Enum.keys = keys;
+    function values(e) {
+        var result = [];
+        for (var _i = 0, _a = Object.keys(e); _i < _a.length; _i++) {
+            var key = _a[_i];
+            result.push(e[key]);
+        }
+        return result;
+    }
+    Enum.values = values;
+    function isType(e, value) {
+        return values(e).indexOf(value) !== -1;
+    }
+    Enum.isType = isType;
+})(Enum = exports.Enum || (exports.Enum = {}));
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ 104:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+const typescript_string_enums_1 = __webpack_require__(10);
+
+const interfaces_1 = __webpack_require__(94);
+
+const consts_1 = __webpack_require__(30);
+
+const utils_1 = __webpack_require__(22);
+
+const tbrpg_1 = __webpack_require__(105); ////////////////////////////////////
+
+
+const handler = async (event, badly_typed_context) => {
+  console.log('\n******* handling a tbrpg-rpc… *******');
+  const context = badly_typed_context;
+  if (!context.clientContext) throw new Error('No/bad/outdated token [1]!');
+  if (!context.clientContext.user) throw new Error('No/bad/outdated token [2]!');
+  let statusCode = 500;
+  let res = {
+    jsonrpc: '2.0',
+    id: '???',
+    error: consts_1.get_default_JsonRpc_error(),
+    result: undefined
+  };
+
+  try {
+    res.error.code = consts_1.JSONRPC_CODE.invalid_request;
+    statusCode = 400;
+    check_sanity(event);
+    const req = parse_jsonrpc_requests(res, event);
+    res.error.code = consts_1.JSONRPC_CODE.internal_error;
+    res.error.message = 'Unknown internal error while processing the request!';
+    statusCode = 500; // TODO extract Context
+
+    res = tbrpg_1.process_rpc(req, res);
+    if (res.error && res.result) throw new Error('Internal error: unclear result after handling!');
+    if (res.result) statusCode = 200; // was processed correctly
+  } catch (err) {
+    statusCode = err.statusCode || statusCode;
+    res.error = err.jsonrpc_response ? err.jsonrpc_response : res.error ? res.error // the default one we put at the start
+    : consts_1.get_default_JsonRpc_error(); // it could have been deleted
+
+    res.error.message = err.message; // forced, or wouldn't have needed to catch
+
+    delete res.result;
+  }
+
+  return {
+    statusCode,
+    body: JSON.stringify(res)
+  };
+};
+
+exports.handler = handler; ////////////
+
+function check_sanity(event) {
+  const {
+    httpMethod,
+    body,
+    isBase64Encoded
+  } = event;
+  if (httpMethod !== 'PUT') throw utils_1.create_error('Wrong HTTP method!', {
+    statusCode: 405
+  });
+  if (isBase64Encoded) throw utils_1.create_error('Base 64 unexpected!', {
+    statusCode: 422
+  });
+  if (!body) throw utils_1.create_error('Missing body!', {
+    statusCode: 413
+  });
+  if (body.length > 32000) throw utils_1.create_error('Body too big!', {
+    statusCode: 413
+  });
+} ////////////
+
+
+function parse_jsonrpc_requests(res, event) {
+  let data;
+
+  try {
+    data = JSON.parse(event.body);
+  } catch (err) {
+    console.error(err);
+    res.error.code = consts_1.JSONRPC_CODE.parse_error;
+    throw utils_1.create_error('JSON.Parse error!', {
+      statusCode: 400
+    });
+  }
+
+  if (Array.isArray(data)) {
+    // we don't support batching
+    res.error.code = consts_1.JSONRPC_CODE.parse_error;
+    throw utils_1.create_error('Batch RPC not implemented!', {
+      statusCode: 501
+    });
+  }
+
+  if (Object.keys(data).sort().join(',') !== 'id,jsonrpc,method,params' || data.jsonrpc !== '2.0' || !(Number.isInteger(data.id) || typeof data.id === 'string')) {
+    res.error.code = consts_1.JSONRPC_CODE.invalid_request;
+    throw utils_1.create_error('Bad JSON-RPC structure!', {
+      statusCode: 400
+    });
+  }
+
+  res.id = data.id;
+  res.error.data.method = data.method; // for convenience
+
+  if (Object.keys(data.params).length < 1) {
+    res.error.code = consts_1.JSONRPC_CODE.invalid_params;
+    throw utils_1.create_error('Invalid params!', {
+      statusCode: 400
+    });
+  }
+
+  if (!typescript_string_enums_1.Enum.isType(interfaces_1.Method, data.method)) {
+    res.error.code = consts_1.JSONRPC_CODE.method_not_found;
+    throw utils_1.create_error('Invalid RPC method!', {
+      statusCode: 400
+    });
+  } // ok, it looks like a real valid TBRPG RPC
+
+
+  return data;
+}
+
+/***/ }),
+
+/***/ 105:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+const tslib_1 = __webpack_require__(0);
+
+const utils_1 = __webpack_require__(22);
+
+const interfaces_1 = __webpack_require__(94);
+
+const echo_1 = tslib_1.__importDefault(__webpack_require__(106));
+
+const sync_1 = tslib_1.__importDefault(__webpack_require__(107));
+
+function process_rpc(req, res) {
+  const {
+    method
+  } = req;
+
+  switch (method) {
+    case interfaces_1.Method.echo:
+      return echo_1.default(req, res);
+
+    case interfaces_1.Method.sync:
+      return sync_1.default(req, res);
+
+    default:
+      {
+        throw utils_1.create_error('RPC method not implemented!', {
+          method,
+          statusCode: 501
+        });
+      }
+  }
+}
+
+exports.process_rpc = process_rpc;
+
+/***/ }),
+
+/***/ 106:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+function handle(req, res) {
+  const {
+    method,
+    params
+  } = req;
+  res.result = {
+    method,
+    params
+  };
+  delete res.error;
+  return res;
+} ////////////////////////////////////
+
+
+exports.default = handle;
+
+/***/ }),
+
+/***/ 107:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+}); ////////////////////////////////////
+
+function handle(req, res) {
+  res.error.message = 'not implemented!';
+  /*res.result = {
+      rpc_v: 1,
+      engine_v: VERSION,
+      //authoritative_state: null
+  }
+  delete res.error*/
+
+  return res;
+} ////////////////////////////////////
+
+
+exports.default = handle;
+
+/***/ }),
+
+/***/ 20:
+/***/ (function(module, exports) {
+
+module.exports = require("http");
+
+/***/ }),
+
+/***/ 22:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+const http_1 = __webpack_require__(20);
+
+const common_error_fields_1 = __webpack_require__(31); // TODO extern
+
+
+function create_error(message, data = {}) {
+  if (message && http_1.STATUS_CODES[message]) {
+    message = '(auto) ' + http_1.STATUS_CODES[message];
+    data.statusCode = Number(message);
+  }
+
+  message = String(message || 'Unknown error!');
+
+  if (!message.toLowerCase().includes('error')) {
+    message = 'Error: ' + message;
+  }
+
+  const error = new Error(message);
+  Object.keys(data).forEach(k => {
+    if (common_error_fields_1.COMMON_ERROR_FIELDS.has(k) && k !== 'name' && k !== 'message' && k !== 'stack') {
+      error[k] = data[k];
+    } else {
+      error.details = error.details || {};
+      error.details[k] = data[k];
+    }
+  });
+  error.framesToPop = error.framesToPop || 1;
+  return error;
+}
+
+exports.create_error = create_error;
+
+/***/ }),
+
+/***/ 27:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return COMMON_ERROR_FIELDS; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return create; });
+function create() {
+  return new Set([// standard fields
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/prototype
+  'name', 'message', // quasi-standard
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/prototype
+  'stack', // standard in node
+  'code', // https://nodejs.org/dist/latest/docs/api/errors.html#errors_node_js_error_codes
+  // non standard but widely used
+  'statusCode', 'shouldRedirect', 'framesToPop', // My (Offirmo) extensions
+  'details', 'SEC', '_temp']);
+}
+
+const DEFAULT_INSTANCE = create();
+const COMMON_ERROR_FIELDS = DEFAULT_INSTANCE;
+
+
+/***/ }),
+
+/***/ 30:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+ ////////////////////////////////////
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+}); ////////////////////////////////////
+
+const APP = 'functions';
+exports.APP = APP; ////////////////////////////////////
+
+const JSONRPC_CODE = {
+  parse_error: -32700,
+  // An error occurred on the server while parsing the JSON text.
+  invalid_request: -32600,
+  method_not_found: -32601,
+  invalid_params: -32602,
+  internal_error: -32603
+};
+exports.JSONRPC_CODE = JSONRPC_CODE;
+
+function get_default_JsonRpc_error() {
+  return {
+    code: JSONRPC_CODE.internal_error,
+    message: 'Internal error!',
+    data: {}
+  };
+}
+
+exports.get_default_JsonRpc_error = get_default_JsonRpc_error;
+
+/***/ }),
+
+/***/ 31:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _field_set__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(27);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "COMMON_ERROR_FIELDS", function() { return _field_set__WEBPACK_IMPORTED_MODULE_0__["a"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "create", function() { return _field_set__WEBPACK_IMPORTED_MODULE_0__["b"]; });
+
+
+
+/***/ }),
+
+/***/ 94:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+
+// EXTERNAL MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/typescript-string-enums/dist/index.js
+var dist = __webpack_require__(10);
+
+// CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/apps/the-boring-rpg/interfaces/dist/src.es2019/actions.js
+ /////////////////////
+
+const ActionType = Object(dist["Enum"])('play', 'equip_item', 'sell_item', 'rename_avatar', 'change_avatar_class', 'redeem_code', 'start_game', 'on_start_session', 'on_logged_in_refresh', 'acknowledge_engagement_msg_seen', 'update_to_now', 'hack'); // represent a passed action
+// XXX useful?
+
+/*
+interface PlayedAction {
+    action: Action
+
+    // XXX  TODO usage??
+    previous_last_user_action_tms: TimestampUTCMs
+    previous_revision: number
+}
+*/
+/////////////////////
+// needed for some validations
+
+function get_action_types() {
+  return dist["Enum"].keys(ActionType);
+} /////////////////////
+
+
+
+// CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/apps/the-boring-rpg/interfaces/dist/src.es2019/persistence.js
+
+const StorageKey = Object(dist["Enum"])('savegame', 'savegame-bkp', 'savegame-bkp-m1', 'savegame-bkp-m2', 'cloud.pending-actions');
+
+// CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/apps/the-boring-rpg/interfaces/dist/src.es2019/rpc.js
+ ////////////////////////////////////
+
+const Method = Object(dist["Enum"])('echo', // for tests
+'sync', 'list_savegames'); /////////////////////
+
+
+// CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/apps/the-boring-rpg/interfaces/dist/src.es2019/index.js
+/* concated harmony reexport ActionType */__webpack_require__.d(__webpack_exports__, "ActionType", function() { return ActionType; });
+/* concated harmony reexport get_action_types */__webpack_require__.d(__webpack_exports__, "get_action_types", function() { return get_action_types; });
+/* concated harmony reexport StorageKey */__webpack_require__.d(__webpack_exports__, "StorageKey", function() { return StorageKey; });
+/* concated harmony reexport Method */__webpack_require__.d(__webpack_exports__, "Method", function() { return Method; });
+
+
+
+
+/***/ })
+
+/******/ })));
