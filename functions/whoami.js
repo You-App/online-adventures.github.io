@@ -81,7 +81,7 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 133);
+/******/ 	return __webpack_require__(__webpack_require__.s = 136);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -17195,7 +17195,7 @@
   else {}
 }.call(this));
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(44)(module)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(46)(module)))
 
 /***/ }),
 /* 3 */
@@ -17611,7 +17611,7 @@ ret.isRecentNode = ret.isNode && (function() {
 ret.nodeSupportsAsyncResource = ret.isNode && (function() {
     var supportsAsync = false;
     try {
-        var res = __webpack_require__(67).AsyncResource;
+        var res = __webpack_require__(69).AsyncResource;
         supportsAsync = typeof res.prototype.runInAsyncScope === "function";
     } catch (e) {
         supportsAsync = false;
@@ -17658,7 +17658,7 @@ try {
   module.exports = util.inherits;
 } catch (e) {
   /* istanbul ignore next */
-  module.exports = __webpack_require__(137);
+  module.exports = __webpack_require__(140);
 }
 
 
@@ -17682,7 +17682,7 @@ const {
   isArray,
   isTypedArray,
 } = __webpack_require__(2);
-const { CLIENT_ALIASES } = __webpack_require__(49);
+const { CLIENT_ALIASES } = __webpack_require__(51);
 
 // Check if the first argument is an array, otherwise uses all arguments as an
 // array.
@@ -17934,7 +17934,7 @@ function invariant(condition, message) {
 const inherits = __webpack_require__(11);
 const helpers = __webpack_require__(14);
 const { EventEmitter } = __webpack_require__(7);
-const debug = __webpack_require__(24);
+const debug = __webpack_require__(25);
 
 const {
   assign,
@@ -17944,8 +17944,8 @@ const {
   isUndefined,
   isNumber,
 } = __webpack_require__(2);
-const saveAsyncStack = __webpack_require__(50);
-const uuid = __webpack_require__(63);
+const saveAsyncStack = __webpack_require__(52);
+const uuid = __webpack_require__(65);
 
 const debugBindings = debug('knex:bindings');
 
@@ -18117,7 +18117,7 @@ function replaceKeyBindings(raw, formatter) {
 
 // Allow the `Raw` object to be utilized with full access to the relevant
 // promise API.
-__webpack_require__(52)(Raw);
+__webpack_require__(54)(Raw);
 helpers.addQueryContext(Raw);
 
 module.exports = Raw;
@@ -18210,16 +18210,22 @@ if (isES5) {
 
 
 /***/ }),
-/* 20 */,
+/* 20 */
+/***/ (function(module, exports) {
+
+module.exports = require("os");
+
+/***/ }),
 /* 21 */,
 /* 22 */,
-/* 23 */
+/* 23 */,
+/* 24 */
 /***/ (function(module, exports) {
 
 module.exports = require("assert");
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -18228,17 +18234,11 @@ module.exports = require("assert");
  */
 
 if (typeof process === 'undefined' || process.type === 'renderer' || process.browser === true || process.__nwjs) {
-	module.exports = __webpack_require__(138);
+	module.exports = __webpack_require__(141);
 } else {
-	module.exports = __webpack_require__(140);
+	module.exports = __webpack_require__(143);
 }
 
-
-/***/ }),
-/* 25 */
-/***/ (function(module, exports) {
-
-module.exports = require("os");
 
 /***/ }),
 /* 26 */,
@@ -18255,7 +18255,7 @@ function noConflict() {
     catch (e) {}
     return bluebird;
 }
-var bluebird = __webpack_require__(143)();
+var bluebird = __webpack_require__(146)();
 bluebird.noConflict = noConflict;
 module.exports = bluebird;
 
@@ -18267,141 +18267,9 @@ module.exports = bluebird;
 /* 32 */,
 /* 33 */,
 /* 34 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-"use strict";
-
-const os = __webpack_require__(25);
-const hasFlag = __webpack_require__(45);
-
-const env = process.env;
-
-let forceColor;
-if (hasFlag('no-color') ||
-	hasFlag('no-colors') ||
-	hasFlag('color=false')) {
-	forceColor = false;
-} else if (hasFlag('color') ||
-	hasFlag('colors') ||
-	hasFlag('color=true') ||
-	hasFlag('color=always')) {
-	forceColor = true;
-}
-if ('FORCE_COLOR' in env) {
-	forceColor = env.FORCE_COLOR.length === 0 || parseInt(env.FORCE_COLOR, 10) !== 0;
-}
-
-function translateLevel(level) {
-	if (level === 0) {
-		return false;
-	}
-
-	return {
-		level,
-		hasBasic: true,
-		has256: level >= 2,
-		has16m: level >= 3
-	};
-}
-
-function supportsColor(stream) {
-	if (forceColor === false) {
-		return 0;
-	}
-
-	if (hasFlag('color=16m') ||
-		hasFlag('color=full') ||
-		hasFlag('color=truecolor')) {
-		return 3;
-	}
-
-	if (hasFlag('color=256')) {
-		return 2;
-	}
-
-	if (stream && !stream.isTTY && forceColor !== true) {
-		return 0;
-	}
-
-	const min = forceColor ? 1 : 0;
-
-	if (process.platform === 'win32') {
-		// Node.js 7.5.0 is the first version of Node.js to include a patch to
-		// libuv that enables 256 color output on Windows. Anything earlier and it
-		// won't work. However, here we target Node.js 8 at minimum as it is an LTS
-		// release, and Node.js 7 is not. Windows 10 build 10586 is the first Windows
-		// release that supports 256 colors. Windows 10 build 14931 is the first release
-		// that supports 16m/TrueColor.
-		const osRelease = os.release().split('.');
-		if (
-			Number(process.versions.node.split('.')[0]) >= 8 &&
-			Number(osRelease[0]) >= 10 &&
-			Number(osRelease[2]) >= 10586
-		) {
-			return Number(osRelease[2]) >= 14931 ? 3 : 2;
-		}
-
-		return 1;
-	}
-
-	if ('CI' in env) {
-		if (['TRAVIS', 'CIRCLECI', 'APPVEYOR', 'GITLAB_CI'].some(sign => sign in env) || env.CI_NAME === 'codeship') {
-			return 1;
-		}
-
-		return min;
-	}
-
-	if ('TEAMCITY_VERSION' in env) {
-		return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env.TEAMCITY_VERSION) ? 1 : 0;
-	}
-
-	if (env.COLORTERM === 'truecolor') {
-		return 3;
-	}
-
-	if ('TERM_PROGRAM' in env) {
-		const version = parseInt((env.TERM_PROGRAM_VERSION || '').split('.')[0], 10);
-
-		switch (env.TERM_PROGRAM) {
-			case 'iTerm.app':
-				return version >= 3 ? 3 : 2;
-			case 'Apple_Terminal':
-				return 2;
-			// No default
-		}
-	}
-
-	if (/-256(color)?$/i.test(env.TERM)) {
-		return 2;
-	}
-
-	if (/^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(env.TERM)) {
-		return 1;
-	}
-
-	if ('COLORTERM' in env) {
-		return 1;
-	}
-
-	if (env.TERM === 'dumb') {
-		return min;
-	}
-
-	return min;
-}
-
-function getSupportLevel(stream) {
-	const level = supportsColor(stream);
-	return translateLevel(level);
-}
-
-module.exports = {
-	supportsColor: getSupportLevel,
-	stdout: getSupportLevel(process.stdout),
-	stderr: getSupportLevel(process.stderr)
-};
-
+module.exports = require("tty");
 
 /***/ }),
 /* 35 */
@@ -18415,13 +18283,13 @@ module.exports = require("stream");
 
 // Builder
 // -------
-const assert = __webpack_require__(23);
+const assert = __webpack_require__(24);
 const inherits = __webpack_require__(11);
 const { EventEmitter } = __webpack_require__(7);
 
 const Raw = __webpack_require__(18);
 const helpers = __webpack_require__(14);
-const JoinClause = __webpack_require__(71);
+const JoinClause = __webpack_require__(73);
 const {
   assign,
   clone,
@@ -18441,9 +18309,9 @@ const {
   last,
   isPlainObject,
 } = __webpack_require__(2);
-const saveAsyncStack = __webpack_require__(50);
+const saveAsyncStack = __webpack_require__(52);
 
-const { lockMode, waitMode } = __webpack_require__(175);
+const { lockMode, waitMode } = __webpack_require__(178);
 
 // Typically called from `knex.builder`,
 // start a new query building chain.
@@ -18604,6 +18472,19 @@ assign(Builder.prototype, {
       grouping: 'columns',
       value: helpers.normalizeArr.apply(null, arguments),
       distinct: true,
+    });
+    return this;
+  },
+
+  distinctOn() {
+    const value = helpers.normalizeArr.apply(null, arguments);
+    if (isEmpty(value)) {
+      throw new Error('distinctOn requires atleast on argument');
+    }
+    this._statements.push({
+      grouping: 'columns',
+      value,
+      distinctOn: true
     });
     return this;
   },
@@ -19694,7 +19575,7 @@ Builder.prototype.into = Builder.prototype.table;
 Builder.prototype.del = Builder.prototype.delete;
 
 // Attach all of the top level promise methods that should be chainable.
-__webpack_require__(52)(Builder);
+__webpack_require__(54)(Builder);
 helpers.addQueryContext(Builder);
 
 Builder.extend = (methodName, fn) => {
@@ -19724,7 +19605,7 @@ module.exports = Builder;
  * README.md file in the root directory of this source tree.
  */
 
-const crypto = __webpack_require__(51)
+const crypto = __webpack_require__(53)
 
 const defaults = __webpack_require__(38)
 
@@ -19986,10 +19867,10 @@ module.exports.__defineSetter__('parseInt8', function (val) {
 /* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var textParsers = __webpack_require__(206);
-var binaryParsers = __webpack_require__(211);
-var arrayParser = __webpack_require__(87);
-var builtinTypes = __webpack_require__(213);
+var textParsers = __webpack_require__(209);
+var binaryParsers = __webpack_require__(214);
+var arrayParser = __webpack_require__(89);
+var builtinTypes = __webpack_require__(216);
 
 exports.getTypeParser = getTypeParser;
 exports.setTypeParser = setTypeParser;
@@ -20040,7 +19921,9 @@ binaryParsers.init(function(oid, converter) {
 /* 41 */,
 /* 42 */,
 /* 43 */,
-/* 44 */
+/* 44 */,
+/* 45 */,
+/* 46 */
 /***/ (function(module, exports) {
 
 module.exports = function(module) {
@@ -20068,7 +19951,157 @@ module.exports = function(module) {
 
 
 /***/ }),
-/* 45 */
+/* 47 */
+/***/ (function(module, exports) {
+
+module.exports = require("net");
+
+/***/ }),
+/* 48 */
+/***/ (function(module, exports) {
+
+module.exports = require("tls");
+
+/***/ }),
+/* 49 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+const os = __webpack_require__(20);
+const hasFlag = __webpack_require__(50);
+
+const env = process.env;
+
+let forceColor;
+if (hasFlag('no-color') ||
+	hasFlag('no-colors') ||
+	hasFlag('color=false')) {
+	forceColor = false;
+} else if (hasFlag('color') ||
+	hasFlag('colors') ||
+	hasFlag('color=true') ||
+	hasFlag('color=always')) {
+	forceColor = true;
+}
+if ('FORCE_COLOR' in env) {
+	forceColor = env.FORCE_COLOR.length === 0 || parseInt(env.FORCE_COLOR, 10) !== 0;
+}
+
+function translateLevel(level) {
+	if (level === 0) {
+		return false;
+	}
+
+	return {
+		level,
+		hasBasic: true,
+		has256: level >= 2,
+		has16m: level >= 3
+	};
+}
+
+function supportsColor(stream) {
+	if (forceColor === false) {
+		return 0;
+	}
+
+	if (hasFlag('color=16m') ||
+		hasFlag('color=full') ||
+		hasFlag('color=truecolor')) {
+		return 3;
+	}
+
+	if (hasFlag('color=256')) {
+		return 2;
+	}
+
+	if (stream && !stream.isTTY && forceColor !== true) {
+		return 0;
+	}
+
+	const min = forceColor ? 1 : 0;
+
+	if (process.platform === 'win32') {
+		// Node.js 7.5.0 is the first version of Node.js to include a patch to
+		// libuv that enables 256 color output on Windows. Anything earlier and it
+		// won't work. However, here we target Node.js 8 at minimum as it is an LTS
+		// release, and Node.js 7 is not. Windows 10 build 10586 is the first Windows
+		// release that supports 256 colors. Windows 10 build 14931 is the first release
+		// that supports 16m/TrueColor.
+		const osRelease = os.release().split('.');
+		if (
+			Number(process.versions.node.split('.')[0]) >= 8 &&
+			Number(osRelease[0]) >= 10 &&
+			Number(osRelease[2]) >= 10586
+		) {
+			return Number(osRelease[2]) >= 14931 ? 3 : 2;
+		}
+
+		return 1;
+	}
+
+	if ('CI' in env) {
+		if (['TRAVIS', 'CIRCLECI', 'APPVEYOR', 'GITLAB_CI'].some(sign => sign in env) || env.CI_NAME === 'codeship') {
+			return 1;
+		}
+
+		return min;
+	}
+
+	if ('TEAMCITY_VERSION' in env) {
+		return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env.TEAMCITY_VERSION) ? 1 : 0;
+	}
+
+	if (env.COLORTERM === 'truecolor') {
+		return 3;
+	}
+
+	if ('TERM_PROGRAM' in env) {
+		const version = parseInt((env.TERM_PROGRAM_VERSION || '').split('.')[0], 10);
+
+		switch (env.TERM_PROGRAM) {
+			case 'iTerm.app':
+				return version >= 3 ? 3 : 2;
+			case 'Apple_Terminal':
+				return 2;
+			// No default
+		}
+	}
+
+	if (/-256(color)?$/i.test(env.TERM)) {
+		return 2;
+	}
+
+	if (/^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(env.TERM)) {
+		return 1;
+	}
+
+	if ('COLORTERM' in env) {
+		return 1;
+	}
+
+	if (env.TERM === 'dumb') {
+		return min;
+	}
+
+	return min;
+}
+
+function getSupportLevel(stream) {
+	const level = supportsColor(stream);
+	return translateLevel(level);
+}
+
+module.exports = {
+	supportsColor: getSupportLevel,
+	stdout: getSupportLevel(process.stdout),
+	stderr: getSupportLevel(process.stderr)
+};
+
+
+/***/ }),
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20083,25 +20116,7 @@ module.exports = (flag, argv) => {
 
 
 /***/ }),
-/* 46 */
-/***/ (function(module, exports) {
-
-module.exports = require("net");
-
-/***/ }),
-/* 47 */
-/***/ (function(module, exports) {
-
-module.exports = require("tls");
-
-/***/ }),
-/* 48 */
-/***/ (function(module, exports) {
-
-module.exports = require("tty");
-
-/***/ }),
-/* 49 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const { keys } = __webpack_require__(2);
@@ -20145,7 +20160,7 @@ module.exports = {
 
 
 /***/ }),
-/* 50 */
+/* 52 */
 /***/ (function(module, exports) {
 
 module.exports = function saveAsyncStack(instance, lines) {
@@ -20160,13 +20175,13 @@ module.exports = function saveAsyncStack(instance, lines) {
 
 
 /***/ }),
-/* 51 */
+/* 53 */
 /***/ (function(module, exports) {
 
 module.exports = require("crypto");
 
 /***/ }),
-/* 52 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const { isEmpty, map, clone, each } = __webpack_require__(2);
@@ -20282,7 +20297,7 @@ module.exports = function(Target) {
 
 
 /***/ }),
-/* 53 */
+/* 55 */
 /***/ (function(module, exports) {
 
 //Get schema-aware table name
@@ -20315,7 +20330,7 @@ module.exports = {
 
 
 /***/ }),
-/* 54 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const { isString, tail } = __webpack_require__(2);
@@ -20371,13 +20386,13 @@ module.exports = {
 
 
 /***/ }),
-/* 55 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const PromiseInspection_1 = __webpack_require__(192);
+const PromiseInspection_1 = __webpack_require__(195);
 function defer() {
     let resolve = null;
     let reject = null;
@@ -20438,11 +20453,11 @@ exports.tryPromise = tryPromise;
 
 
 /***/ }),
-/* 56 */,
-/* 57 */
+/* 58 */,
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var json = typeof JSON !== 'undefined' ? JSON : __webpack_require__(233);
+var json = typeof JSON !== 'undefined' ? JSON : __webpack_require__(237);
 
 module.exports = function (obj, opts) {
     if (!opts) opts = {};
@@ -20529,11 +20544,11 @@ var objectKeys = Object.keys || function (obj) {
 
 
 /***/ }),
-/* 58 */,
-/* 59 */,
 /* 60 */,
 /* 61 */,
-/* 62 */
+/* 62 */,
+/* 63 */,
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -20549,7 +20564,7 @@ function setup(env) {
 	createDebug.disable = disable;
 	createDebug.enable = enable;
 	createDebug.enabled = enabled;
-	createDebug.humanize = __webpack_require__(139);
+	createDebug.humanize = __webpack_require__(142);
 
 	Object.keys(env).forEach(key => {
 		createDebug[key] = env[key];
@@ -20805,11 +20820,11 @@ module.exports = setup;
 
 
 /***/ }),
-/* 63 */
+/* 65 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var v1 = __webpack_require__(141);
-var v4 = __webpack_require__(142);
+var v1 = __webpack_require__(144);
+var v4 = __webpack_require__(145);
 
 var uuid = v4;
 uuid.v1 = v1;
@@ -20819,13 +20834,13 @@ module.exports = uuid;
 
 
 /***/ }),
-/* 64 */
+/* 66 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Unique ID creation requires a high quality random # generator.  In node.js
 // this is pretty straight-forward - we use the crypto API.
 
-var crypto = __webpack_require__(51);
+var crypto = __webpack_require__(53);
 
 module.exports = function nodeRNG() {
   return crypto.randomBytes(16);
@@ -20833,7 +20848,7 @@ module.exports = function nodeRNG() {
 
 
 /***/ }),
-/* 65 */
+/* 67 */
 /***/ (function(module, exports) {
 
 /**
@@ -20863,41 +20878,41 @@ module.exports = bytesToUuid;
 
 
 /***/ }),
-/* 66 */
+/* 68 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Bluebird = __webpack_require__(28);
 
 const Raw = __webpack_require__(18);
-const Ref = __webpack_require__(173);
-const Runner = __webpack_require__(174);
-const Formatter = __webpack_require__(70);
-const Transaction = __webpack_require__(176);
+const Ref = __webpack_require__(176);
+const Runner = __webpack_require__(177);
+const Formatter = __webpack_require__(72);
+const Transaction = __webpack_require__(179);
 
 const QueryBuilder = __webpack_require__(36);
-const QueryCompiler = __webpack_require__(79);
+const QueryCompiler = __webpack_require__(81);
 
-const SchemaBuilder = __webpack_require__(186);
-const SchemaCompiler = __webpack_require__(80);
-const TableBuilder = __webpack_require__(187);
-const TableCompiler = __webpack_require__(81);
-const ColumnBuilder = __webpack_require__(188);
-const ColumnCompiler = __webpack_require__(82);
+const SchemaBuilder = __webpack_require__(189);
+const SchemaCompiler = __webpack_require__(82);
+const TableBuilder = __webpack_require__(190);
+const TableCompiler = __webpack_require__(83);
+const ColumnBuilder = __webpack_require__(191);
+const ColumnCompiler = __webpack_require__(84);
 
-const { Pool, TimeoutError } = __webpack_require__(189);
+const { Pool, TimeoutError } = __webpack_require__(192);
 const inherits = __webpack_require__(11);
 const { EventEmitter } = __webpack_require__(7);
 const { promisify } = __webpack_require__(4);
 
-const { makeEscape } = __webpack_require__(84);
+const { makeEscape } = __webpack_require__(86);
 const { uniqueId, cloneDeep, defaults } = __webpack_require__(2);
 
-const Logger = __webpack_require__(194);
+const Logger = __webpack_require__(197);
 
-const debug = __webpack_require__(24)('knex:client');
-const debugQuery = __webpack_require__(24)('knex:query');
-const debugBindings = __webpack_require__(24)('knex:bindings');
-const { POOL_CONFIG_OPTIONS } = __webpack_require__(49);
+const debug = __webpack_require__(25)('knex:client');
+const debugQuery = __webpack_require__(25)('knex:query');
+const debugBindings = __webpack_require__(25)('knex:bindings');
+const { POOL_CONFIG_OPTIONS } = __webpack_require__(51);
 
 // The base client provides the general structure
 // for a dialect specific client object.
@@ -21280,13 +21295,13 @@ module.exports = Client;
 
 
 /***/ }),
-/* 67 */
+/* 69 */
 /***/ (function(module, exports) {
 
 module.exports = require("async_hooks");
 
 /***/ }),
-/* 68 */
+/* 70 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21335,7 +21350,7 @@ return catchFilter;
 
 
 /***/ }),
-/* 69 */
+/* 71 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21393,7 +21408,7 @@ module.exports = nodebackForPromise;
 
 
 /***/ }),
-/* 70 */
+/* 72 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const QueryBuilder = __webpack_require__(36);
@@ -21694,10 +21709,10 @@ module.exports = Formatter;
 
 
 /***/ }),
-/* 71 */
+/* 73 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const assert = __webpack_require__(23);
+const assert = __webpack_require__(24);
 
 // JoinClause
 // -------
@@ -21971,17 +21986,17 @@ module.exports = JoinClause;
 
 
 /***/ }),
-/* 72 */
+/* 74 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const { EventEmitter } = __webpack_require__(7);
 
-const { Migrator } = __webpack_require__(177);
-const Seeder = __webpack_require__(182);
-const FunctionHelper = __webpack_require__(183);
-const QueryInterface = __webpack_require__(78);
+const { Migrator } = __webpack_require__(180);
+const Seeder = __webpack_require__(185);
+const FunctionHelper = __webpack_require__(186);
+const QueryInterface = __webpack_require__(80);
 const { merge } = __webpack_require__(2);
-const batchInsert = __webpack_require__(184);
+const batchInsert = __webpack_require__(187);
 
 function makeKnex(client) {
   // The object we're potentially using to kick off an initial chain.
@@ -22259,7 +22274,7 @@ module.exports = makeKnex;
 
 
 /***/ }),
-/* 73 */
+/* 75 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {
@@ -22267,7 +22282,7 @@ const {
   getLockTableName,
   getLockTableNameWithSchema,
   getTableName,
-} = __webpack_require__(53);
+} = __webpack_require__(55);
 
 function ensureTable(tableName, schemaName, trxOrKnex) {
   const lockTable = getLockTableName(tableName);
@@ -22332,7 +22347,7 @@ module.exports = {
 
 
 /***/ }),
-/* 74 */
+/* 76 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var path = __webpack_require__(12);
@@ -22436,7 +22451,7 @@ mkdirP.sync = function sync (p, opts, made) {
 
 
 /***/ }),
-/* 75 */
+/* 77 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const { template } = __webpack_require__(2);
@@ -22497,13 +22512,13 @@ module.exports = {
 
 
 /***/ }),
-/* 76 */
+/* 78 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const {
   FsMigrations,
   DEFAULT_LOAD_EXTENSIONS,
-} = __webpack_require__(180);
+} = __webpack_require__(183);
 
 const CONFIG_DEFAULT = Object.freeze({
   extension: 'js',
@@ -22556,7 +22571,7 @@ module.exports = {
 
 
 /***/ }),
-/* 77 */
+/* 79 */
 /***/ (function(module, exports) {
 
 function webpackEmptyContext(req) {
@@ -22567,10 +22582,10 @@ function webpackEmptyContext(req) {
 webpackEmptyContext.keys = function() { return []; };
 webpackEmptyContext.resolve = webpackEmptyContext;
 module.exports = webpackEmptyContext;
-webpackEmptyContext.id = 77;
+webpackEmptyContext.id = 79;
 
 /***/ }),
-/* 78 */
+/* 80 */
 /***/ (function(module, exports) {
 
 // All properties we can use to start a query chain
@@ -22667,7 +22682,7 @@ module.exports = [
 
 
 /***/ }),
-/* 79 */
+/* 81 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Query Compiler
@@ -22675,8 +22690,8 @@ module.exports = [
 const helpers = __webpack_require__(14);
 const Raw = __webpack_require__(18);
 const QueryBuilder = __webpack_require__(36);
-const JoinClause = __webpack_require__(71);
-const debug = __webpack_require__(24);
+const JoinClause = __webpack_require__(73);
+const debug = __webpack_require__(25);
 
 const {
   assign,
@@ -22692,7 +22707,7 @@ const {
   has,
   keys,
 } = __webpack_require__(2);
-const uuid = __webpack_require__(63);
+const uuid = __webpack_require__(65);
 
 const debugBindings = debug('knex:bindings');
 
@@ -22860,7 +22875,7 @@ assign(QueryCompiler.prototype, {
 
   // Compiles the columns in the query, specifying if an item was distinct.
   columns() {
-    let distinct = false;
+    let distinctClause = '';
     if (this.onlyUnions()) return '';
     const columns = this.grouped.columns || [];
     let i = -1,
@@ -22868,7 +22883,11 @@ assign(QueryCompiler.prototype, {
     if (columns) {
       while (++i < columns.length) {
         const stmt = columns[i];
-        if (stmt.distinct) distinct = true;
+        if (stmt.distinct) distinctClause = 'distinct ';
+        if (stmt.distinctOn) {
+          distinctClause = this.distinctOn(stmt.value);
+          continue;
+        }
         if (stmt.type === 'aggregate') {
           sql.push(...this.aggregate(stmt));
         } else if (stmt.type === 'aggregateRaw') {
@@ -22880,7 +22899,7 @@ assign(QueryCompiler.prototype, {
     }
     if (sql.length === 0) sql = ['*'];
     return (
-      `select ${distinct ? 'distinct ' : ''}` +
+      `select ${distinctClause}` +
       sql.join(', ') +
       (this.tableName
         ? ` from ${this.single.only ? 'only ' : ''}${this.tableName}`
@@ -23246,6 +23265,12 @@ assign(QueryCompiler.prototype, {
     );
   },
 
+  distinctOn(value) {
+    throw new Error(
+      '.distinctOn() is currently only supported on PostgreSQL'
+    )
+  },
+
   // On Clause
   // ------
 
@@ -23550,10 +23575,10 @@ module.exports = QueryCompiler;
 
 
 /***/ }),
-/* 80 */
+/* 82 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const { pushQuery, pushAdditional, unshiftQuery } = __webpack_require__(54);
+const { pushQuery, pushAdditional, unshiftQuery } = __webpack_require__(56);
 
 const { isUndefined } = __webpack_require__(2);
 
@@ -23640,14 +23665,14 @@ module.exports = SchemaCompiler;
 
 
 /***/ }),
-/* 81 */
+/* 83 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* eslint max-len:0 */
 
 // Table Compiler
 // -------
-const { pushAdditional, pushQuery, unshiftQuery } = __webpack_require__(54);
+const { pushAdditional, pushQuery, unshiftQuery } = __webpack_require__(56);
 const helpers = __webpack_require__(14);
 const {
   groupBy,
@@ -23952,7 +23977,7 @@ module.exports = TableCompiler;
 
 
 /***/ }),
-/* 82 */
+/* 84 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Column Compiler
@@ -23960,7 +23985,7 @@ module.exports = TableCompiler;
 // during the table "create" / "alter" statements.
 // -------
 const Raw = __webpack_require__(18);
-const helpers = __webpack_require__(54);
+const helpers = __webpack_require__(56);
 const { groupBy, first, tail, has, isObject } = __webpack_require__(2);
 
 function ColumnCompiler(client, tableCompiler, columnBuilder) {
@@ -24131,7 +24156,7 @@ module.exports = ColumnCompiler;
 
 
 /***/ }),
-/* 83 */
+/* 85 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24143,7 +24168,7 @@ exports.TimeoutError = TimeoutError;
 
 
 /***/ }),
-/* 84 */
+/* 86 */
 /***/ (function(module, exports) {
 
 /*eslint max-len: 0, no-var:0 */
@@ -24339,7 +24364,7 @@ module.exports = {
 
 
 /***/ }),
-/* 85 */
+/* 87 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24353,10 +24378,10 @@ module.exports = {
  */
 
 var util = __webpack_require__(4)
-var Client = __webpack_require__(205)
+var Client = __webpack_require__(208)
 var defaults = __webpack_require__(38)
-var Connection = __webpack_require__(91)
-var Pool = __webpack_require__(225)
+var Connection = __webpack_require__(93)
+var Pool = __webpack_require__(228)
 
 const poolFactory = (Client) => {
   var BoundPool = function (options) {
@@ -24380,7 +24405,7 @@ var PG = function (clientConstructor) {
 }
 
 if (typeof process.env.NODE_PG_FORCE_NATIVE !== 'undefined') {
-  module.exports = new PG(__webpack_require__(92))
+  module.exports = new PG(__webpack_require__(94))
 } else {
   module.exports = new PG(Client)
 
@@ -24389,7 +24414,7 @@ if (typeof process.env.NODE_PG_FORCE_NATIVE !== 'undefined') {
     delete module.exports.native
     var native = null
     try {
-      native = new PG(__webpack_require__(92))
+      native = new PG(__webpack_require__(94))
     } catch (err) {
       if (err.code !== 'MODULE_NOT_FOUND') {
         throw err
@@ -24405,7 +24430,7 @@ if (typeof process.env.NODE_PG_FORCE_NATIVE !== 'undefined') {
 
 
 /***/ }),
-/* 86 */
+/* 88 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24509,10 +24534,10 @@ function identity (value) {
 
 
 /***/ }),
-/* 87 */
+/* 89 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var array = __webpack_require__(86);
+var array = __webpack_require__(88);
 
 module.exports = {
   create: function (source, transform) {
@@ -24526,7 +24551,7 @@ module.exports = {
 
 
 /***/ }),
-/* 88 */
+/* 90 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24572,7 +24597,7 @@ module.exports = TypeOverrides
 
 
 /***/ }),
-/* 89 */
+/* 91 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24585,11 +24610,11 @@ module.exports = TypeOverrides
  * README.md file in the root directory of this source tree.
  */
 
-var dns = __webpack_require__(220)
+var dns = __webpack_require__(223)
 
 var defaults = __webpack_require__(38)
 
-var parse = __webpack_require__(221).parse // parses a connection string
+var parse = __webpack_require__(224).parse // parses a connection string
 
 var val = function (key, config, envVar) {
   if (envVar === undefined) {
@@ -24716,7 +24741,7 @@ module.exports = ConnectionParameters
 
 
 /***/ }),
-/* 90 */
+/* 92 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24826,7 +24851,7 @@ module.exports = Result
 
 
 /***/ }),
-/* 91 */
+/* 93 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24839,12 +24864,12 @@ module.exports = Result
  * README.md file in the root directory of this source tree.
  */
 
-var net = __webpack_require__(46)
+var net = __webpack_require__(47)
 var EventEmitter = __webpack_require__(7).EventEmitter
 var util = __webpack_require__(4)
 
-var Writer = __webpack_require__(223)
-var Reader = __webpack_require__(224)
+var Writer = __webpack_require__(226)
+var Reader = __webpack_require__(227)
 
 var TEXT_MODE = 0
 var BINARY_MODE = 1
@@ -24896,9 +24921,8 @@ Connection.prototype.connect = function (port, host) {
   })
 
   const reportStreamError = function (error) {
-    // don't raise ECONNRESET errors - they can & should be ignored
-    // during disconnect
-    if (self._ending && error.code === 'ECONNRESET') {
+    // errors about disconnections should be ignored during disconnect
+    if (self._ending && (error.code === 'ECONNRESET' || error.code === 'EPIPE')) {
       return
     }
     self.emit('error', error)
@@ -24923,10 +24947,9 @@ Connection.prototype.connect = function (port, host) {
       default: // Any other response byte, including 'E' (ErrorResponse) indicating a server error
         return self.emit('error', new Error('There was an error establishing an SSL connection'))
     }
-    var tls = __webpack_require__(47)
-    self.stream = tls.connect({
+    var tls = __webpack_require__(48)
+    const options = {
       socket: self.stream,
-      servername: host,
       checkServerIdentity: self.ssl.checkServerIdentity || tls.checkServerIdentity,
       rejectUnauthorized: self.ssl.rejectUnauthorized,
       ca: self.ssl.ca,
@@ -24936,7 +24959,11 @@ Connection.prototype.connect = function (port, host) {
       cert: self.ssl.cert,
       secureOptions: self.ssl.secureOptions,
       NPNProtocols: self.ssl.NPNProtocols
-    })
+    }
+    if (net.isIP(host) === 0) {
+      options.servername = host
+    }
+    self.stream = tls.connect(options)
     self.attachListeners(self.stream)
     self.stream.on('error', reportStreamError)
 
@@ -25538,22 +25565,22 @@ module.exports = Connection
 
 
 /***/ }),
-/* 92 */
+/* 94 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-module.exports = __webpack_require__(226)
+module.exports = __webpack_require__(229)
 
 
 /***/ }),
-/* 93 */,
-/* 94 */,
 /* 95 */,
 /* 96 */,
 /* 97 */,
 /* 98 */,
-/* 99 */
+/* 99 */,
+/* 100 */,
+/* 101 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Knex.js
@@ -25563,12 +25590,10 @@ module.exports = __webpack_require__(226)
 //     For details and documentation:
 //     http://knexjs.org
 
-module.exports = __webpack_require__(135);
+module.exports = __webpack_require__(138);
 
 
 /***/ }),
-/* 100 */,
-/* 101 */,
 /* 102 */,
 /* 103 */,
 /* 104 */,
@@ -25600,7 +25625,10 @@ module.exports = __webpack_require__(135);
 /* 130 */,
 /* 131 */,
 /* 132 */,
-/* 133 */
+/* 133 */,
+/* 134 */,
+/* 135 */,
+/* 136 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25610,7 +25638,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-const netlify_1 = __webpack_require__(134);
+const netlify_1 = __webpack_require__(137);
 
 const handler = async (event, badly_typed_context) => {
   const who_am_i = {};
@@ -25640,7 +25668,7 @@ const handler = async (event, badly_typed_context) => {
 
     const {
       ensure_user_through_netlify
-    } = __webpack_require__(237);
+    } = __webpack_require__(241);
 
     who_am_i['3-DB_result'] = await ensure_user_through_netlify(netlify_id, data);
   } catch (err) {
@@ -25657,7 +25685,7 @@ const handler = async (event, badly_typed_context) => {
 exports.handler = handler;
 
 /***/ }),
-/* 134 */
+/* 137 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25701,27 +25729,27 @@ function get_netlify_user_data(context) {
 exports.get_netlify_user_data = get_netlify_user_data;
 
 /***/ }),
-/* 135 */
+/* 138 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Knex = __webpack_require__(136);
+const Knex = __webpack_require__(139);
 
 module.exports = Knex;
 
 
 /***/ }),
-/* 136 */
+/* 139 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Raw = __webpack_require__(18);
-const Client = __webpack_require__(66);
+const Client = __webpack_require__(68);
 const QueryBuilder = __webpack_require__(36);
-const QueryInterface = __webpack_require__(78);
+const QueryInterface = __webpack_require__(80);
 
-const makeKnex = __webpack_require__(72);
-const parseConnection = __webpack_require__(196);
-const fakeClient = __webpack_require__(198);
-const { SUPPORTED_CLIENTS } = __webpack_require__(49);
+const makeKnex = __webpack_require__(74);
+const parseConnection = __webpack_require__(199);
+const fakeClient = __webpack_require__(201);
+const { SUPPORTED_CLIENTS } = __webpack_require__(51);
 const { resolveClientNameWithAliases } = __webpack_require__(14);
 
 function Knex(config) {
@@ -25755,7 +25783,7 @@ function Knex(config) {
     }
 
     const resolvedClientName = resolveClientNameWithAliases(clientName);
-    Dialect = __webpack_require__(199)(`./${resolvedClientName}/index.js`);
+    Dialect = __webpack_require__(202)(`./${resolvedClientName}/index.js`);
   }
 
   // If config connection parameter is passed as string, try to parse it
@@ -25795,7 +25823,7 @@ module.exports = Knex;
 
 
 /***/ }),
-/* 137 */
+/* 140 */
 /***/ (function(module, exports) {
 
 if (typeof Object.create === 'function') {
@@ -25828,7 +25856,7 @@ if (typeof Object.create === 'function') {
 
 
 /***/ }),
-/* 138 */
+/* 141 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* eslint-env browser */
@@ -26080,7 +26108,7 @@ function localstorage() {
 	}
 }
 
-module.exports = __webpack_require__(62)(exports);
+module.exports = __webpack_require__(64)(exports);
 
 const {formatters} = module.exports;
 
@@ -26098,7 +26126,7 @@ formatters.j = function (v) {
 
 
 /***/ }),
-/* 139 */
+/* 142 */
 /***/ (function(module, exports) {
 
 /**
@@ -26266,14 +26294,14 @@ function plural(ms, msAbs, n, name) {
 
 
 /***/ }),
-/* 140 */
+/* 143 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
  * Module dependencies.
  */
 
-const tty = __webpack_require__(48);
+const tty = __webpack_require__(34);
 const util = __webpack_require__(4);
 
 /**
@@ -26296,7 +26324,7 @@ exports.colors = [6, 2, 3, 4, 5, 1];
 try {
 	// Optional dependency (as in, doesn't need to be installed, NOT like optionalDependencies in package.json)
 	// eslint-disable-next-line import/no-extraneous-dependencies
-	const supportsColor = __webpack_require__(34);
+	const supportsColor = __webpack_require__(49);
 
 	if (supportsColor && (supportsColor.stderr || supportsColor).level >= 2) {
 		exports.colors = [
@@ -26504,7 +26532,7 @@ function init(debug) {
 	}
 }
 
-module.exports = __webpack_require__(62)(exports);
+module.exports = __webpack_require__(64)(exports);
 
 const {formatters} = module.exports;
 
@@ -26529,11 +26557,11 @@ formatters.O = function (v) {
 
 
 /***/ }),
-/* 141 */
+/* 144 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var rng = __webpack_require__(64);
-var bytesToUuid = __webpack_require__(65);
+var rng = __webpack_require__(66);
+var bytesToUuid = __webpack_require__(67);
 
 // **`v1()` - Generate time-based UUID**
 //
@@ -26644,11 +26672,11 @@ module.exports = v1;
 
 
 /***/ }),
-/* 142 */
+/* 145 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var rng = __webpack_require__(64);
-var bytesToUuid = __webpack_require__(65);
+var rng = __webpack_require__(66);
+var bytesToUuid = __webpack_require__(67);
 
 function v4(options, buf, offset) {
   var i = buf && offset || 0;
@@ -26679,7 +26707,7 @@ module.exports = v4;
 
 
 /***/ }),
-/* 143 */
+/* 146 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26716,7 +26744,7 @@ var getContextDomain = function() {
     };
 };
 var AsyncResource = util.isNode && util.nodeSupportsAsyncResource ?
-    __webpack_require__(67).AsyncResource : null;
+    __webpack_require__(69).AsyncResource : null;
 var getContextAsyncHooks = function() {
     return {
         domain: getDomain(),
@@ -26735,7 +26763,7 @@ var disableAsyncHooks = function() {
 };
 
 var es5 = __webpack_require__(19);
-var Async = __webpack_require__(144);
+var Async = __webpack_require__(147);
 var async = new Async();
 es5.defineProperty(Promise, "_async", {value: async});
 var errors = __webpack_require__(15);
@@ -26749,21 +26777,21 @@ Promise.AggregateError = errors.AggregateError;
 var INTERNAL = function(){};
 var APPLY = {};
 var NEXT_FILTER = {};
-var tryConvertToPromise = __webpack_require__(147)(Promise, INTERNAL);
+var tryConvertToPromise = __webpack_require__(150)(Promise, INTERNAL);
 var PromiseArray =
-    __webpack_require__(148)(Promise, INTERNAL,
+    __webpack_require__(151)(Promise, INTERNAL,
                                tryConvertToPromise, apiRejection, Proxyable);
-var Context = __webpack_require__(149)(Promise);
+var Context = __webpack_require__(152)(Promise);
  /*jshint unused:false*/
 var createContext = Context.create;
 
-var debug = __webpack_require__(150)(Promise, Context,
+var debug = __webpack_require__(153)(Promise, Context,
     enableAsyncHooks, disableAsyncHooks);
 var CapturedTrace = debug.CapturedTrace;
 var PassThroughHandlerContext =
-    __webpack_require__(151)(Promise, tryConvertToPromise, NEXT_FILTER);
-var catchFilter = __webpack_require__(68)(NEXT_FILTER);
-var nodebackForPromise = __webpack_require__(69);
+    __webpack_require__(154)(Promise, tryConvertToPromise, NEXT_FILTER);
+var catchFilter = __webpack_require__(70)(NEXT_FILTER);
+var nodebackForPromise = __webpack_require__(71);
 var errorObj = util.errorObj;
 var tryCatch = util.tryCatch;
 function check(self, executor) {
@@ -27453,31 +27481,31 @@ util.notEnumerableProp(Promise,
                        "_makeSelfResolutionError",
                        makeSelfResolutionError);
 
-__webpack_require__(152)(Promise, INTERNAL, tryConvertToPromise, apiRejection,
+__webpack_require__(155)(Promise, INTERNAL, tryConvertToPromise, apiRejection,
     debug);
-__webpack_require__(153)(Promise, INTERNAL, tryConvertToPromise, debug);
-__webpack_require__(154)(Promise, PromiseArray, apiRejection, debug);
-__webpack_require__(155)(Promise);
-__webpack_require__(156)(Promise);
-__webpack_require__(157)(
+__webpack_require__(156)(Promise, INTERNAL, tryConvertToPromise, debug);
+__webpack_require__(157)(Promise, PromiseArray, apiRejection, debug);
+__webpack_require__(158)(Promise);
+__webpack_require__(159)(Promise);
+__webpack_require__(160)(
     Promise, PromiseArray, tryConvertToPromise, INTERNAL, async);
 Promise.Promise = Promise;
 Promise.version = "3.7.1";
-__webpack_require__(158)(Promise);
-__webpack_require__(159)(Promise, apiRejection, INTERNAL, tryConvertToPromise, Proxyable, debug);
-__webpack_require__(160)(Promise, PromiseArray, apiRejection, tryConvertToPromise, INTERNAL, debug);
 __webpack_require__(161)(Promise);
-__webpack_require__(162)(Promise, INTERNAL);
-__webpack_require__(163)(Promise, PromiseArray, tryConvertToPromise, apiRejection);
-__webpack_require__(164)(Promise, INTERNAL, tryConvertToPromise, apiRejection);
-__webpack_require__(165)(Promise, PromiseArray, apiRejection, tryConvertToPromise, INTERNAL, debug);
-__webpack_require__(166)(Promise, PromiseArray, debug);
-__webpack_require__(167)(Promise, PromiseArray, apiRejection);
-__webpack_require__(168)(Promise, INTERNAL, debug);
-__webpack_require__(169)(Promise, apiRejection, tryConvertToPromise, createContext, INTERNAL, debug);
-__webpack_require__(170)(Promise);
-__webpack_require__(171)(Promise, INTERNAL);
-__webpack_require__(172)(Promise, INTERNAL);
+__webpack_require__(162)(Promise, apiRejection, INTERNAL, tryConvertToPromise, Proxyable, debug);
+__webpack_require__(163)(Promise, PromiseArray, apiRejection, tryConvertToPromise, INTERNAL, debug);
+__webpack_require__(164)(Promise);
+__webpack_require__(165)(Promise, INTERNAL);
+__webpack_require__(166)(Promise, PromiseArray, tryConvertToPromise, apiRejection);
+__webpack_require__(167)(Promise, INTERNAL, tryConvertToPromise, apiRejection);
+__webpack_require__(168)(Promise, PromiseArray, apiRejection, tryConvertToPromise, INTERNAL, debug);
+__webpack_require__(169)(Promise, PromiseArray, debug);
+__webpack_require__(170)(Promise, PromiseArray, apiRejection);
+__webpack_require__(171)(Promise, INTERNAL, debug);
+__webpack_require__(172)(Promise, apiRejection, tryConvertToPromise, createContext, INTERNAL, debug);
+__webpack_require__(173)(Promise);
+__webpack_require__(174)(Promise, INTERNAL);
+__webpack_require__(175)(Promise, INTERNAL);
                                                          
     util.toFastProperties(Promise);                                          
     util.toFastProperties(Promise.prototype);                                
@@ -27505,15 +27533,15 @@ __webpack_require__(172)(Promise, INTERNAL);
 
 
 /***/ }),
-/* 144 */
+/* 147 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var firstLineError;
 try {throw new Error(); } catch (e) {firstLineError = e;}
-var schedule = __webpack_require__(145);
-var Queue = __webpack_require__(146);
+var schedule = __webpack_require__(148);
+var Queue = __webpack_require__(149);
 
 function Async() {
     this._customScheduler = false;
@@ -27632,7 +27660,7 @@ module.exports.firstLineError = firstLineError;
 
 
 /***/ }),
-/* 145 */
+/* 148 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27701,7 +27729,7 @@ module.exports = schedule;
 
 
 /***/ }),
-/* 146 */
+/* 149 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27781,7 +27809,7 @@ module.exports = Queue;
 
 
 /***/ }),
-/* 147 */
+/* 150 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27874,7 +27902,7 @@ return tryConvertToPromise;
 
 
 /***/ }),
-/* 148 */
+/* 151 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28067,7 +28095,7 @@ return PromiseArray;
 
 
 /***/ }),
-/* 149 */
+/* 152 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28143,7 +28171,7 @@ return Context;
 
 
 /***/ }),
-/* 150 */
+/* 153 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29186,7 +29214,7 @@ return {
 
 
 /***/ }),
-/* 151 */
+/* 154 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29195,7 +29223,7 @@ module.exports = function(Promise, tryConvertToPromise, NEXT_FILTER) {
 var util = __webpack_require__(3);
 var CancellationError = Promise.CancellationError;
 var errorObj = util.errorObj;
-var catchFilter = __webpack_require__(68)(NEXT_FILTER);
+var catchFilter = __webpack_require__(70)(NEXT_FILTER);
 
 function PassThroughHandlerContext(promise, type, handler) {
     this.promise = promise;
@@ -29339,7 +29367,7 @@ return PassThroughHandlerContext;
 
 
 /***/ }),
-/* 152 */
+/* 155 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29401,7 +29429,7 @@ Promise.prototype._resolveFromSyncValue = function (value) {
 
 
 /***/ }),
-/* 153 */
+/* 156 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29475,7 +29503,7 @@ Promise.bind = function (thisArg, value) {
 
 
 /***/ }),
-/* 154 */
+/* 157 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29611,7 +29639,7 @@ Promise.prototype._resultCancelled = function() {
 
 
 /***/ }),
-/* 155 */
+/* 158 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29664,7 +29692,7 @@ Promise.prototype.catchReturn = function (value) {
 
 
 /***/ }),
-/* 156 */
+/* 159 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29774,7 +29802,7 @@ Promise.PromiseInspection = PromiseInspection;
 
 
 /***/ }),
-/* 157 */
+/* 160 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29946,7 +29974,7 @@ Promise.join = function () {
 
 
 /***/ }),
-/* 158 */
+/* 161 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30076,7 +30104,7 @@ Promise.prototype.get = function (propertyName) {
 
 
 /***/ }),
-/* 159 */
+/* 162 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30306,7 +30334,7 @@ Promise.spawn = function (generatorFunction) {
 
 
 /***/ }),
-/* 160 */
+/* 163 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30488,7 +30516,7 @@ Promise.map = function (promises, fn, options, _filter) {
 
 
 /***/ }),
-/* 161 */
+/* 164 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30553,7 +30581,7 @@ Promise.prototype.asCallback = Promise.prototype.nodeify = function (nodeback,
 
 
 /***/ }),
-/* 162 */
+/* 165 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30561,7 +30589,7 @@ Promise.prototype.asCallback = Promise.prototype.nodeify = function (nodeback,
 module.exports = function(Promise, INTERNAL) {
 var THIS = {};
 var util = __webpack_require__(3);
-var nodebackForPromise = __webpack_require__(69);
+var nodebackForPromise = __webpack_require__(71);
 var withAppended = util.withAppended;
 var maybeWrapAsError = util.maybeWrapAsError;
 var canEvaluate = util.canEvaluate;
@@ -30874,7 +30902,7 @@ Promise.promisifyAll = function (target, options) {
 
 
 /***/ }),
-/* 163 */
+/* 166 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30999,7 +31027,7 @@ Promise.props = function (promises) {
 
 
 /***/ }),
-/* 164 */
+/* 167 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31055,7 +31083,7 @@ Promise.prototype.race = function () {
 
 
 /***/ }),
-/* 165 */
+/* 168 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31245,7 +31273,7 @@ function gotValue(value) {
 
 
 /***/ }),
-/* 166 */
+/* 169 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31299,7 +31327,7 @@ Promise.prototype.settle = function () {
 
 
 /***/ }),
-/* 167 */
+/* 170 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31454,7 +31482,7 @@ Promise._SomePromiseArray = SomePromiseArray;
 
 
 /***/ }),
-/* 168 */
+/* 171 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31554,7 +31582,7 @@ Promise.prototype.timeout = function (ms, message) {
 
 
 /***/ }),
-/* 169 */
+/* 172 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31787,7 +31815,7 @@ module.exports = function (Promise, apiRejection, tryConvertToPromise,
 
 
 /***/ }),
-/* 170 */
+/* 173 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31815,7 +31843,7 @@ Promise.prototype.any = function () {
 
 
 /***/ }),
-/* 171 */
+/* 174 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31852,7 +31880,7 @@ Promise.mapSeries = PromiseMapSeries;
 
 
 /***/ }),
-/* 172 */
+/* 175 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -31871,7 +31899,7 @@ Promise.filter = function (promises, fn, options) {
 
 
 /***/ }),
-/* 173 */
+/* 176 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Raw = __webpack_require__(18);
@@ -31916,7 +31944,7 @@ module.exports = Ref;
 
 
 /***/ }),
-/* 174 */
+/* 177 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Bluebird = __webpack_require__(28);
@@ -32182,7 +32210,7 @@ module.exports = Runner;
 
 
 /***/ }),
-/* 175 */
+/* 178 */
 /***/ (function(module, exports) {
 
 /**
@@ -32201,16 +32229,16 @@ module.exports = {
 
 
 /***/ }),
-/* 176 */
+/* 179 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Transaction
 // -------
 const Bluebird = __webpack_require__(28);
 const { EventEmitter } = __webpack_require__(7);
-const Debug = __webpack_require__(24);
+const Debug = __webpack_require__(25);
 
-const makeKnex = __webpack_require__(72);
+const makeKnex = __webpack_require__(74);
 
 const debug = Debug('knex:tx');
 
@@ -32604,7 +32632,7 @@ module.exports = Transaction;
 
 
 /***/ }),
-/* 177 */
+/* 180 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Migrator
@@ -32626,11 +32654,11 @@ const {
   getLockTableNameWithSchema,
   getTable,
   getTableName,
-} = __webpack_require__(53);
-const { getSchemaBuilder } = __webpack_require__(73);
-const migrationListResolver = __webpack_require__(178);
-const MigrationGenerator = __webpack_require__(179);
-const { getMergedConfig } = __webpack_require__(76);
+} = __webpack_require__(55);
+const { getSchemaBuilder } = __webpack_require__(75);
+const migrationListResolver = __webpack_require__(181);
+const MigrationGenerator = __webpack_require__(182);
+const { getMergedConfig } = __webpack_require__(78);
 
 function LockError(msg) {
   this.name = 'MigrationLocked';
@@ -33210,12 +33238,12 @@ module.exports = {
 
 
 /***/ }),
-/* 178 */
+/* 181 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const Bluebird = __webpack_require__(28);
-const { getTableName } = __webpack_require__(53);
-const { ensureTable } = __webpack_require__(73);
+const { getTableName } = __webpack_require__(55);
+const { ensureTable } = __webpack_require__(75);
 
 // Lists all available migration versions, as a sorted array.
 function listAll(migrationSource, loadExtensions) {
@@ -33256,15 +33284,15 @@ module.exports = {
 
 
 /***/ }),
-/* 179 */
+/* 182 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(__dirname) {const fs = __webpack_require__(8);
 const path = __webpack_require__(12);
 const { promisify } = __webpack_require__(4);
-const mkdirp = __webpack_require__(74);
-const { writeJsFileUsingTemplate } = __webpack_require__(75);
-const { getMergedConfig } = __webpack_require__(76);
+const mkdirp = __webpack_require__(76);
+const { writeJsFileUsingTemplate } = __webpack_require__(77);
+const { getMergedConfig } = __webpack_require__(78);
 
 class MigrationGenerator {
   constructor(migrationConfig) {
@@ -33369,7 +33397,7 @@ module.exports = MigrationGenerator;
 /* WEBPACK VAR INJECTION */}.call(this, "/"))
 
 /***/ }),
-/* 180 */
+/* 183 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const fs = __webpack_require__(8);
@@ -33454,7 +33482,7 @@ class FsMigrations {
 
   getMigration(migration) {
     const absoluteDir = path.resolve(process.cwd(), migration.directory);
-    return __webpack_require__(181)(path.join(absoluteDir, migration.file));
+    return __webpack_require__(184)(path.join(absoluteDir, migration.file));
   }
 }
 
@@ -33473,7 +33501,7 @@ module.exports = {
 
 
 /***/ }),
-/* 181 */
+/* 184 */
 /***/ (function(module, exports) {
 
 function webpackEmptyContext(req) {
@@ -33484,10 +33512,10 @@ function webpackEmptyContext(req) {
 webpackEmptyContext.keys = function() { return []; };
 webpackEmptyContext.resolve = webpackEmptyContext;
 module.exports = webpackEmptyContext;
-webpackEmptyContext.id = 181;
+webpackEmptyContext.id = 184;
 
 /***/ }),
-/* 182 */
+/* 185 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(__dirname) {// Seeder
@@ -33496,9 +33524,9 @@ webpackEmptyContext.id = 181;
 const fs = __webpack_require__(8);
 const path = __webpack_require__(12);
 const { promisify } = __webpack_require__(4);
-const mkdirp = __webpack_require__(74);
+const mkdirp = __webpack_require__(76);
 const { filter, includes, extend } = __webpack_require__(2);
-const { writeJsFileUsingTemplate } = __webpack_require__(75);
+const { writeJsFileUsingTemplate } = __webpack_require__(77);
 
 // The new seeds we're performing, typically called from the `knex.seed`
 // interface on the main `knex` object. Passes the `knex` instance performing
@@ -33561,7 +33589,7 @@ class Seeder {
 
   // Validates seed files by requiring and checking for a `seed` function.
   _validateSeedStructure(name) {
-    const seed = __webpack_require__(77)(path.join(this._absoluteConfigDir(), name));
+    const seed = __webpack_require__(79)(path.join(this._absoluteConfigDir(), name));
     if (typeof seed.seed !== 'function') {
       throw new Error(`Invalid seed file: ${name} must have a seed function`);
     }
@@ -33604,7 +33632,7 @@ class Seeder {
     const log = [];
     for (const seedName of seeds) {
       const seedPath = path.join(seedDirectory, seedName);
-      const seed = __webpack_require__(77)(seedPath);
+      const seed = __webpack_require__(79)(seedPath);
       try {
         await seed.seed(knex);
         log.push(seedPath);
@@ -33657,7 +33685,7 @@ module.exports = Seeder;
 /* WEBPACK VAR INJECTION */}.call(this, "/"))
 
 /***/ }),
-/* 183 */
+/* 186 */
 /***/ (function(module, exports) {
 
 // FunctionHelper
@@ -33677,11 +33705,11 @@ module.exports = FunctionHelper;
 
 
 /***/ }),
-/* 184 */
+/* 187 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const { isNumber, chunk, flatten } = __webpack_require__(2);
-const delay = __webpack_require__(185);
+const delay = __webpack_require__(188);
 
 module.exports = function batchInsert(
   client,
@@ -33740,7 +33768,7 @@ module.exports = function batchInsert(
 
 
 /***/ }),
-/* 185 */
+/* 188 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const { promisify } = __webpack_require__(4);
@@ -33749,14 +33777,14 @@ module.exports = promisify(setTimeout);
 
 
 /***/ }),
-/* 186 */
+/* 189 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const inherits = __webpack_require__(11);
 const { EventEmitter } = __webpack_require__(7);
 const { each, toArray } = __webpack_require__(2);
 const { addQueryContext } = __webpack_require__(14);
-const saveAsyncStack = __webpack_require__(50);
+const saveAsyncStack = __webpack_require__(52);
 
 // Constructor for the builder instance, typically called from
 // `knex.builder`, accepting the current `knex` instance,
@@ -33820,7 +33848,7 @@ each(
   }
 );
 
-__webpack_require__(52)(SchemaBuilder);
+__webpack_require__(54)(SchemaBuilder);
 addQueryContext(SchemaBuilder);
 
 SchemaBuilder.prototype.withSchema = function(schemaName) {
@@ -33840,7 +33868,7 @@ module.exports = SchemaBuilder;
 
 
 /***/ }),
-/* 187 */
+/* 190 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // TableBuilder
@@ -34131,7 +34159,7 @@ module.exports = TableBuilder;
 
 
 /***/ }),
-/* 188 */
+/* 191 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const { extend, each, toArray } = __webpack_require__(2);
@@ -34253,15 +34281,15 @@ module.exports = ColumnBuilder;
 
 
 /***/ }),
-/* 189 */
+/* 192 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const Pool_1 = __webpack_require__(190);
+const Pool_1 = __webpack_require__(193);
 exports.Pool = Pool_1.Pool;
-const TimeoutError_1 = __webpack_require__(83);
+const TimeoutError_1 = __webpack_require__(85);
 exports.TimeoutError = TimeoutError_1.TimeoutError;
 module.exports = {
     Pool: Pool_1.Pool,
@@ -34270,15 +34298,15 @@ module.exports = {
 
 
 /***/ }),
-/* 190 */
+/* 193 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const PendingOperation_1 = __webpack_require__(191);
-const Resource_1 = __webpack_require__(193);
-const utils_1 = __webpack_require__(55);
+const PendingOperation_1 = __webpack_require__(194);
+const Resource_1 = __webpack_require__(196);
+const utils_1 = __webpack_require__(57);
 const events_1 = __webpack_require__(7);
 class Pool {
     constructor(opt) {
@@ -34679,14 +34707,14 @@ function callbackOrPromise(func) {
 
 
 /***/ }),
-/* 191 */
+/* 194 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const TimeoutError_1 = __webpack_require__(83);
-const utils_1 = __webpack_require__(55);
+const TimeoutError_1 = __webpack_require__(85);
+const utils_1 = __webpack_require__(57);
 class PendingOperation {
     constructor(timeoutMillis) {
         this.timeoutMillis = timeoutMillis;
@@ -34732,7 +34760,7 @@ function timeout(promise, time) {
 
 
 /***/ }),
-/* 192 */
+/* 195 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -34760,13 +34788,13 @@ exports.PromiseInspection = PromiseInspection;
 
 
 /***/ }),
-/* 193 */
+/* 196 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const utils_1 = __webpack_require__(55);
+const utils_1 = __webpack_require__(57);
 class Resource {
     constructor(resource) {
         this.resource = resource;
@@ -34786,12 +34814,12 @@ exports.Resource = Resource;
 
 
 /***/ }),
-/* 194 */
+/* 197 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* eslint no-console:0 */
 
-const color = __webpack_require__(195);
+const color = __webpack_require__(198);
 const { isFunction, isNil } = __webpack_require__(2);
 
 function log(message, userFn, colorFn) {
@@ -34840,7 +34868,7 @@ module.exports = Logger;
 
 
 /***/ }),
-/* 195 */
+/* 198 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -34923,11 +34951,11 @@ module.exports = {
 
 
 /***/ }),
-/* 196 */
+/* 199 */
 /***/ (function(module, exports, __webpack_require__) {
 
 const url = __webpack_require__(16);
-const { parse } = __webpack_require__(197);
+const { parse } = __webpack_require__(200);
 const parsePG = parse;
 
 module.exports = function parseConnectionString(str) {
@@ -34988,7 +35016,7 @@ function connectionObject(parsed) {
 
 
 /***/ }),
-/* 197 */
+/* 200 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -35073,10 +35101,10 @@ parse.parse = parse;
 
 
 /***/ }),
-/* 198 */
+/* 201 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const Formatter = __webpack_require__(70);
+const Formatter = __webpack_require__(72);
 
 const fakeClient = {
   formatter(builder) {
@@ -35088,11 +35116,11 @@ module.exports = fakeClient;
 
 
 /***/ }),
-/* 199 */
+/* 202 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var map = {
-	"./postgres/index.js": 200
+	"./postgres/index.js": 203
 };
 
 
@@ -35113,10 +35141,10 @@ webpackContext.keys = function webpackContextKeys() {
 };
 webpackContext.resolve = webpackContextResolve;
 module.exports = webpackContext;
-webpackContext.id = 199;
+webpackContext.id = 202;
 
 /***/ }),
-/* 200 */
+/* 203 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // PostgreSQL
@@ -35124,14 +35152,14 @@ webpackContext.id = 199;
 const { map, extend, isString } = __webpack_require__(2);
 const { promisify } = __webpack_require__(4);
 const inherits = __webpack_require__(11);
-const Client = __webpack_require__(66);
+const Client = __webpack_require__(68);
 const Bluebird = __webpack_require__(28);
 
-const QueryCompiler = __webpack_require__(201);
-const ColumnCompiler = __webpack_require__(202);
-const TableCompiler = __webpack_require__(203);
-const SchemaCompiler = __webpack_require__(204);
-const { makeEscape } = __webpack_require__(84);
+const QueryCompiler = __webpack_require__(204);
+const ColumnCompiler = __webpack_require__(205);
+const TableCompiler = __webpack_require__(206);
+const SchemaCompiler = __webpack_require__(207);
+const { makeEscape } = __webpack_require__(86);
 
 function Client_PG(config) {
   Client.apply(this, arguments);
@@ -35167,7 +35195,7 @@ Object.assign(Client_PG.prototype, {
   driverName: 'pg',
 
   _driver() {
-    return __webpack_require__(85);
+    return __webpack_require__(87);
   },
 
   _escapeBinding: makeEscape({
@@ -35323,7 +35351,7 @@ Object.assign(Client_PG.prototype, {
   _stream(connection, obj, stream, options) {
     const PGQueryStream = process.browser
       ? undefined
-      : __webpack_require__(231);
+      : __webpack_require__(234);
     const sql = obj.sql;
 
     return new Bluebird(function(resolver, rejecter) {
@@ -35443,14 +35471,14 @@ module.exports = Client_PG;
 
 
 /***/ }),
-/* 201 */
+/* 204 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // PostgreSQL Query Builder & Compiler
 // ------
 const inherits = __webpack_require__(11);
 
-const QueryCompiler = __webpack_require__(79);
+const QueryCompiler = __webpack_require__(81);
 
 const { reduce, identity } = __webpack_require__(2);
 
@@ -35605,20 +35633,24 @@ Object.assign(QueryCompiler_PG.prototype, {
       },
     };
   },
+
+  distinctOn(value) {
+    return 'distinct on (' + this.formatter.columnize(value) + ') ';
+  }
 });
 
 module.exports = QueryCompiler_PG;
 
 
 /***/ }),
-/* 202 */
+/* 205 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // PostgreSQL Column Compiler
 // -------
 
 const inherits = __webpack_require__(11);
-const ColumnCompiler = __webpack_require__(82);
+const ColumnCompiler = __webpack_require__(84);
 const { isObject } = __webpack_require__(2);
 
 function ColumnCompiler_PG() {
@@ -35739,7 +35771,7 @@ module.exports = ColumnCompiler_PG;
 
 
 /***/ }),
-/* 203 */
+/* 206 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* eslint max-len: 0 */
@@ -35748,7 +35780,7 @@ module.exports = ColumnCompiler_PG;
 // -------
 
 const inherits = __webpack_require__(11);
-const TableCompiler = __webpack_require__(81);
+const TableCompiler = __webpack_require__(83);
 
 const { has } = __webpack_require__(2);
 
@@ -35928,14 +35960,14 @@ module.exports = TableCompiler_PG;
 
 
 /***/ }),
-/* 204 */
+/* 207 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // PostgreSQL Schema Compiler
 // -------
 
 const inherits = __webpack_require__(11);
-const SchemaCompiler = __webpack_require__(80);
+const SchemaCompiler = __webpack_require__(82);
 
 function SchemaCompiler_PG() {
   SchemaCompiler.apply(this, arguments);
@@ -36043,7 +36075,7 @@ module.exports = SchemaCompiler_PG;
 
 
 /***/ }),
-/* 205 */
+/* 208 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36059,14 +36091,14 @@ module.exports = SchemaCompiler_PG;
 var EventEmitter = __webpack_require__(7).EventEmitter
 var util = __webpack_require__(4)
 var utils = __webpack_require__(37)
-var sasl = __webpack_require__(214)
-var pgPass = __webpack_require__(215)
-var TypeOverrides = __webpack_require__(88)
+var sasl = __webpack_require__(217)
+var pgPass = __webpack_require__(218)
+var TypeOverrides = __webpack_require__(90)
 
-var ConnectionParameters = __webpack_require__(89)
-var Query = __webpack_require__(222)
+var ConnectionParameters = __webpack_require__(91)
+var Query = __webpack_require__(225)
 var defaults = __webpack_require__(38)
-var Connection = __webpack_require__(91)
+var Connection = __webpack_require__(93)
 
 var Client = function (config) {
   EventEmitter.call(this)
@@ -36611,14 +36643,14 @@ module.exports = Client
 
 
 /***/ }),
-/* 206 */
+/* 209 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var array = __webpack_require__(86)
-var arrayParser = __webpack_require__(87);
-var parseDate = __webpack_require__(207);
-var parseInterval = __webpack_require__(208);
-var parseByteA = __webpack_require__(210);
+var array = __webpack_require__(88)
+var arrayParser = __webpack_require__(89);
+var parseDate = __webpack_require__(210);
+var parseInterval = __webpack_require__(211);
+var parseByteA = __webpack_require__(213);
 
 function allowNull (fn) {
   return function nullAllowed (value) {
@@ -36832,7 +36864,7 @@ module.exports = {
 
 
 /***/ }),
-/* 207 */
+/* 210 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36949,13 +36981,13 @@ function is0To99 (num) {
 
 
 /***/ }),
-/* 208 */
+/* 211 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var extend = __webpack_require__(209)
+var extend = __webpack_require__(212)
 
 module.exports = PostgresInterval
 
@@ -37081,7 +37113,7 @@ function parse (interval) {
 
 
 /***/ }),
-/* 209 */
+/* 212 */
 /***/ (function(module, exports) {
 
 module.exports = extend
@@ -37104,7 +37136,7 @@ function extend(target) {
 
 
 /***/ }),
-/* 210 */
+/* 213 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37142,10 +37174,10 @@ module.exports = function parseBytea (input) {
 
 
 /***/ }),
-/* 211 */
+/* 214 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var parseInt64 = __webpack_require__(212);
+var parseInt64 = __webpack_require__(215);
 
 var parseBits = function(data, bits, offset, invert, callback) {
   offset = offset || 0;
@@ -37405,7 +37437,7 @@ module.exports = {
 
 
 /***/ }),
-/* 212 */
+/* 215 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37512,7 +37544,7 @@ module.exports = readInt8;
 
 
 /***/ }),
-/* 213 */
+/* 216 */
 /***/ (function(module, exports) {
 
 /**
@@ -37591,12 +37623,12 @@ module.exports = {
 
 
 /***/ }),
-/* 214 */
+/* 217 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const crypto = __webpack_require__(51)
+const crypto = __webpack_require__(53)
 
 function startSession (mechanisms) {
   if (mechanisms.indexOf('SCRAM-SHA-256') === -1) {
@@ -37745,7 +37777,7 @@ module.exports = {
 
 
 /***/ }),
-/* 215 */
+/* 218 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37753,7 +37785,7 @@ module.exports = {
 
 var path = __webpack_require__(12)
   , fs = __webpack_require__(8)
-  , helper = __webpack_require__(216)
+  , helper = __webpack_require__(219)
 ;
 
 
@@ -37775,7 +37807,7 @@ module.exports.warnTo = helper.warnTo;
 
 
 /***/ }),
-/* 216 */
+/* 219 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37783,7 +37815,7 @@ module.exports.warnTo = helper.warnTo;
 
 var path = __webpack_require__(12)
   , Stream = __webpack_require__(35).Stream
-  , Split = __webpack_require__(217)
+  , Split = __webpack_require__(220)
   , util = __webpack_require__(4)
   , defaultPort = 5432
   , isWin = (process.platform === 'win32')
@@ -38015,7 +38047,7 @@ var isValidEntry = module.exports.isValidEntry = function(entry){
 
 
 /***/ }),
-/* 217 */
+/* 220 */
 /***/ (function(module, exports, __webpack_require__) {
 
 //filter will reemit the data if cb(err,pass) pass is truthy
@@ -38025,8 +38057,8 @@ var isValidEntry = module.exports.isValidEntry = function(entry){
 // the most basic reduce just emits one 'data' event after it has recieved 'end'
 
 
-var through = __webpack_require__(218)
-var Decoder = __webpack_require__(219).StringDecoder
+var through = __webpack_require__(221)
+var Decoder = __webpack_require__(222).StringDecoder
 
 module.exports = split
 
@@ -38084,7 +38116,7 @@ function split (matcher, mapper, options) {
 
 
 /***/ }),
-/* 218 */
+/* 221 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var Stream = __webpack_require__(35)
@@ -38198,19 +38230,19 @@ function through (write, end, opts) {
 
 
 /***/ }),
-/* 219 */
+/* 222 */
 /***/ (function(module, exports) {
 
 module.exports = require("string_decoder");
 
 /***/ }),
-/* 220 */
+/* 223 */
 /***/ (function(module, exports) {
 
 module.exports = require("dns");
 
 /***/ }),
-/* 221 */
+/* 224 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -38279,7 +38311,7 @@ module.exports = {
 
 
 /***/ }),
-/* 222 */
+/* 225 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -38295,7 +38327,7 @@ module.exports = {
 var EventEmitter = __webpack_require__(7).EventEmitter
 var util = __webpack_require__(4)
 
-var Result = __webpack_require__(90)
+var Result = __webpack_require__(92)
 var utils = __webpack_require__(37)
 
 var Query = function (config, values, callback) {
@@ -38515,7 +38547,7 @@ module.exports = Query
 
 
 /***/ }),
-/* 223 */
+/* 226 */
 /***/ (function(module, exports) {
 
 //binary data writer tuned for creating
@@ -38650,10 +38682,10 @@ Writer.prototype.flush = function (code) {
 
 
 /***/ }),
-/* 224 */
+/* 227 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var assert = __webpack_require__(23)
+var assert = __webpack_require__(24)
 
 var Reader = module.exports = function(options) {
   //TODO - remove for version 1.0
@@ -38721,7 +38753,7 @@ Reader.prototype.read = function() {
 
 
 /***/ }),
-/* 225 */
+/* 228 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -38793,7 +38825,7 @@ class Pool extends EventEmitter {
     this.options = Object.assign({}, options)
     this.options.max = this.options.max || this.options.poolSize || 10
     this.log = this.options.log || function () { }
-    this.Client = this.options.Client || Client || __webpack_require__(85).Client
+    this.Client = this.options.Client || Client || __webpack_require__(87).Client
     this.Promise = this.options.Promise || global.Promise
 
     if (typeof this.options.idleTimeoutMillis === 'undefined') {
@@ -39094,7 +39126,7 @@ module.exports = Pool
 
 
 /***/ }),
-/* 226 */
+/* 229 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39108,19 +39140,19 @@ module.exports = Pool
  */
 
 // eslint-disable-next-line
-var Native = __webpack_require__(227)
-var TypeOverrides = __webpack_require__(88)
-var semver = __webpack_require__(228)
-var pkg = __webpack_require__(229)
-var assert = __webpack_require__(23)
+var Native = __webpack_require__(230)
+var TypeOverrides = __webpack_require__(90)
+var semver = __webpack_require__(231)
+var pkg = __webpack_require__(232)
+var assert = __webpack_require__(24)
 var EventEmitter = __webpack_require__(7).EventEmitter
 var util = __webpack_require__(4)
-var ConnectionParameters = __webpack_require__(89)
+var ConnectionParameters = __webpack_require__(91)
 
 var msg = 'Version >= ' + pkg.minNativeVersion + ' of pg-native required.'
 assert(semver.gte(Native.version, pkg.minNativeVersion), msg)
 
-var NativeQuery = __webpack_require__(230)
+var NativeQuery = __webpack_require__(233)
 
 var Client = module.exports = function (config) {
   EventEmitter.call(this)
@@ -39396,7 +39428,7 @@ Client.prototype.getTypeParser = function (oid, format) {
 
 
 /***/ }),
-/* 227 */
+/* 230 */
 /***/ (function(module, exports) {
 
 module.exports = noop
@@ -39410,7 +39442,7 @@ noop()
 
 
 /***/ }),
-/* 228 */
+/* 231 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;// export the class if we are in a Node-like system.
@@ -40611,13 +40643,13 @@ if (true)
 
 
 /***/ }),
-/* 229 */
+/* 232 */
 /***/ (function(module) {
 
-module.exports = JSON.parse("{\"name\":\"pg\",\"version\":\"7.12.1\",\"description\":\"PostgreSQL client - pure javascript & libpq with the same API\",\"keywords\":[\"database\",\"libpq\",\"pg\",\"postgre\",\"postgres\",\"postgresql\",\"rdbms\"],\"homepage\":\"http://github.com/brianc/node-postgres\",\"repository\":{\"type\":\"git\",\"url\":\"git://github.com/brianc/node-postgres.git\"},\"author\":\"Brian Carlson <brian.m.carlson@gmail.com>\",\"main\":\"./lib\",\"dependencies\":{\"buffer-writer\":\"2.0.0\",\"packet-reader\":\"1.0.0\",\"pg-connection-string\":\"0.1.3\",\"pg-pool\":\"^2.0.4\",\"pg-types\":\"^2.1.0\",\"pgpass\":\"1.x\",\"semver\":\"4.3.2\"},\"devDependencies\":{\"async\":\"0.9.0\",\"bluebird\":\"3.5.2\",\"co\":\"4.6.0\",\"eslint\":\"^6.0.1\",\"eslint-config-standard\":\"^13.0.1\",\"eslint-plugin-import\":\"^2.18.1\",\"eslint-plugin-node\":\"^9.1.0\",\"eslint-plugin-promise\":\"^4.2.1\",\"eslint-plugin-standard\":\"^4.0.0\",\"pg-copy-streams\":\"0.3.0\"},\"minNativeVersion\":\"2.0.0\",\"scripts\":{\"test\":\"make test-all\"},\"license\":\"MIT\",\"engines\":{\"node\":\">= 4.5.0\"}}");
+module.exports = JSON.parse("{\"name\":\"pg\",\"version\":\"7.14.0\",\"description\":\"PostgreSQL client - pure javascript & libpq with the same API\",\"keywords\":[\"database\",\"libpq\",\"pg\",\"postgre\",\"postgres\",\"postgresql\",\"rdbms\"],\"homepage\":\"http://github.com/brianc/node-postgres\",\"repository\":{\"type\":\"git\",\"url\":\"git://github.com/brianc/node-postgres.git\"},\"author\":\"Brian Carlson <brian.m.carlson@gmail.com>\",\"main\":\"./lib\",\"dependencies\":{\"buffer-writer\":\"2.0.0\",\"packet-reader\":\"1.0.0\",\"pg-connection-string\":\"0.1.3\",\"pg-pool\":\"^2.0.7\",\"pg-types\":\"^2.1.0\",\"pgpass\":\"1.x\",\"semver\":\"4.3.2\"},\"devDependencies\":{\"async\":\"0.9.0\",\"bluebird\":\"3.5.2\",\"co\":\"4.6.0\",\"eslint\":\"^6.0.1\",\"eslint-config-standard\":\"^13.0.1\",\"eslint-plugin-import\":\"^2.18.1\",\"eslint-plugin-node\":\"^9.1.0\",\"eslint-plugin-promise\":\"^4.2.1\",\"eslint-plugin-standard\":\"^4.0.0\",\"pg-copy-streams\":\"0.3.0\"},\"minNativeVersion\":\"2.0.0\",\"scripts\":{\"test\":\"make test-all\"},\"files\":[\"lib\",\"SPONSORS.md\"],\"license\":\"MIT\",\"engines\":{\"node\":\">= 4.5.0\"}}");
 
 /***/ }),
-/* 230 */
+/* 233 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40791,12 +40823,12 @@ NativeQuery.prototype.submit = function (client) {
 
 
 /***/ }),
-/* 231 */
+/* 234 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var Cursor = __webpack_require__(232)
+var Cursor = __webpack_require__(235)
 var Readable = __webpack_require__(35).Readable
 
 class PgQueryStream extends Readable {
@@ -40859,12 +40891,12 @@ module.exports = PgQueryStream
 
 
 /***/ }),
-/* 232 */
+/* 235 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const Result = __webpack_require__(90)
+const Result = __webpack_require__(92)
 const prepare = __webpack_require__(37).prepareValue
 const EventEmitter = __webpack_require__(7).EventEmitter
 const util = __webpack_require__(4)
@@ -41053,15 +41085,71 @@ module.exports = Cursor
 
 
 /***/ }),
-/* 233 */
+/* 236 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports.parse = __webpack_require__(234);
-exports.stringify = __webpack_require__(235);
+"use strict";
+
+
+var PLUS_ONLY = /\+.*$/;
+var PLUS_AND_DOT = /\.|\+.*$/g;
+var normalizeableProviders = {
+  'gmail.com': {
+    'cut': PLUS_AND_DOT
+  },
+  'googlemail.com': {
+    'cut': PLUS_AND_DOT,
+    'aliasOf': 'gmail.com'
+  },
+  'hotmail.com': {
+    'cut': PLUS_ONLY
+  },
+  'live.com': {
+    'cut': PLUS_AND_DOT
+  },
+  'outlook.com': {
+    'cut': PLUS_ONLY
+  }
+};
+
+module.exports = function normalizeEmail(eMail) {
+  if (typeof eMail != 'string') {
+    throw new TypeError('normalize-email expects a string');
+  }
+
+  var email = eMail.toLowerCase();
+  var emailParts = email.split(/@/);
+
+  if (emailParts.length !== 2) {
+    return eMail;
+  }
+
+  var username = emailParts[0];
+  var domain = emailParts[1];
+
+  if (normalizeableProviders.hasOwnProperty(domain)) {
+    if (normalizeableProviders[domain].hasOwnProperty('cut')) {
+      username = username.replace(normalizeableProviders[domain].cut, '');
+    }
+    if (normalizeableProviders[domain].hasOwnProperty('aliasOf')) {
+      domain = normalizeableProviders[domain].aliasOf;
+    }
+  }
+
+  return username + '@' + domain;
+}
 
 
 /***/ }),
-/* 234 */
+/* 237 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports.parse = __webpack_require__(238);
+exports.stringify = __webpack_require__(239);
+
+
+/***/ }),
+/* 238 */
 /***/ (function(module, exports) {
 
 var at, // The index of the current character
@@ -41340,7 +41428,7 @@ module.exports = function (source, reviver) {
 
 
 /***/ }),
-/* 235 */
+/* 239 */
 /***/ (function(module, exports) {
 
 var cx = /[\u0000\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g,
@@ -41500,8 +41588,8 @@ module.exports = function (value, replacer, space) {
 
 
 /***/ }),
-/* 236 */,
-/* 237 */
+/* 240 */,
+/* 241 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -41524,35 +41612,126 @@ function tiny_singleton(generator) {
 /* harmony default export */ var src_es2019 = (tiny_singleton);
 
 // EXTERNAL MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/knex/knex.js
-var knex = __webpack_require__(99);
+var knex = __webpack_require__(101);
 var knex_default = /*#__PURE__*/__webpack_require__.n(knex);
 
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/apps/shared/db/dist/src.es2019/db.js
 
 
-const get_db = src_es2019(() => knex_default()({
+const get_db = src_es2019(({
+  min = 1,
+  max = 1
+} = {}) => knex_default()({
   client: 'pg',
   connection: process.env.SECRET_DATABASE_URL || 'postgres://postgres:@127.0.0.1:32768/postgres',
   debug: true,
   // log: TODO
   pool: {
-    min: 1,
-    max: 1
+    min,
+    max
   }
 }));
 /* harmony default export */ var db = (get_db);
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/apps/shared/db/dist/src.es2019/users/consts.js
 const TABLE_USERS = 'users';
 const TABLE_NETLIFY_USERS = 'users__netlify';
+const TABLE_AUTH0_USERS = 'users__auth0';
 const DEFAULT_ROLES = [];
 const DEFAULT_CALLED = 'anonymous';
 // EXTERNAL MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/tiny-invariant/dist/tiny-invariant.esm.js
 var tiny_invariant_esm = __webpack_require__(17);
 
+// CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/2-advanced/normalize-string/dist/src.es2019/normalize.js
+function combine_normalizers(...normalizers) {
+  return s => normalizers.reduce((acc, normalizer) => {
+    const out = normalizer(acc); //console.log(`combined normalization: "${acc}" -> "${out}"`)
+
+    return out;
+  }, s);
+}
+
+function normalize(s, ...normalizers) {
+  return combine_normalizers(...normalizers)(s);
+}
+
+
+// CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/2-advanced/normalize-string/dist/src.es2019/normalizers.js
+ /////////////////////
+
+const capitalize = s => s.length === 0 ? s : s[0].toUpperCase() + s.slice(1);
+
+const to_lower_case = s => s.toLowerCase();
+
+const to_upper_case = s => s.toUpperCase(); // https://devdocs.io/javascript/global_objects/string/trim
+
+
+const trim = s => s.trim(); // https://thread.engineering/2018-08-29-searching-and-sorting-text-with-diacritical-marks-in-javascript/
+
+
+const coerce_to_ascii = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // https://devdocs.io/javascript/global_objects/string/normalize
+// https://withblue.ink/2019/03/11/why-you-need-to-normalize-unicode-strings.html
+
+
+const normalize_unicode = s => s.normalize(); // https://stackoverflow.com/a/1981366/587407
+
+
+const ANY_BLANK_REGEXP = /\s+/g;
+
+const coerce_blanks_to_single_spaces = s => s.replace(ANY_BLANK_REGEXP, ' '); // https://stackoverflow.com/a/19313707/587407
+
+
+const ANY_DELIMITER_REGEXP = new RegExp('[-+()*/:? _]', 'g');
+
+const coerce_delimiters_to_space = s => s.replace(ANY_DELIMITER_REGEXP, ' ');
+
+const convert_spaces_to_camel_case = s => s.split(' ').map(capitalize).join(''); // for user names, player names...
+
+
+const coerce_to_safe_nickname = combine_normalizers(trim, coerce_to_ascii, to_lower_case, coerce_delimiters_to_space, coerce_blanks_to_single_spaces, convert_spaces_to_camel_case);
+const coerce_to_redeemable_code = combine_normalizers(trim, coerce_to_ascii, to_upper_case, coerce_delimiters_to_space, convert_spaces_to_camel_case); /////////////////////
+
+const NORMALIZERS = {
+  capitalize,
+  to_lower_case,
+  to_upper_case,
+  trim,
+  coerce_to_ascii,
+  normalize_unicode,
+  coerce_blanks_to_single_spaces,
+  coerce_delimiters_to_space,
+  convert_spaces_to_camel_case,
+  coerce_to_safe_nickname,
+  coerce_to_redeemable_code
+}; /////////////////////
+
+
+// CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/apps/shared/db/dist/src.es2019/utils/index.js
+const normalizeEmail = __webpack_require__(236);
+
+
+
+function validate_structure(possible_email) {
+  const [before, after, ...rest] = possible_email.split('@'); //console.log({before, after, rest, ta: typeof after})
+
+  if (rest.length) throw new Error('Invalid email: more than one @!');
+  if (typeof after !== 'string') throw new Error('Invalid email: no @!');
+  if (after.split('.').length < 2) throw new Error('Invalid email: bad domain!');
+  if (!before.length || !after.length) throw new Error('Invalid email: bad structure!');
+}
+
+const normalize_email = combine_normalizers(NORMALIZERS.trim, s => s.split(' ').join(''), // remove spaces inside (autocomplete)
+NORMALIZERS.to_lower_case, normalizeEmail, s => {
+  validate_structure(s);
+  return s;
+});
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/apps/shared/db/dist/src.es2019/users/create.js
 
 
+
 async function create_user(data, trx = db()) {
+  data = { ...data,
+    email: normalize_email(data.email)
+  };
   const [id] = await trx('users').insert(data).returning('id');
   Object(tiny_invariant_esm["default"])(id >= 0, 'created user id');
   return id;
@@ -41562,6 +41741,7 @@ async function create_netlify_user(data, trx = db()) {
 }
 async function create_user_through_netlify(netlify_id, base_data) {
   return db().transaction(async trx => {
+    //let user_id =
     const user_id = await create_user(base_data, trx);
     const netlify_user = {
       user_id,
@@ -41575,6 +41755,10 @@ async function create_user_through_netlify(netlify_id, base_data) {
 }
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/apps/shared/db/dist/src.es2019/users/read.js
 
+
+/*export async function get_user_by_email(email: string): Promise<null | MergedUser> {
+
+}*/
 
 async function get_full_user_through_netlify(netlify_id) {
   const raw_result = await db().select(db().raw('row_to_json("users__netlify".*) AS "netlify_user", row_to_json("users".*) AS "user"')).from('users').fullOuterJoin('users__netlify', {
@@ -41599,7 +41783,7 @@ async function get_full_user_through_netlify(netlify_id) {
   return merged;
 }
 // EXTERNAL MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/json-stable-stringify/index.js
-var json_stable_stringify = __webpack_require__(57);
+var json_stable_stringify = __webpack_require__(59);
 var json_stable_stringify_default = /*#__PURE__*/__webpack_require__.n(json_stable_stringify);
 
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/apps/shared/db/dist/src.es2019/users/update.js
@@ -41671,6 +41855,7 @@ async function ensure_user_through_netlify(netlify_id, data) {
 /* concated harmony reexport get_db */__webpack_require__.d(__webpack_exports__, "get_db", function() { return get_db; });
 /* concated harmony reexport TABLE_USERS */__webpack_require__.d(__webpack_exports__, "TABLE_USERS", function() { return TABLE_USERS; });
 /* concated harmony reexport TABLE_NETLIFY_USERS */__webpack_require__.d(__webpack_exports__, "TABLE_NETLIFY_USERS", function() { return TABLE_NETLIFY_USERS; });
+/* concated harmony reexport TABLE_AUTH0_USERS */__webpack_require__.d(__webpack_exports__, "TABLE_AUTH0_USERS", function() { return TABLE_AUTH0_USERS; });
 /* concated harmony reexport DEFAULT_ROLES */__webpack_require__.d(__webpack_exports__, "DEFAULT_ROLES", function() { return DEFAULT_ROLES; });
 /* concated harmony reexport DEFAULT_CALLED */__webpack_require__.d(__webpack_exports__, "DEFAULT_CALLED", function() { return DEFAULT_CALLED; });
 /* concated harmony reexport create_user */__webpack_require__.d(__webpack_exports__, "create_user", function() { return create_user; });

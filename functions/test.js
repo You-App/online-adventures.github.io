@@ -81,7 +81,7 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 108);
+/******/ 	return __webpack_require__(__webpack_require__.s = 109);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -314,233 +314,238 @@ function __importDefault(mod) {
 
 "use strict";
 
-const escapeStringRegexp = __webpack_require__(113);
 const ansiStyles = __webpack_require__(114);
-const stdoutColor = __webpack_require__(34).stdout;
-
-const template = __webpack_require__(118);
-
-const isSimpleWindowsTerm = process.platform === 'win32' && !(process.env.TERM || '').toLowerCase().startsWith('xterm');
+const {stdout: stdoutColor, stderr: stderrColor} = __webpack_require__(118);
+const {
+	stringReplaceAll,
+	stringEncaseCRLFWithFirstIndex
+} = __webpack_require__(120);
 
 // `supportsColor.level` → `ansiStyles.color[name]` mapping
-const levelMapping = ['ansi', 'ansi', 'ansi256', 'ansi16m'];
-
-// `color-convert` models to exclude from the Chalk API due to conflicts and such
-const skipModels = new Set(['gray']);
+const levelMapping = [
+	'ansi',
+	'ansi',
+	'ansi256',
+	'ansi16m'
+];
 
 const styles = Object.create(null);
 
-function applyOptions(obj, options) {
-	options = options || {};
-
-	// Detect level if not set manually
-	const scLevel = stdoutColor ? stdoutColor.level : 0;
-	obj.level = options.level === undefined ? scLevel : options.level;
-	obj.enabled = 'enabled' in options ? options.enabled : obj.level > 0;
-}
-
-function Chalk(options) {
-	// We check for this.template here since calling `chalk.constructor()`
-	// by itself will have a `this` of a previously constructed chalk object
-	if (!this || !(this instanceof Chalk) || this.template) {
-		const chalk = {};
-		applyOptions(chalk, options);
-
-		chalk.template = function () {
-			const args = [].slice.call(arguments);
-			return chalkTag.apply(null, [chalk.template].concat(args));
-		};
-
-		Object.setPrototypeOf(chalk, Chalk.prototype);
-		Object.setPrototypeOf(chalk.template, chalk);
-
-		chalk.template.constructor = Chalk;
-
-		return chalk.template;
+const applyOptions = (object, options = {}) => {
+	if (options.level > 3 || options.level < 0) {
+		throw new Error('The `level` option should be an integer from 0 to 3');
 	}
 
-	applyOptions(this, options);
+	// Detect level if not set manually
+	const colorLevel = stdoutColor ? stdoutColor.level : 0;
+	object.level = options.level === undefined ? colorLevel : options.level;
+};
+
+class ChalkClass {
+	constructor(options) {
+		return chalkFactory(options);
+	}
 }
 
-// Use bright blue on Windows as the normal blue color is illegible
-if (isSimpleWindowsTerm) {
-	ansiStyles.blue.open = '\u001B[94m';
+const chalkFactory = options => {
+	const chalk = {};
+	applyOptions(chalk, options);
+
+	chalk.template = (...arguments_) => chalkTag(chalk.template, ...arguments_);
+
+	Object.setPrototypeOf(chalk, Chalk.prototype);
+	Object.setPrototypeOf(chalk.template, chalk);
+
+	chalk.template.constructor = () => {
+		throw new Error('`chalk.constructor()` is deprecated. Use `new chalk.Instance()` instead.');
+	};
+
+	chalk.template.Instance = ChalkClass;
+
+	return chalk.template;
+};
+
+function Chalk(options) {
+	return chalkFactory(options);
 }
 
-for (const key of Object.keys(ansiStyles)) {
-	ansiStyles[key].closeRe = new RegExp(escapeStringRegexp(ansiStyles[key].close), 'g');
-
-	styles[key] = {
+for (const [styleName, style] of Object.entries(ansiStyles)) {
+	styles[styleName] = {
 		get() {
-			const codes = ansiStyles[key];
-			return build.call(this, this._styles ? this._styles.concat(codes) : [codes], this._empty, key);
+			const builder = createBuilder(this, createStyler(style.open, style.close, this._styler), this._isEmpty);
+			Object.defineProperty(this, styleName, {value: builder});
+			return builder;
 		}
 	};
 }
 
 styles.visible = {
 	get() {
-		return build.call(this, this._styles || [], true, 'visible');
+		const builder = createBuilder(this, this._styler, true);
+		Object.defineProperty(this, 'visible', {value: builder});
+		return builder;
 	}
 };
 
-ansiStyles.color.closeRe = new RegExp(escapeStringRegexp(ansiStyles.color.close), 'g');
-for (const model of Object.keys(ansiStyles.color.ansi)) {
-	if (skipModels.has(model)) {
-		continue;
-	}
+const usedModels = ['rgb', 'hex', 'keyword', 'hsl', 'hsv', 'hwb', 'ansi', 'ansi256'];
 
+for (const model of usedModels) {
 	styles[model] = {
 		get() {
-			const level = this.level;
-			return function () {
-				const open = ansiStyles.color[levelMapping[level]][model].apply(null, arguments);
-				const codes = {
-					open,
-					close: ansiStyles.color.close,
-					closeRe: ansiStyles.color.closeRe
-				};
-				return build.call(this, this._styles ? this._styles.concat(codes) : [codes], this._empty, model);
+			const {level} = this;
+			return function (...arguments_) {
+				const styler = createStyler(ansiStyles.color[levelMapping[level]][model](...arguments_), ansiStyles.color.close, this._styler);
+				return createBuilder(this, styler, this._isEmpty);
 			};
 		}
 	};
 }
 
-ansiStyles.bgColor.closeRe = new RegExp(escapeStringRegexp(ansiStyles.bgColor.close), 'g');
-for (const model of Object.keys(ansiStyles.bgColor.ansi)) {
-	if (skipModels.has(model)) {
-		continue;
-	}
-
+for (const model of usedModels) {
 	const bgModel = 'bg' + model[0].toUpperCase() + model.slice(1);
 	styles[bgModel] = {
 		get() {
-			const level = this.level;
-			return function () {
-				const open = ansiStyles.bgColor[levelMapping[level]][model].apply(null, arguments);
-				const codes = {
-					open,
-					close: ansiStyles.bgColor.close,
-					closeRe: ansiStyles.bgColor.closeRe
-				};
-				return build.call(this, this._styles ? this._styles.concat(codes) : [codes], this._empty, model);
+			const {level} = this;
+			return function (...arguments_) {
+				const styler = createStyler(ansiStyles.bgColor[levelMapping[level]][model](...arguments_), ansiStyles.bgColor.close, this._styler);
+				return createBuilder(this, styler, this._isEmpty);
 			};
 		}
 	};
 }
 
-const proto = Object.defineProperties(() => {}, styles);
-
-function build(_styles, _empty, key) {
-	const builder = function () {
-		return applyStyle.apply(builder, arguments);
-	};
-
-	builder._styles = _styles;
-	builder._empty = _empty;
-
-	const self = this;
-
-	Object.defineProperty(builder, 'level', {
+const proto = Object.defineProperties(() => {}, {
+	...styles,
+	level: {
 		enumerable: true,
 		get() {
-			return self.level;
+			return this._generator.level;
 		},
 		set(level) {
-			self.level = level;
+			this._generator.level = level;
 		}
-	});
+	}
+});
 
-	Object.defineProperty(builder, 'enabled', {
-		enumerable: true,
-		get() {
-			return self.enabled;
-		},
-		set(enabled) {
-			self.enabled = enabled;
-		}
-	});
+const createStyler = (open, close, parent) => {
+	let openAll;
+	let closeAll;
+	if (parent === undefined) {
+		openAll = open;
+		closeAll = close;
+	} else {
+		openAll = parent.openAll + open;
+		closeAll = close + parent.closeAll;
+	}
 
-	// See below for fix regarding invisible grey/dim combination on Windows
-	builder.hasGrey = this.hasGrey || key === 'gray' || key === 'grey';
+	return {
+		open,
+		close,
+		openAll,
+		closeAll,
+		parent
+	};
+};
+
+const createBuilder = (self, _styler, _isEmpty) => {
+	const builder = (...arguments_) => {
+		// Single argument is hot path, implicit coercion is faster than anything
+		// eslint-disable-next-line no-implicit-coercion
+		return applyStyle(builder, (arguments_.length === 1) ? ('' + arguments_[0]) : arguments_.join(' '));
+	};
 
 	// `__proto__` is used because we must return a function, but there is
 	// no way to create a function with a different prototype
 	builder.__proto__ = proto; // eslint-disable-line no-proto
 
+	builder._generator = self;
+	builder._styler = _styler;
+	builder._isEmpty = _isEmpty;
+
 	return builder;
-}
+};
 
-function applyStyle() {
-	// Support varags, but simply cast to string in case there's only one arg
-	const args = arguments;
-	const argsLen = args.length;
-	let str = String(arguments[0]);
-
-	if (argsLen === 0) {
-		return '';
+const applyStyle = (self, string) => {
+	if (self.level <= 0 || !string) {
+		return self._isEmpty ? '' : string;
 	}
 
-	if (argsLen > 1) {
-		// Don't slice `arguments`, it prevents V8 optimizations
-		for (let a = 1; a < argsLen; a++) {
-			str += ' ' + args[a];
+	let styler = self._styler;
+
+	if (styler === undefined) {
+		return string;
+	}
+
+	const {openAll, closeAll} = styler;
+	if (string.indexOf('\u001B') !== -1) {
+		while (styler !== undefined) {
+			// Replace any instances already present with a re-opening code
+			// otherwise only the part of the string until said closing code
+			// will be colored, and the rest will simply be 'plain'.
+			string = stringReplaceAll(string, styler.close, styler.open);
+
+			styler = styler.parent;
 		}
 	}
 
-	if (!this.enabled || this.level <= 0 || !str) {
-		return this._empty ? '' : str;
+	// We can move both next actions out of loop, because remaining actions in loop won't have
+	// any/visible effect on parts we add here. Close the styling before a linebreak and reopen
+	// after next line to fix a bleed issue on macOS: https://github.com/chalk/chalk/pull/92
+	const lfIndex = string.indexOf('\n');
+	if (lfIndex !== -1) {
+		string = stringEncaseCRLFWithFirstIndex(string, closeAll, openAll, lfIndex);
 	}
 
-	// Turns out that on Windows dimmed gray text becomes invisible in cmd.exe,
-	// see https://github.com/chalk/chalk/issues/58
-	// If we're on Windows and we're dealing with a gray color, temporarily make 'dim' a noop.
-	const originalDim = ansiStyles.dim.open;
-	if (isSimpleWindowsTerm && this.hasGrey) {
-		ansiStyles.dim.open = '';
-	}
+	return openAll + string + closeAll;
+};
 
-	for (const code of this._styles.slice().reverse()) {
-		// Replace any instances already present with a re-opening code
-		// otherwise only the part of the string until said closing code
-		// will be colored, and the rest will simply be 'plain'.
-		str = code.open + str.replace(code.closeRe, code.open) + code.close;
+let template;
+const chalkTag = (chalk, ...strings) => {
+	const [firstString] = strings;
 
-		// Close the styling before a linebreak and reopen
-		// after next line to fix a bleed issue on macOS
-		// https://github.com/chalk/chalk/pull/92
-		str = str.replace(/\r?\n/g, `${code.close}$&${code.open}`);
-	}
-
-	// Reset the original `dim` if we changed it to work around the Windows dimmed gray issue
-	ansiStyles.dim.open = originalDim;
-
-	return str;
-}
-
-function chalkTag(chalk, strings) {
-	if (!Array.isArray(strings)) {
+	if (!Array.isArray(firstString)) {
 		// If chalk() was called by itself or with a string,
 		// return the string itself as a string.
-		return [].slice.call(arguments, 1).join(' ');
+		return strings.join(' ');
 	}
 
-	const args = [].slice.call(arguments, 2);
-	const parts = [strings.raw[0]];
+	const arguments_ = strings.slice(1);
+	const parts = [firstString.raw[0]];
 
-	for (let i = 1; i < strings.length; i++) {
-		parts.push(String(args[i - 1]).replace(/[{}\\]/g, '\\$&'));
-		parts.push(String(strings.raw[i]));
+	for (let i = 1; i < firstString.length; i++) {
+		parts.push(
+			String(arguments_[i - 1]).replace(/[{}\\]/g, '\\$&'),
+			String(firstString.raw[i])
+		);
+	}
+
+	if (template === undefined) {
+		template = __webpack_require__(121);
 	}
 
 	return template(chalk, parts.join(''));
-}
+};
 
 Object.defineProperties(Chalk.prototype, styles);
 
-module.exports = Chalk(); // eslint-disable-line new-cap
-module.exports.supportsColor = stdoutColor;
-module.exports.default = module.exports; // For TypeScript
+const chalk = Chalk(); // eslint-disable-line new-cap
+chalk.supportsColor = stdoutColor;
+chalk.stderr = Chalk({level: stderrColor ? stderrColor.level : 0}); // eslint-disable-line new-cap
+chalk.stderr.supportsColor = stderrColor;
+
+// For TypeScript
+chalk.Level = {
+	None: 0,
+	Basic: 1,
+	Ansi256: 2,
+	TrueColor: 3,
+	0: 'None',
+	1: 'Basic',
+	2: 'Ansi256',
+	3: 'TrueColor'
+};
+
+module.exports = chalk;
 
 
 /***/ }),
@@ -560,7 +565,7 @@ module.exports = require("util");
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return dynamicRequire; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return isNodeEnv; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return getGlobalObject; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "i", function() { return uuid4; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "j", function() { return uuid4; });
 /* unused harmony export parseUrl */
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return getEventDescription; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return consoleSandbox; });
@@ -568,8 +573,8 @@ module.exports = require("util");
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return addExceptionMechanism; });
 /* unused harmony export getLocationHref */
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return htmlTreeAsString; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "i", function() { return parseRetryAfterHeader; });
 /* harmony import */ var _is__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(9);
-/// <reference lib="dom" />
 
 /**
  * Requires a module which is protected _against bundler minification.
@@ -798,7 +803,8 @@ function htmlTreeAsString(elem) {
  * e.g. [HTMLElement] => input#foo.btn[name=baz]
  * @returns generated DOM path
  */
-function _htmlElementAsString(elem) {
+function _htmlElementAsString(el) {
+    var elem = el;
     var out = [];
     var className;
     var classes;
@@ -828,6 +834,26 @@ function _htmlElementAsString(elem) {
         }
     }
     return out.join('');
+}
+var defaultRetryAfter = 60 * 1000; // 60 seconds
+/**
+ * Extracts Retry-After value from the request header or returns default value
+ * @param now current unix timestamp
+ * @param header string representation of 'Retry-After' header
+ */
+function parseRetryAfterHeader(now, header) {
+    if (!header) {
+        return defaultRetryAfter;
+    }
+    var headerDelay = parseInt("" + header, 10);
+    if (!isNaN(headerDelay)) {
+        return headerDelay * 1000;
+    }
+    var headerDate = Date.parse("" + header);
+    if (!isNaN(headerDate)) {
+        return headerDate - now;
+    }
+    return defaultRetryAfter;
 }
 //# sourceMappingURL=misc.js.map
 
@@ -860,7 +886,6 @@ module.exports = require("fs");
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return isRegExp; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "i", function() { return isThenable; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return isSyntheticEvent; });
-/// <reference lib="dom" />
 /**
  * Checks whether given value's type is one of a few Error or Error-like
  * {@link isError}.
@@ -1123,7 +1148,7 @@ var Memo = /** @class */ (function () {
 var misc = __webpack_require__(6);
 
 // EXTERNAL MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/@sentry/utils/esm/string.js
-var string = __webpack_require__(56);
+var string = __webpack_require__(58);
 
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/@sentry/utils/esm/object.js
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return fill; });
@@ -1213,32 +1238,33 @@ function getWalkSource(value) {
         return err;
     }
     if (Object(is["c" /* isEvent */])(value)) {
+        var event_1 = value;
         var source = {};
-        source.type = value.type;
+        source.type = event_1.type;
         // Accessing event.target can throw (see getsentry/raven-js#838, #768)
         try {
-            source.target = Object(is["a" /* isElement */])(value.target)
-                ? Object(misc["g" /* htmlTreeAsString */])(value.target)
-                : Object.prototype.toString.call(value.target);
+            source.target = Object(is["a" /* isElement */])(event_1.target)
+                ? Object(misc["g" /* htmlTreeAsString */])(event_1.target)
+                : Object.prototype.toString.call(event_1.target);
         }
         catch (_oO) {
             source.target = '<unknown>';
         }
         try {
-            source.currentTarget = Object(is["a" /* isElement */])(value.currentTarget)
-                ? Object(misc["g" /* htmlTreeAsString */])(value.currentTarget)
-                : Object.prototype.toString.call(value.currentTarget);
+            source.currentTarget = Object(is["a" /* isElement */])(event_1.currentTarget)
+                ? Object(misc["g" /* htmlTreeAsString */])(event_1.currentTarget)
+                : Object.prototype.toString.call(event_1.currentTarget);
         }
         catch (_oO) {
             source.currentTarget = '<unknown>';
         }
         // tslint:disable-next-line:strict-type-predicates
         if (typeof CustomEvent !== 'undefined' && value instanceof CustomEvent) {
-            source.detail = value.detail;
+            source.detail = event_1.detail;
         }
-        for (var i in value) {
-            if (Object.prototype.hasOwnProperty.call(value, i)) {
-                source[i] = value[i];
+        for (var i in event_1) {
+            if (Object.prototype.hasOwnProperty.call(event_1, i)) {
+                source[i] = event_1;
             }
         }
         return source;
@@ -1295,7 +1321,7 @@ function serializeValue(value) {
  */
 // tslint:disable-next-line:cyclomatic-complexity
 function normalizeValue(value, key) {
-    if (key === 'domain' && typeof value === 'object' && value._events) {
+    if (key === 'domain' && value && typeof value === 'object' && value._events) {
         return '[Domain]';
     }
     if (key === 'domainEmitter') {
@@ -1462,11 +1488,17 @@ function invariant(condition, message) {
 /* 20 */
 /***/ (function(module, exports) {
 
+module.exports = require("os");
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports) {
+
 module.exports = require("http");
 
 /***/ }),
-/* 21 */,
-/* 22 */
+/* 22 */,
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1476,7 +1508,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-const http_1 = __webpack_require__(20);
+const http_1 = __webpack_require__(21);
 
 const common_error_fields_1 = __webpack_require__(31); // TODO extern
 
@@ -1509,19 +1541,13 @@ function create_error(message, data = {}) {
 exports.create_error = create_error;
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports) {
 
 module.exports = require("assert");
 
 /***/ }),
-/* 24 */,
-/* 25 */
-/***/ (function(module, exports) {
-
-module.exports = require("os");
-
-/***/ }),
+/* 25 */,
 /* 26 */,
 /* 27 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
@@ -1800,7 +1826,7 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _generate__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(58);
+/* harmony import */ var _generate__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(60);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "get_UTC_timestamp_ms", function() { return _generate__WEBPACK_IMPORTED_MODULE_0__["a"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "get_human_readable_UTC_timestamp_ms", function() { return _generate__WEBPACK_IMPORTED_MODULE_0__["d"]; });
@@ -1831,141 +1857,9 @@ exports.CHANNEL = process.env.CHANNEL || (() => {
 
 /***/ }),
 /* 34 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-"use strict";
-
-const os = __webpack_require__(25);
-const hasFlag = __webpack_require__(45);
-
-const env = process.env;
-
-let forceColor;
-if (hasFlag('no-color') ||
-	hasFlag('no-colors') ||
-	hasFlag('color=false')) {
-	forceColor = false;
-} else if (hasFlag('color') ||
-	hasFlag('colors') ||
-	hasFlag('color=true') ||
-	hasFlag('color=always')) {
-	forceColor = true;
-}
-if ('FORCE_COLOR' in env) {
-	forceColor = env.FORCE_COLOR.length === 0 || parseInt(env.FORCE_COLOR, 10) !== 0;
-}
-
-function translateLevel(level) {
-	if (level === 0) {
-		return false;
-	}
-
-	return {
-		level,
-		hasBasic: true,
-		has256: level >= 2,
-		has16m: level >= 3
-	};
-}
-
-function supportsColor(stream) {
-	if (forceColor === false) {
-		return 0;
-	}
-
-	if (hasFlag('color=16m') ||
-		hasFlag('color=full') ||
-		hasFlag('color=truecolor')) {
-		return 3;
-	}
-
-	if (hasFlag('color=256')) {
-		return 2;
-	}
-
-	if (stream && !stream.isTTY && forceColor !== true) {
-		return 0;
-	}
-
-	const min = forceColor ? 1 : 0;
-
-	if (process.platform === 'win32') {
-		// Node.js 7.5.0 is the first version of Node.js to include a patch to
-		// libuv that enables 256 color output on Windows. Anything earlier and it
-		// won't work. However, here we target Node.js 8 at minimum as it is an LTS
-		// release, and Node.js 7 is not. Windows 10 build 10586 is the first Windows
-		// release that supports 256 colors. Windows 10 build 14931 is the first release
-		// that supports 16m/TrueColor.
-		const osRelease = os.release().split('.');
-		if (
-			Number(process.versions.node.split('.')[0]) >= 8 &&
-			Number(osRelease[0]) >= 10 &&
-			Number(osRelease[2]) >= 10586
-		) {
-			return Number(osRelease[2]) >= 14931 ? 3 : 2;
-		}
-
-		return 1;
-	}
-
-	if ('CI' in env) {
-		if (['TRAVIS', 'CIRCLECI', 'APPVEYOR', 'GITLAB_CI'].some(sign => sign in env) || env.CI_NAME === 'codeship') {
-			return 1;
-		}
-
-		return min;
-	}
-
-	if ('TEAMCITY_VERSION' in env) {
-		return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env.TEAMCITY_VERSION) ? 1 : 0;
-	}
-
-	if (env.COLORTERM === 'truecolor') {
-		return 3;
-	}
-
-	if ('TERM_PROGRAM' in env) {
-		const version = parseInt((env.TERM_PROGRAM_VERSION || '').split('.')[0], 10);
-
-		switch (env.TERM_PROGRAM) {
-			case 'iTerm.app':
-				return version >= 3 ? 3 : 2;
-			case 'Apple_Terminal':
-				return 2;
-			// No default
-		}
-	}
-
-	if (/-256(color)?$/i.test(env.TERM)) {
-		return 2;
-	}
-
-	if (/^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(env.TERM)) {
-		return 1;
-	}
-
-	if ('COLORTERM' in env) {
-		return 1;
-	}
-
-	if (env.TERM === 'dumb') {
-		return min;
-	}
-
-	return min;
-}
-
-function getSupportLevel(stream) {
-	const level = supportsColor(stream);
-	return translateLevel(level);
-}
-
-module.exports = {
-	supportsColor: getSupportLevel,
-	stdout: getSupportLevel(process.stdout),
-	stderr: getSupportLevel(process.stderr)
-};
-
+module.exports = require("tty");
 
 /***/ }),
 /* 35 */,
@@ -1974,19 +1868,41 @@ module.exports = {
 /* 38 */,
 /* 39 */,
 /* 40 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return getGlobalThis; });
+/* global globalThis, self, window, global */
+const lastResort = {};
+function getGlobalThis() {
+  // @ts-ignore
+  if (typeof globalThis !== 'undefined') return globalThis; // check node first https://github.com/ljharb/globalThis/issues/2
+  // @ts-ignore
+
+  if (typeof global !== 'undefined') return global; // @ts-ignore
+
+  if (typeof self !== 'undefined') return self; // @ts-ignore
+
+  if (typeof window !== 'undefined') return window;
+  if (typeof this !== 'undefined') return this;
+  return lastResort; // should never happen
+}
+
+/***/ }),
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
  * Module dependencies.
  */
 
-var net = __webpack_require__(46);
-var tls = __webpack_require__(47);
+var net = __webpack_require__(47);
+var tls = __webpack_require__(48);
 var url = __webpack_require__(16);
-var assert = __webpack_require__(23);
-var Agent = __webpack_require__(121);
+var assert = __webpack_require__(24);
+var Agent = __webpack_require__(124);
 var inherits = __webpack_require__(4).inherits;
-var debug = __webpack_require__(126)('https-proxy-agent');
+var debug = __webpack_require__(129)('https-proxy-agent');
 
 /**
  * Module exports.
@@ -2220,19 +2136,19 @@ function isDefaultPort(port, secure) {
 
 
 /***/ }),
-/* 41 */
+/* 42 */
 /***/ (function(module, exports) {
 
 module.exports = require("https");
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ (function(module, exports) {
 
 module.exports = require("domain");
 
 /***/ }),
-/* 43 */
+/* 44 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2243,7 +2159,7 @@ module.exports = require("domain");
 /* harmony import */ var _sentry_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(9);
 /* harmony import */ var _sentry_utils__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(13);
 /* harmony import */ var _sentry_utils__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(6);
-/* harmony import */ var _span__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(96);
+/* harmony import */ var _span__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(98);
 
 
 
@@ -2559,7 +2475,8 @@ function addGlobalEventProcessor(callback) {
 //# sourceMappingURL=scope.js.map
 
 /***/ }),
-/* 44 */
+/* 45 */,
+/* 46 */
 /***/ (function(module, exports) {
 
 module.exports = function(module) {
@@ -2587,7 +2504,157 @@ module.exports = function(module) {
 
 
 /***/ }),
-/* 45 */
+/* 47 */
+/***/ (function(module, exports) {
+
+module.exports = require("net");
+
+/***/ }),
+/* 48 */
+/***/ (function(module, exports) {
+
+module.exports = require("tls");
+
+/***/ }),
+/* 49 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+const os = __webpack_require__(20);
+const hasFlag = __webpack_require__(50);
+
+const env = process.env;
+
+let forceColor;
+if (hasFlag('no-color') ||
+	hasFlag('no-colors') ||
+	hasFlag('color=false')) {
+	forceColor = false;
+} else if (hasFlag('color') ||
+	hasFlag('colors') ||
+	hasFlag('color=true') ||
+	hasFlag('color=always')) {
+	forceColor = true;
+}
+if ('FORCE_COLOR' in env) {
+	forceColor = env.FORCE_COLOR.length === 0 || parseInt(env.FORCE_COLOR, 10) !== 0;
+}
+
+function translateLevel(level) {
+	if (level === 0) {
+		return false;
+	}
+
+	return {
+		level,
+		hasBasic: true,
+		has256: level >= 2,
+		has16m: level >= 3
+	};
+}
+
+function supportsColor(stream) {
+	if (forceColor === false) {
+		return 0;
+	}
+
+	if (hasFlag('color=16m') ||
+		hasFlag('color=full') ||
+		hasFlag('color=truecolor')) {
+		return 3;
+	}
+
+	if (hasFlag('color=256')) {
+		return 2;
+	}
+
+	if (stream && !stream.isTTY && forceColor !== true) {
+		return 0;
+	}
+
+	const min = forceColor ? 1 : 0;
+
+	if (process.platform === 'win32') {
+		// Node.js 7.5.0 is the first version of Node.js to include a patch to
+		// libuv that enables 256 color output on Windows. Anything earlier and it
+		// won't work. However, here we target Node.js 8 at minimum as it is an LTS
+		// release, and Node.js 7 is not. Windows 10 build 10586 is the first Windows
+		// release that supports 256 colors. Windows 10 build 14931 is the first release
+		// that supports 16m/TrueColor.
+		const osRelease = os.release().split('.');
+		if (
+			Number(process.versions.node.split('.')[0]) >= 8 &&
+			Number(osRelease[0]) >= 10 &&
+			Number(osRelease[2]) >= 10586
+		) {
+			return Number(osRelease[2]) >= 14931 ? 3 : 2;
+		}
+
+		return 1;
+	}
+
+	if ('CI' in env) {
+		if (['TRAVIS', 'CIRCLECI', 'APPVEYOR', 'GITLAB_CI'].some(sign => sign in env) || env.CI_NAME === 'codeship') {
+			return 1;
+		}
+
+		return min;
+	}
+
+	if ('TEAMCITY_VERSION' in env) {
+		return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env.TEAMCITY_VERSION) ? 1 : 0;
+	}
+
+	if (env.COLORTERM === 'truecolor') {
+		return 3;
+	}
+
+	if ('TERM_PROGRAM' in env) {
+		const version = parseInt((env.TERM_PROGRAM_VERSION || '').split('.')[0], 10);
+
+		switch (env.TERM_PROGRAM) {
+			case 'iTerm.app':
+				return version >= 3 ? 3 : 2;
+			case 'Apple_Terminal':
+				return 2;
+			// No default
+		}
+	}
+
+	if (/-256(color)?$/i.test(env.TERM)) {
+		return 2;
+	}
+
+	if (/^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(env.TERM)) {
+		return 1;
+	}
+
+	if ('COLORTERM' in env) {
+		return 1;
+	}
+
+	if (env.TERM === 'dumb') {
+		return min;
+	}
+
+	return min;
+}
+
+function getSupportLevel(stream) {
+	const level = supportsColor(stream);
+	return translateLevel(level);
+}
+
+module.exports = {
+	supportsColor: getSupportLevel,
+	stdout: getSupportLevel(process.stdout),
+	stderr: getSupportLevel(process.stderr)
+};
+
+
+/***/ }),
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2602,32 +2669,14 @@ module.exports = (flag, argv) => {
 
 
 /***/ }),
-/* 46 */
-/***/ (function(module, exports) {
-
-module.exports = require("net");
-
-/***/ }),
-/* 47 */
-/***/ (function(module, exports) {
-
-module.exports = require("tls");
-
-/***/ }),
-/* 48 */
-/***/ (function(module, exports) {
-
-module.exports = require("tty");
-
-/***/ }),
-/* 49 */,
-/* 50 */,
 /* 51 */,
 /* 52 */,
 /* 53 */,
 /* 54 */,
 /* 55 */,
-/* 56 */
+/* 56 */,
+/* 57 */,
+/* 58 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2729,8 +2778,8 @@ function isMatchingPattern(value, pattern) {
 //# sourceMappingURL=string.js.map
 
 /***/ }),
-/* 57 */,
-/* 58 */
+/* 59 */,
+/* 60 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -2786,24 +2835,23 @@ function get_human_readable_UTC_timestamp_ms(now = new Date()) {
  /////////////////////
 
 /***/ }),
-/* 59 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* MIT license */
-var cssKeywords = __webpack_require__(116);
+/* eslint-disable no-mixed-operators */
+const cssKeywords = __webpack_require__(116);
 
 // NOTE: conversions should only return primitive values (i.e. arrays, or
 //       values that give correct `typeof` results).
 //       do not use box values types (i.e. Number(), String(), etc.)
 
-var reverseKeywords = {};
-for (var key in cssKeywords) {
-	if (cssKeywords.hasOwnProperty(key)) {
-		reverseKeywords[cssKeywords[key]] = key;
-	}
+const reverseKeywords = {};
+for (const key of Object.keys(cssKeywords)) {
+	reverseKeywords[cssKeywords[key]] = key;
 }
 
-var convert = module.exports = {
+const convert = {
 	rgb: {channels: 3, labels: 'rgb'},
 	hsl: {channels: 3, labels: 'hsl'},
 	hsv: {channels: 3, labels: 'hsv'},
@@ -2821,40 +2869,38 @@ var convert = module.exports = {
 	gray: {channels: 1, labels: ['gray']}
 };
 
-// hide .channels and .labels properties
-for (var model in convert) {
-	if (convert.hasOwnProperty(model)) {
-		if (!('channels' in convert[model])) {
-			throw new Error('missing channels property: ' + model);
-		}
+module.exports = convert;
 
-		if (!('labels' in convert[model])) {
-			throw new Error('missing channel labels property: ' + model);
-		}
-
-		if (convert[model].labels.length !== convert[model].channels) {
-			throw new Error('channel and label counts mismatch: ' + model);
-		}
-
-		var channels = convert[model].channels;
-		var labels = convert[model].labels;
-		delete convert[model].channels;
-		delete convert[model].labels;
-		Object.defineProperty(convert[model], 'channels', {value: channels});
-		Object.defineProperty(convert[model], 'labels', {value: labels});
+// Hide .channels and .labels properties
+for (const model of Object.keys(convert)) {
+	if (!('channels' in convert[model])) {
+		throw new Error('missing channels property: ' + model);
 	}
+
+	if (!('labels' in convert[model])) {
+		throw new Error('missing channel labels property: ' + model);
+	}
+
+	if (convert[model].labels.length !== convert[model].channels) {
+		throw new Error('channel and label counts mismatch: ' + model);
+	}
+
+	const {channels, labels} = convert[model];
+	delete convert[model].channels;
+	delete convert[model].labels;
+	Object.defineProperty(convert[model], 'channels', {value: channels});
+	Object.defineProperty(convert[model], 'labels', {value: labels});
 }
 
 convert.rgb.hsl = function (rgb) {
-	var r = rgb[0] / 255;
-	var g = rgb[1] / 255;
-	var b = rgb[2] / 255;
-	var min = Math.min(r, g, b);
-	var max = Math.max(r, g, b);
-	var delta = max - min;
-	var h;
-	var s;
-	var l;
+	const r = rgb[0] / 255;
+	const g = rgb[1] / 255;
+	const b = rgb[2] / 255;
+	const min = Math.min(r, g, b);
+	const max = Math.max(r, g, b);
+	const delta = max - min;
+	let h;
+	let s;
 
 	if (max === min) {
 		h = 0;
@@ -2872,7 +2918,7 @@ convert.rgb.hsl = function (rgb) {
 		h += 360;
 	}
 
-	l = (min + max) / 2;
+	const l = (min + max) / 2;
 
 	if (max === min) {
 		s = 0;
@@ -2886,23 +2932,24 @@ convert.rgb.hsl = function (rgb) {
 };
 
 convert.rgb.hsv = function (rgb) {
-	var rdif;
-	var gdif;
-	var bdif;
-	var h;
-	var s;
+	let rdif;
+	let gdif;
+	let bdif;
+	let h;
+	let s;
 
-	var r = rgb[0] / 255;
-	var g = rgb[1] / 255;
-	var b = rgb[2] / 255;
-	var v = Math.max(r, g, b);
-	var diff = v - Math.min(r, g, b);
-	var diffc = function (c) {
+	const r = rgb[0] / 255;
+	const g = rgb[1] / 255;
+	const b = rgb[2] / 255;
+	const v = Math.max(r, g, b);
+	const diff = v - Math.min(r, g, b);
+	const diffc = function (c) {
 		return (v - c) / 6 / diff + 1 / 2;
 	};
 
 	if (diff === 0) {
-		h = s = 0;
+		h = 0;
+		s = 0;
 	} else {
 		s = diff / v;
 		rdif = diffc(r);
@@ -2916,6 +2963,7 @@ convert.rgb.hsv = function (rgb) {
 		} else if (b === v) {
 			h = (2 / 3) + gdif - rdif;
 		}
+
 		if (h < 0) {
 			h += 1;
 		} else if (h > 1) {
@@ -2931,11 +2979,11 @@ convert.rgb.hsv = function (rgb) {
 };
 
 convert.rgb.hwb = function (rgb) {
-	var r = rgb[0];
-	var g = rgb[1];
-	var b = rgb[2];
-	var h = convert.rgb.hsl(rgb)[0];
-	var w = 1 / 255 * Math.min(r, Math.min(g, b));
+	const r = rgb[0];
+	const g = rgb[1];
+	let b = rgb[2];
+	const h = convert.rgb.hsl(rgb)[0];
+	const w = 1 / 255 * Math.min(r, Math.min(g, b));
 
 	b = 1 - 1 / 255 * Math.max(r, Math.max(g, b));
 
@@ -2943,54 +2991,48 @@ convert.rgb.hwb = function (rgb) {
 };
 
 convert.rgb.cmyk = function (rgb) {
-	var r = rgb[0] / 255;
-	var g = rgb[1] / 255;
-	var b = rgb[2] / 255;
-	var c;
-	var m;
-	var y;
-	var k;
+	const r = rgb[0] / 255;
+	const g = rgb[1] / 255;
+	const b = rgb[2] / 255;
 
-	k = Math.min(1 - r, 1 - g, 1 - b);
-	c = (1 - r - k) / (1 - k) || 0;
-	m = (1 - g - k) / (1 - k) || 0;
-	y = (1 - b - k) / (1 - k) || 0;
+	const k = Math.min(1 - r, 1 - g, 1 - b);
+	const c = (1 - r - k) / (1 - k) || 0;
+	const m = (1 - g - k) / (1 - k) || 0;
+	const y = (1 - b - k) / (1 - k) || 0;
 
 	return [c * 100, m * 100, y * 100, k * 100];
 };
 
-/**
- * See https://en.m.wikipedia.org/wiki/Euclidean_distance#Squared_Euclidean_distance
- * */
 function comparativeDistance(x, y) {
+	/*
+		See https://en.m.wikipedia.org/wiki/Euclidean_distance#Squared_Euclidean_distance
+	*/
 	return (
-		Math.pow(x[0] - y[0], 2) +
-		Math.pow(x[1] - y[1], 2) +
-		Math.pow(x[2] - y[2], 2)
+		((x[0] - y[0]) ** 2) +
+		((x[1] - y[1]) ** 2) +
+		((x[2] - y[2]) ** 2)
 	);
 }
 
 convert.rgb.keyword = function (rgb) {
-	var reversed = reverseKeywords[rgb];
+	const reversed = reverseKeywords[rgb];
 	if (reversed) {
 		return reversed;
 	}
 
-	var currentClosestDistance = Infinity;
-	var currentClosestKeyword;
+	let currentClosestDistance = Infinity;
+	let currentClosestKeyword;
 
-	for (var keyword in cssKeywords) {
-		if (cssKeywords.hasOwnProperty(keyword)) {
-			var value = cssKeywords[keyword];
+	for (const keyword of Object.keys(cssKeywords)) {
+		const value = cssKeywords[keyword];
 
-			// Compute comparative distance
-			var distance = comparativeDistance(rgb, value);
+		// Compute comparative distance
+		const distance = comparativeDistance(rgb, value);
 
-			// Check if its less, if so set as closest
-			if (distance < currentClosestDistance) {
-				currentClosestDistance = distance;
-				currentClosestKeyword = keyword;
-			}
+		// Check if its less, if so set as closest
+		if (distance < currentClosestDistance) {
+			currentClosestDistance = distance;
+			currentClosestKeyword = keyword;
 		}
 	}
 
@@ -3002,55 +3044,50 @@ convert.keyword.rgb = function (keyword) {
 };
 
 convert.rgb.xyz = function (rgb) {
-	var r = rgb[0] / 255;
-	var g = rgb[1] / 255;
-	var b = rgb[2] / 255;
+	let r = rgb[0] / 255;
+	let g = rgb[1] / 255;
+	let b = rgb[2] / 255;
 
-	// assume sRGB
-	r = r > 0.04045 ? Math.pow(((r + 0.055) / 1.055), 2.4) : (r / 12.92);
-	g = g > 0.04045 ? Math.pow(((g + 0.055) / 1.055), 2.4) : (g / 12.92);
-	b = b > 0.04045 ? Math.pow(((b + 0.055) / 1.055), 2.4) : (b / 12.92);
+	// Assume sRGB
+	r = r > 0.04045 ? (((r + 0.055) / 1.055) ** 2.4) : (r / 12.92);
+	g = g > 0.04045 ? (((g + 0.055) / 1.055) ** 2.4) : (g / 12.92);
+	b = b > 0.04045 ? (((b + 0.055) / 1.055) ** 2.4) : (b / 12.92);
 
-	var x = (r * 0.4124) + (g * 0.3576) + (b * 0.1805);
-	var y = (r * 0.2126) + (g * 0.7152) + (b * 0.0722);
-	var z = (r * 0.0193) + (g * 0.1192) + (b * 0.9505);
+	const x = (r * 0.4124) + (g * 0.3576) + (b * 0.1805);
+	const y = (r * 0.2126) + (g * 0.7152) + (b * 0.0722);
+	const z = (r * 0.0193) + (g * 0.1192) + (b * 0.9505);
 
 	return [x * 100, y * 100, z * 100];
 };
 
 convert.rgb.lab = function (rgb) {
-	var xyz = convert.rgb.xyz(rgb);
-	var x = xyz[0];
-	var y = xyz[1];
-	var z = xyz[2];
-	var l;
-	var a;
-	var b;
+	const xyz = convert.rgb.xyz(rgb);
+	let x = xyz[0];
+	let y = xyz[1];
+	let z = xyz[2];
 
 	x /= 95.047;
 	y /= 100;
 	z /= 108.883;
 
-	x = x > 0.008856 ? Math.pow(x, 1 / 3) : (7.787 * x) + (16 / 116);
-	y = y > 0.008856 ? Math.pow(y, 1 / 3) : (7.787 * y) + (16 / 116);
-	z = z > 0.008856 ? Math.pow(z, 1 / 3) : (7.787 * z) + (16 / 116);
+	x = x > 0.008856 ? (x ** (1 / 3)) : (7.787 * x) + (16 / 116);
+	y = y > 0.008856 ? (y ** (1 / 3)) : (7.787 * y) + (16 / 116);
+	z = z > 0.008856 ? (z ** (1 / 3)) : (7.787 * z) + (16 / 116);
 
-	l = (116 * y) - 16;
-	a = 500 * (x - y);
-	b = 200 * (y - z);
+	const l = (116 * y) - 16;
+	const a = 500 * (x - y);
+	const b = 200 * (y - z);
 
 	return [l, a, b];
 };
 
 convert.hsl.rgb = function (hsl) {
-	var h = hsl[0] / 360;
-	var s = hsl[1] / 100;
-	var l = hsl[2] / 100;
-	var t1;
-	var t2;
-	var t3;
-	var rgb;
-	var val;
+	const h = hsl[0] / 360;
+	const s = hsl[1] / 100;
+	const l = hsl[2] / 100;
+	let t2;
+	let t3;
+	let val;
 
 	if (s === 0) {
 		val = l * 255;
@@ -3063,14 +3100,15 @@ convert.hsl.rgb = function (hsl) {
 		t2 = l + s - l * s;
 	}
 
-	t1 = 2 * l - t2;
+	const t1 = 2 * l - t2;
 
-	rgb = [0, 0, 0];
-	for (var i = 0; i < 3; i++) {
+	const rgb = [0, 0, 0];
+	for (let i = 0; i < 3; i++) {
 		t3 = h + 1 / 3 * -(i - 1);
 		if (t3 < 0) {
 			t3++;
 		}
+
 		if (t3 > 1) {
 			t3--;
 		}
@@ -3092,33 +3130,31 @@ convert.hsl.rgb = function (hsl) {
 };
 
 convert.hsl.hsv = function (hsl) {
-	var h = hsl[0];
-	var s = hsl[1] / 100;
-	var l = hsl[2] / 100;
-	var smin = s;
-	var lmin = Math.max(l, 0.01);
-	var sv;
-	var v;
+	const h = hsl[0];
+	let s = hsl[1] / 100;
+	let l = hsl[2] / 100;
+	let smin = s;
+	const lmin = Math.max(l, 0.01);
 
 	l *= 2;
 	s *= (l <= 1) ? l : 2 - l;
 	smin *= lmin <= 1 ? lmin : 2 - lmin;
-	v = (l + s) / 2;
-	sv = l === 0 ? (2 * smin) / (lmin + smin) : (2 * s) / (l + s);
+	const v = (l + s) / 2;
+	const sv = l === 0 ? (2 * smin) / (lmin + smin) : (2 * s) / (l + s);
 
 	return [h, sv * 100, v * 100];
 };
 
 convert.hsv.rgb = function (hsv) {
-	var h = hsv[0] / 60;
-	var s = hsv[1] / 100;
-	var v = hsv[2] / 100;
-	var hi = Math.floor(h) % 6;
+	const h = hsv[0] / 60;
+	const s = hsv[1] / 100;
+	let v = hsv[2] / 100;
+	const hi = Math.floor(h) % 6;
 
-	var f = h - Math.floor(h);
-	var p = 255 * v * (1 - s);
-	var q = 255 * v * (1 - (s * f));
-	var t = 255 * v * (1 - (s * (1 - f)));
+	const f = h - Math.floor(h);
+	const p = 255 * v * (1 - s);
+	const q = 255 * v * (1 - (s * f));
+	const t = 255 * v * (1 - (s * (1 - f)));
 	v *= 255;
 
 	switch (hi) {
@@ -3138,16 +3174,15 @@ convert.hsv.rgb = function (hsv) {
 };
 
 convert.hsv.hsl = function (hsv) {
-	var h = hsv[0];
-	var s = hsv[1] / 100;
-	var v = hsv[2] / 100;
-	var vmin = Math.max(v, 0.01);
-	var lmin;
-	var sl;
-	var l;
+	const h = hsv[0];
+	const s = hsv[1] / 100;
+	const v = hsv[2] / 100;
+	const vmin = Math.max(v, 0.01);
+	let sl;
+	let l;
 
 	l = (2 - s) * v;
-	lmin = (2 - s) * vmin;
+	const lmin = (2 - s) * vmin;
 	sl = s * vmin;
 	sl /= (lmin <= 1) ? lmin : 2 - lmin;
 	sl = sl || 0;
@@ -3158,87 +3193,83 @@ convert.hsv.hsl = function (hsv) {
 
 // http://dev.w3.org/csswg/css-color/#hwb-to-rgb
 convert.hwb.rgb = function (hwb) {
-	var h = hwb[0] / 360;
-	var wh = hwb[1] / 100;
-	var bl = hwb[2] / 100;
-	var ratio = wh + bl;
-	var i;
-	var v;
-	var f;
-	var n;
+	const h = hwb[0] / 360;
+	let wh = hwb[1] / 100;
+	let bl = hwb[2] / 100;
+	const ratio = wh + bl;
+	let f;
 
-	// wh + bl cant be > 1
+	// Wh + bl cant be > 1
 	if (ratio > 1) {
 		wh /= ratio;
 		bl /= ratio;
 	}
 
-	i = Math.floor(6 * h);
-	v = 1 - bl;
+	const i = Math.floor(6 * h);
+	const v = 1 - bl;
 	f = 6 * h - i;
 
 	if ((i & 0x01) !== 0) {
 		f = 1 - f;
 	}
 
-	n = wh + f * (v - wh); // linear interpolation
+	const n = wh + f * (v - wh); // Linear interpolation
 
-	var r;
-	var g;
-	var b;
+	let r;
+	let g;
+	let b;
+	/* eslint-disable max-statements-per-line,no-multi-spaces */
 	switch (i) {
 		default:
 		case 6:
-		case 0: r = v; g = n; b = wh; break;
-		case 1: r = n; g = v; b = wh; break;
-		case 2: r = wh; g = v; b = n; break;
-		case 3: r = wh; g = n; b = v; break;
-		case 4: r = n; g = wh; b = v; break;
-		case 5: r = v; g = wh; b = n; break;
+		case 0: r = v;  g = n;  b = wh; break;
+		case 1: r = n;  g = v;  b = wh; break;
+		case 2: r = wh; g = v;  b = n; break;
+		case 3: r = wh; g = n;  b = v; break;
+		case 4: r = n;  g = wh; b = v; break;
+		case 5: r = v;  g = wh; b = n; break;
 	}
+	/* eslint-enable max-statements-per-line,no-multi-spaces */
 
 	return [r * 255, g * 255, b * 255];
 };
 
 convert.cmyk.rgb = function (cmyk) {
-	var c = cmyk[0] / 100;
-	var m = cmyk[1] / 100;
-	var y = cmyk[2] / 100;
-	var k = cmyk[3] / 100;
-	var r;
-	var g;
-	var b;
+	const c = cmyk[0] / 100;
+	const m = cmyk[1] / 100;
+	const y = cmyk[2] / 100;
+	const k = cmyk[3] / 100;
 
-	r = 1 - Math.min(1, c * (1 - k) + k);
-	g = 1 - Math.min(1, m * (1 - k) + k);
-	b = 1 - Math.min(1, y * (1 - k) + k);
+	const r = 1 - Math.min(1, c * (1 - k) + k);
+	const g = 1 - Math.min(1, m * (1 - k) + k);
+	const b = 1 - Math.min(1, y * (1 - k) + k);
 
 	return [r * 255, g * 255, b * 255];
 };
 
 convert.xyz.rgb = function (xyz) {
-	var x = xyz[0] / 100;
-	var y = xyz[1] / 100;
-	var z = xyz[2] / 100;
-	var r;
-	var g;
-	var b;
+	const x = xyz[0] / 100;
+	const y = xyz[1] / 100;
+	const z = xyz[2] / 100;
+	let r;
+	let g;
+	let b;
 
 	r = (x * 3.2406) + (y * -1.5372) + (z * -0.4986);
 	g = (x * -0.9689) + (y * 1.8758) + (z * 0.0415);
 	b = (x * 0.0557) + (y * -0.2040) + (z * 1.0570);
 
-	// assume sRGB
+	// Assume sRGB
 	r = r > 0.0031308
-		? ((1.055 * Math.pow(r, 1.0 / 2.4)) - 0.055)
+		? ((1.055 * (r ** (1.0 / 2.4))) - 0.055)
 		: r * 12.92;
 
 	g = g > 0.0031308
-		? ((1.055 * Math.pow(g, 1.0 / 2.4)) - 0.055)
+		? ((1.055 * (g ** (1.0 / 2.4))) - 0.055)
 		: g * 12.92;
 
 	b = b > 0.0031308
-		? ((1.055 * Math.pow(b, 1.0 / 2.4)) - 0.055)
+		? ((1.055 * (b ** (1.0 / 2.4))) - 0.055)
 		: b * 12.92;
 
 	r = Math.min(Math.max(0, r), 1);
@@ -3249,43 +3280,40 @@ convert.xyz.rgb = function (xyz) {
 };
 
 convert.xyz.lab = function (xyz) {
-	var x = xyz[0];
-	var y = xyz[1];
-	var z = xyz[2];
-	var l;
-	var a;
-	var b;
+	let x = xyz[0];
+	let y = xyz[1];
+	let z = xyz[2];
 
 	x /= 95.047;
 	y /= 100;
 	z /= 108.883;
 
-	x = x > 0.008856 ? Math.pow(x, 1 / 3) : (7.787 * x) + (16 / 116);
-	y = y > 0.008856 ? Math.pow(y, 1 / 3) : (7.787 * y) + (16 / 116);
-	z = z > 0.008856 ? Math.pow(z, 1 / 3) : (7.787 * z) + (16 / 116);
+	x = x > 0.008856 ? (x ** (1 / 3)) : (7.787 * x) + (16 / 116);
+	y = y > 0.008856 ? (y ** (1 / 3)) : (7.787 * y) + (16 / 116);
+	z = z > 0.008856 ? (z ** (1 / 3)) : (7.787 * z) + (16 / 116);
 
-	l = (116 * y) - 16;
-	a = 500 * (x - y);
-	b = 200 * (y - z);
+	const l = (116 * y) - 16;
+	const a = 500 * (x - y);
+	const b = 200 * (y - z);
 
 	return [l, a, b];
 };
 
 convert.lab.xyz = function (lab) {
-	var l = lab[0];
-	var a = lab[1];
-	var b = lab[2];
-	var x;
-	var y;
-	var z;
+	const l = lab[0];
+	const a = lab[1];
+	const b = lab[2];
+	let x;
+	let y;
+	let z;
 
 	y = (l + 16) / 116;
 	x = a / 500 + y;
 	z = y - b / 200;
 
-	var y2 = Math.pow(y, 3);
-	var x2 = Math.pow(x, 3);
-	var z2 = Math.pow(z, 3);
+	const y2 = y ** 3;
+	const x2 = x ** 3;
+	const z2 = z ** 3;
 	y = y2 > 0.008856 ? y2 : (y - 16 / 116) / 7.787;
 	x = x2 > 0.008856 ? x2 : (x - 16 / 116) / 7.787;
 	z = z2 > 0.008856 ? z2 : (z - 16 / 116) / 7.787;
@@ -3298,45 +3326,38 @@ convert.lab.xyz = function (lab) {
 };
 
 convert.lab.lch = function (lab) {
-	var l = lab[0];
-	var a = lab[1];
-	var b = lab[2];
-	var hr;
-	var h;
-	var c;
+	const l = lab[0];
+	const a = lab[1];
+	const b = lab[2];
+	let h;
 
-	hr = Math.atan2(b, a);
+	const hr = Math.atan2(b, a);
 	h = hr * 360 / 2 / Math.PI;
 
 	if (h < 0) {
 		h += 360;
 	}
 
-	c = Math.sqrt(a * a + b * b);
+	const c = Math.sqrt(a * a + b * b);
 
 	return [l, c, h];
 };
 
 convert.lch.lab = function (lch) {
-	var l = lch[0];
-	var c = lch[1];
-	var h = lch[2];
-	var a;
-	var b;
-	var hr;
+	const l = lch[0];
+	const c = lch[1];
+	const h = lch[2];
 
-	hr = h / 360 * 2 * Math.PI;
-	a = c * Math.cos(hr);
-	b = c * Math.sin(hr);
+	const hr = h / 360 * 2 * Math.PI;
+	const a = c * Math.cos(hr);
+	const b = c * Math.sin(hr);
 
 	return [l, a, b];
 };
 
-convert.rgb.ansi16 = function (args) {
-	var r = args[0];
-	var g = args[1];
-	var b = args[2];
-	var value = 1 in arguments ? arguments[1] : convert.rgb.hsv(args)[2]; // hsv -> ansi16 optimization
+convert.rgb.ansi16 = function (args, saturation = null) {
+	const [r, g, b] = args;
+	let value = saturation === null ? convert.rgb.hsv(args)[2] : saturation; // Hsv -> ansi16 optimization
 
 	value = Math.round(value / 50);
 
@@ -3344,7 +3365,7 @@ convert.rgb.ansi16 = function (args) {
 		return 30;
 	}
 
-	var ansi = 30
+	let ansi = 30
 		+ ((Math.round(b / 255) << 2)
 		| (Math.round(g / 255) << 1)
 		| Math.round(r / 255));
@@ -3357,17 +3378,17 @@ convert.rgb.ansi16 = function (args) {
 };
 
 convert.hsv.ansi16 = function (args) {
-	// optimization here; we already know the value and don't need to get
+	// Optimization here; we already know the value and don't need to get
 	// it converted for us.
 	return convert.rgb.ansi16(convert.hsv.rgb(args), args[2]);
 };
 
 convert.rgb.ansi256 = function (args) {
-	var r = args[0];
-	var g = args[1];
-	var b = args[2];
+	const r = args[0];
+	const g = args[1];
+	const b = args[2];
 
-	// we use the extended greyscale palette here, with the exception of
+	// We use the extended greyscale palette here, with the exception of
 	// black and white. normal palette only has 4 greyscale shades.
 	if (r === g && g === b) {
 		if (r < 8) {
@@ -3381,7 +3402,7 @@ convert.rgb.ansi256 = function (args) {
 		return Math.round(((r - 8) / 247) * 24) + 232;
 	}
 
-	var ansi = 16
+	const ansi = 16
 		+ (36 * Math.round(r / 255 * 5))
 		+ (6 * Math.round(g / 255 * 5))
 		+ Math.round(b / 255 * 5);
@@ -3390,9 +3411,9 @@ convert.rgb.ansi256 = function (args) {
 };
 
 convert.ansi16.rgb = function (args) {
-	var color = args % 10;
+	let color = args % 10;
 
-	// handle greyscale
+	// Handle greyscale
 	if (color === 0 || color === 7) {
 		if (args > 50) {
 			color += 3.5;
@@ -3403,71 +3424,71 @@ convert.ansi16.rgb = function (args) {
 		return [color, color, color];
 	}
 
-	var mult = (~~(args > 50) + 1) * 0.5;
-	var r = ((color & 1) * mult) * 255;
-	var g = (((color >> 1) & 1) * mult) * 255;
-	var b = (((color >> 2) & 1) * mult) * 255;
+	const mult = (~~(args > 50) + 1) * 0.5;
+	const r = ((color & 1) * mult) * 255;
+	const g = (((color >> 1) & 1) * mult) * 255;
+	const b = (((color >> 2) & 1) * mult) * 255;
 
 	return [r, g, b];
 };
 
 convert.ansi256.rgb = function (args) {
-	// handle greyscale
+	// Handle greyscale
 	if (args >= 232) {
-		var c = (args - 232) * 10 + 8;
+		const c = (args - 232) * 10 + 8;
 		return [c, c, c];
 	}
 
 	args -= 16;
 
-	var rem;
-	var r = Math.floor(args / 36) / 5 * 255;
-	var g = Math.floor((rem = args % 36) / 6) / 5 * 255;
-	var b = (rem % 6) / 5 * 255;
+	let rem;
+	const r = Math.floor(args / 36) / 5 * 255;
+	const g = Math.floor((rem = args % 36) / 6) / 5 * 255;
+	const b = (rem % 6) / 5 * 255;
 
 	return [r, g, b];
 };
 
 convert.rgb.hex = function (args) {
-	var integer = ((Math.round(args[0]) & 0xFF) << 16)
+	const integer = ((Math.round(args[0]) & 0xFF) << 16)
 		+ ((Math.round(args[1]) & 0xFF) << 8)
 		+ (Math.round(args[2]) & 0xFF);
 
-	var string = integer.toString(16).toUpperCase();
+	const string = integer.toString(16).toUpperCase();
 	return '000000'.substring(string.length) + string;
 };
 
 convert.hex.rgb = function (args) {
-	var match = args.toString(16).match(/[a-f0-9]{6}|[a-f0-9]{3}/i);
+	const match = args.toString(16).match(/[a-f0-9]{6}|[a-f0-9]{3}/i);
 	if (!match) {
 		return [0, 0, 0];
 	}
 
-	var colorString = match[0];
+	let colorString = match[0];
 
 	if (match[0].length === 3) {
-		colorString = colorString.split('').map(function (char) {
+		colorString = colorString.split('').map(char => {
 			return char + char;
 		}).join('');
 	}
 
-	var integer = parseInt(colorString, 16);
-	var r = (integer >> 16) & 0xFF;
-	var g = (integer >> 8) & 0xFF;
-	var b = integer & 0xFF;
+	const integer = parseInt(colorString, 16);
+	const r = (integer >> 16) & 0xFF;
+	const g = (integer >> 8) & 0xFF;
+	const b = integer & 0xFF;
 
 	return [r, g, b];
 };
 
 convert.rgb.hcg = function (rgb) {
-	var r = rgb[0] / 255;
-	var g = rgb[1] / 255;
-	var b = rgb[2] / 255;
-	var max = Math.max(Math.max(r, g), b);
-	var min = Math.min(Math.min(r, g), b);
-	var chroma = (max - min);
-	var grayscale;
-	var hue;
+	const r = rgb[0] / 255;
+	const g = rgb[1] / 255;
+	const b = rgb[2] / 255;
+	const max = Math.max(Math.max(r, g), b);
+	const min = Math.min(Math.min(r, g), b);
+	const chroma = (max - min);
+	let grayscale;
+	let hue;
 
 	if (chroma < 1) {
 		grayscale = min / (1 - chroma);
@@ -3484,7 +3505,7 @@ convert.rgb.hcg = function (rgb) {
 	if (max === g) {
 		hue = 2 + (b - r) / chroma;
 	} else {
-		hue = 4 + (r - g) / chroma + 4;
+		hue = 4 + (r - g) / chroma;
 	}
 
 	hue /= 6;
@@ -3494,17 +3515,12 @@ convert.rgb.hcg = function (rgb) {
 };
 
 convert.hsl.hcg = function (hsl) {
-	var s = hsl[1] / 100;
-	var l = hsl[2] / 100;
-	var c = 1;
-	var f = 0;
+	const s = hsl[1] / 100;
+	const l = hsl[2] / 100;
 
-	if (l < 0.5) {
-		c = 2.0 * s * l;
-	} else {
-		c = 2.0 * s * (1.0 - l);
-	}
+	const c = l < 0.5 ? (2.0 * s * l) : (2.0 * s * (1.0 - l));
 
+	let f = 0;
 	if (c < 1.0) {
 		f = (l - 0.5 * c) / (1.0 - c);
 	}
@@ -3513,11 +3529,11 @@ convert.hsl.hcg = function (hsl) {
 };
 
 convert.hsv.hcg = function (hsv) {
-	var s = hsv[1] / 100;
-	var v = hsv[2] / 100;
+	const s = hsv[1] / 100;
+	const v = hsv[2] / 100;
 
-	var c = s * v;
-	var f = 0;
+	const c = s * v;
+	let f = 0;
 
 	if (c < 1.0) {
 		f = (v - c) / (1 - c);
@@ -3527,20 +3543,21 @@ convert.hsv.hcg = function (hsv) {
 };
 
 convert.hcg.rgb = function (hcg) {
-	var h = hcg[0] / 360;
-	var c = hcg[1] / 100;
-	var g = hcg[2] / 100;
+	const h = hcg[0] / 360;
+	const c = hcg[1] / 100;
+	const g = hcg[2] / 100;
 
 	if (c === 0.0) {
 		return [g * 255, g * 255, g * 255];
 	}
 
-	var pure = [0, 0, 0];
-	var hi = (h % 1) * 6;
-	var v = hi % 1;
-	var w = 1 - v;
-	var mg = 0;
+	const pure = [0, 0, 0];
+	const hi = (h % 1) * 6;
+	const v = hi % 1;
+	const w = 1 - v;
+	let mg = 0;
 
+	/* eslint-disable max-statements-per-line */
 	switch (Math.floor(hi)) {
 		case 0:
 			pure[0] = 1; pure[1] = v; pure[2] = 0; break;
@@ -3555,6 +3572,7 @@ convert.hcg.rgb = function (hcg) {
 		default:
 			pure[0] = 1; pure[1] = 0; pure[2] = w;
 	}
+	/* eslint-enable max-statements-per-line */
 
 	mg = (1.0 - c) * g;
 
@@ -3566,11 +3584,11 @@ convert.hcg.rgb = function (hcg) {
 };
 
 convert.hcg.hsv = function (hcg) {
-	var c = hcg[1] / 100;
-	var g = hcg[2] / 100;
+	const c = hcg[1] / 100;
+	const g = hcg[2] / 100;
 
-	var v = c + g * (1.0 - c);
-	var f = 0;
+	const v = c + g * (1.0 - c);
+	let f = 0;
 
 	if (v > 0.0) {
 		f = c / v;
@@ -3580,11 +3598,11 @@ convert.hcg.hsv = function (hcg) {
 };
 
 convert.hcg.hsl = function (hcg) {
-	var c = hcg[1] / 100;
-	var g = hcg[2] / 100;
+	const c = hcg[1] / 100;
+	const g = hcg[2] / 100;
 
-	var l = g * (1.0 - c) + 0.5 * c;
-	var s = 0;
+	const l = g * (1.0 - c) + 0.5 * c;
+	let s = 0;
 
 	if (l > 0.0 && l < 0.5) {
 		s = c / (2 * l);
@@ -3597,18 +3615,18 @@ convert.hcg.hsl = function (hcg) {
 };
 
 convert.hcg.hwb = function (hcg) {
-	var c = hcg[1] / 100;
-	var g = hcg[2] / 100;
-	var v = c + g * (1.0 - c);
+	const c = hcg[1] / 100;
+	const g = hcg[2] / 100;
+	const v = c + g * (1.0 - c);
 	return [hcg[0], (v - c) * 100, (1 - v) * 100];
 };
 
 convert.hwb.hcg = function (hwb) {
-	var w = hwb[1] / 100;
-	var b = hwb[2] / 100;
-	var v = 1 - b;
-	var c = v - w;
-	var g = 0;
+	const w = hwb[1] / 100;
+	const b = hwb[2] / 100;
+	const v = 1 - b;
+	const c = v - w;
+	let g = 0;
 
 	if (c < 1) {
 		g = (v - c) / (1 - c);
@@ -3629,9 +3647,11 @@ convert.gray.rgb = function (args) {
 	return [args[0] / 100 * 255, args[0] / 100 * 255, args[0] / 100 * 255];
 };
 
-convert.gray.hsl = convert.gray.hsv = function (args) {
+convert.gray.hsl = function (args) {
 	return [0, 0, args[0]];
 };
+
+convert.gray.hsv = convert.gray.hsl;
 
 convert.gray.hwb = function (gray) {
 	return [0, 100, gray[0]];
@@ -3646,21 +3666,21 @@ convert.gray.lab = function (gray) {
 };
 
 convert.gray.hex = function (gray) {
-	var val = Math.round(gray[0] / 100 * 255) & 0xFF;
-	var integer = (val << 16) + (val << 8) + val;
+	const val = Math.round(gray[0] / 100 * 255) & 0xFF;
+	const integer = (val << 16) + (val << 8) + val;
 
-	var string = integer.toString(16).toUpperCase();
+	const string = integer.toString(16).toUpperCase();
 	return '000000'.substring(string.length) + string;
 };
 
 convert.rgb.gray = function (rgb) {
-	var val = (rgb[0] + rgb[1] + rgb[2]) / 3;
+	const val = (rgb[0] + rgb[1] + rgb[2]) / 3;
 	return [val / 255 * 100];
 };
 
 
 /***/ }),
-/* 60 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3677,7 +3697,7 @@ function setup(env) {
   createDebug.disable = disable;
   createDebug.enable = enable;
   createDebug.enabled = enabled;
-  createDebug.humanize = __webpack_require__(128);
+  createDebug.humanize = __webpack_require__(131);
   Object.keys(env).forEach(function (key) {
     createDebug[key] = env[key];
   });
@@ -3916,14 +3936,12 @@ module.exports = setup;
 
 
 /***/ }),
-/* 61 */
+/* 63 */
 /***/ (function(module, exports) {
 
 module.exports = require("module");
 
 /***/ }),
-/* 62 */,
-/* 63 */,
 /* 64 */,
 /* 65 */,
 /* 66 */,
@@ -3953,7 +3971,9 @@ module.exports = require("module");
 /* 90 */,
 /* 91 */,
 /* 92 */,
-/* 93 */
+/* 93 */,
+/* 94 */,
+/* 95 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3976,28 +3996,15 @@ __webpack_require__.r(analytics_state_namespaceObject);
 __webpack_require__.d(analytics_state_namespaceObject, "create", function() { return analytics_state_create; });
 __webpack_require__.d(analytics_state_namespaceObject, "addDetail", function() { return state_addDetail; });
 
-// CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/0-stdlib/globalthis-ponyfill/dist/src.es2019/index.js
-/* global globalThis, self, window, global */
-const lastResort = {};
-function getGlobalThis() {
-  // @ts-ignore
-  if (typeof globalThis !== 'undefined') return globalThis; // check node first https://github.com/ljharb/globalThis/issues/2
-  // @ts-ignore
+// EXTERNAL MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/0-stdlib/globalthis-ponyfill/dist/src.es2019/index.js
+var src_es2019 = __webpack_require__(40);
 
-  if (typeof global !== 'undefined') return global; // @ts-ignore
-
-  if (typeof self !== 'undefined') return self; // @ts-ignore
-
-  if (typeof window !== 'undefined') return window;
-  if (typeof this !== 'undefined') return this;
-  return lastResort; // should never happen
-}
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/2-advanced/soft-execution-context/dist/src.es2019/consts.js
 const LIB = 'soft-execution-context';
 const INTERNAL_PROP = '_SEC';
 
 // EXTERNAL MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/emittery/index.js
-var emittery = __webpack_require__(95);
+var emittery = __webpack_require__(97);
 var emittery_default = /*#__PURE__*/__webpack_require__.n(emittery);
 
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/2-advanced/soft-execution-context/dist/src.es2019/root-prototype.js
@@ -4033,7 +4040,7 @@ function activate_plugin(state, PLUGIN
 /*, args*/
 ) {
   const plugin_parent_state = state.parent ? state.parent.plugins[PLUGIN.id] : null;
-  let plugin_state = PLUGIN.state.create(plugin_parent_state);
+  const plugin_state = PLUGIN.state.create(plugin_parent_state);
   return { ...state,
     plugins: { ...state.plugins,
       [PLUGIN.id]: { ...plugin_state,
@@ -4350,7 +4357,7 @@ function normalizeError(err_like = {}) {
   return true_err;
 }
 
-/* harmony default export */ var src_es2019 = (normalizeError);
+/* harmony default export */ var dist_src_es2019 = (normalizeError);
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/0-stdlib/promise-try/dist/src.es2019/index.js
 // http://2ality.com/2017/08/promise-try.html#work-arounds
 function promiseTry(fn) {
@@ -4359,7 +4366,7 @@ function promiseTry(fn) {
 
 
 // EXTERNAL MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/0-stdlib/timestamps/dist/src.es2019/generate.js
-var generate = __webpack_require__(58);
+var generate = __webpack_require__(60);
 
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/2-advanced/soft-execution-context/dist/src.es2019/plugins/error-handling/state.js
 /////////////////////
@@ -4441,7 +4448,7 @@ const error_handling_PLUGIN = {
     }, err) {
       createCatcher({
         debugId,
-        decorators: [src_es2019, err => SEC._decorateErrorWithLogicalStack(err), err => SEC._decorateErrorWithDetails(err)],
+        decorators: [dist_src_es2019, err => SEC._decorateErrorWithLogicalStack(err), err => SEC._decorateErrorWithDetails(err)],
         onError: shouldRethrow ? null : err => SEC.emitter.emit('final-error', {
           SEC,
           err: cleanTemp(err)
@@ -4616,7 +4623,7 @@ const analytics_PLUGIN = {
     prototype.fireAnalyticsEvent = function fireAnalyticsEvent(eventId, details = {}) {
       const SEC = this;
       const now = Object(generate["a" /* get_UTC_timestamp_ms */])();
-      let root_state = SEC[INTERNAL_PROP];
+      const root_state = SEC[INTERNAL_PROP];
       if (!eventId) throw new Error('Incorrect eventId!');
       const {
         ENV
@@ -4665,7 +4672,7 @@ const PLUGINS = Object.values(PLUGINS_BY_ID);
 
 
 function decorateWithDetectedEnv(SEC) {
-  let ENV = (() => {
+  const ENV = (() => {
     try {
       /*
       if (typeof NODE_ENV === 'string')
@@ -4723,9 +4730,9 @@ function createSEC(args = {}) {
   /////// PARAMS ///////
   if (args.parent && !isSEC(args.parent)) throw new Error(`${LIB}›createSEC() argument error: parent must be a valid SEC!`);
   let unhandled_args = Object.keys(args);
-  let SEC = Object.create(ROOT_PROTOTYPE); /////// STATE ///////
+  const SEC = Object.create(ROOT_PROTOTYPE); /////// STATE ///////
 
-  let parent_state = args.parent ? args.parent[INTERNAL_PROP] : undefined;
+  const parent_state = args.parent ? args.parent[INTERNAL_PROP] : undefined;
   let state = create(parent_state);
   unhandled_args = unhandled_args.filter(arg => arg !== 'parent');
   PLUGINS.forEach(PLUGIN => {
@@ -4760,7 +4767,7 @@ function createSEC(args = {}) {
 const GLOBAL_VAR_NAME = '__global_root_sec';
 
 function getRootSEC() {
-  const global_this = getGlobalThis();
+  const global_this = Object(src_es2019["a" /* getGlobalThis */])();
 
   if (!global_this[GLOBAL_VAR_NAME]) {
     console.log(`[${LIB}: Creating root SEC…]`); // XXX
@@ -4786,8 +4793,8 @@ function getRootSEC() {
 
 
 /***/ }),
-/* 94 */,
-/* 95 */
+/* 96 */,
+/* 97 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5151,7 +5158,7 @@ module.exports = Emittery;
 
 
 /***/ }),
-/* 96 */
+/* 98 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5165,8 +5172,8 @@ var TRACEPARENT_REGEXP = /^[ \t]*([0-9a-f]{32})?-?([0-9a-f]{16})?-?([01])?[ \t]*
  */
 var Span = /** @class */ (function () {
     function Span(_traceId, _spanId, _sampled, _parent) {
-        if (_traceId === void 0) { _traceId = Object(_sentry_utils__WEBPACK_IMPORTED_MODULE_0__[/* uuid4 */ "i"])(); }
-        if (_spanId === void 0) { _spanId = Object(_sentry_utils__WEBPACK_IMPORTED_MODULE_0__[/* uuid4 */ "i"])().substring(16); }
+        if (_traceId === void 0) { _traceId = Object(_sentry_utils__WEBPACK_IMPORTED_MODULE_0__[/* uuid4 */ "j"])(); }
+        if (_spanId === void 0) { _spanId = Object(_sentry_utils__WEBPACK_IMPORTED_MODULE_0__[/* uuid4 */ "j"])().substring(16); }
         this._traceId = _traceId;
         this._spanId = _spanId;
         this._sampled = _sampled;
@@ -5235,7 +5242,7 @@ var Span = /** @class */ (function () {
 //# sourceMappingURL=span.js.map
 
 /***/ }),
-/* 97 */
+/* 99 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/**
@@ -5550,7 +5557,7 @@ LRUMap.prototype.toString = function() {
 
 
 /***/ }),
-/* 98 */
+/* 100 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5752,8 +5759,6 @@ function tryDecode(str, decode) {
 
 
 /***/ }),
-/* 99 */,
-/* 100 */,
 /* 101 */,
 /* 102 */,
 /* 103 */,
@@ -5761,7 +5766,8 @@ function tryDecode(str, decode) {
 /* 105 */,
 /* 106 */,
 /* 107 */,
-/* 108 */
+/* 108 */,
+/* 109 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5771,11 +5777,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-const runner_1 = __webpack_require__(109);
+const runner_1 = __webpack_require__(110);
 
-const require_http_method_1 = __webpack_require__(131);
+const require_http_method_1 = __webpack_require__(134);
 
-const test_failure_1 = __webpack_require__(132);
+const test_failure_1 = __webpack_require__(135);
 
 async function _handler(SEC, event, context, response, next) {
   response.statusCode = 200;
@@ -5789,7 +5795,7 @@ const handler = (event, badly_typed_context) => {
 exports.handler = handler;
 
 /***/ }),
-/* 109 */
+/* 110 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5805,13 +5811,13 @@ const tiny_invariant_1 = tslib_1.__importDefault(__webpack_require__(17));
 
 const timestamps_1 = __webpack_require__(32);
 
-const sec_1 = __webpack_require__(110);
+const sec_1 = __webpack_require__(111);
 
-const sentry_1 = __webpack_require__(119);
+const sentry_1 = __webpack_require__(122);
 
 const channel_1 = __webpack_require__(33);
 
-const utils_1 = __webpack_require__(22);
+const utils_1 = __webpack_require__(23);
 
 const MARGIN_AND_SENTRY_BUDGET_MS = channel_1.CHANNEL === 'dev' ? 5000 : 1000;
 
@@ -5989,7 +5995,7 @@ function use_middlewares_with_error_safety_net(event, badly_typed_context, middl
 exports.use_middlewares_with_error_safety_net = use_middlewares_with_error_safety_net;
 
 /***/ }),
-/* 110 */
+/* 111 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6001,15 +6007,15 @@ Object.defineProperty(exports, "__esModule", {
 
 const tslib_1 = __webpack_require__(0);
 
-const soft_execution_context_1 = __webpack_require__(93);
+const soft_execution_context_1 = __webpack_require__(95);
 
-const soft_execution_context_node_1 = __webpack_require__(111);
+const soft_execution_context_node_1 = __webpack_require__(112);
 
 const consts_1 = __webpack_require__(30);
 
 const channel_1 = __webpack_require__(33);
 
-const logger_1 = tslib_1.__importDefault(__webpack_require__(112)); /////////////////////
+const logger_1 = tslib_1.__importDefault(__webpack_require__(113)); /////////////////////
 
 
 const SEC = soft_execution_context_1.getRootSEC().setLogicalStack({
@@ -6064,14 +6070,14 @@ if (ENV !== "production") {
 exports.default = SEC;
 
 /***/ }),
-/* 111 */
+/* 112 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const os = __webpack_require__(25);
+const os = __webpack_require__(20);
 
 const {
   getRootSEC
-} = __webpack_require__(93); // TODO protect from double install
+} = __webpack_require__(95); // TODO protect from double install
 
 
 function listenToUncaughtErrors() {
@@ -6119,7 +6125,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 112 */
+/* 113 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6129,7 +6135,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-const practical_logger_node_1 = __webpack_require__(238);
+const universal_debug_api_node_1 = __webpack_require__(242);
 
 const consts_1 = __webpack_require__(30);
 
@@ -6137,7 +6143,7 @@ const channel_1 = __webpack_require__(33); /////////////////////////////////////
 //const logger = (CHANNEL === 'dev' ? create_node : create_core)({
 
 
-const logger = practical_logger_node_1.createLogger({
+const logger = universal_debug_api_node_1.getLogger({
   name: consts_1.APP,
   suggestedLevel: channel_1.CHANNEL === 'dev' ? 'silly' : 'warning'
 });
@@ -6147,44 +6153,68 @@ logger.info(`❄️ Cold start of "${consts_1.APP}", channel = ${channel_1.CHANN
 exports.default = logger;
 
 /***/ }),
-/* 113 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var matchOperatorsRe = /[|\\{}()[\]^$+*?.]/g;
-
-module.exports = function (str) {
-	if (typeof str !== 'string') {
-		throw new TypeError('Expected a string');
-	}
-
-	return str.replace(matchOperatorsRe, '\\$&');
-};
-
-
-/***/ }),
 /* 114 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(module) {
-const colorConvert = __webpack_require__(115);
 
-const wrapAnsi16 = (fn, offset) => function () {
-	const code = fn.apply(colorConvert, arguments);
+const wrapAnsi16 = (fn, offset) => (...args) => {
+	const code = fn(...args);
 	return `\u001B[${code + offset}m`;
 };
 
-const wrapAnsi256 = (fn, offset) => function () {
-	const code = fn.apply(colorConvert, arguments);
+const wrapAnsi256 = (fn, offset) => (...args) => {
+	const code = fn(...args);
 	return `\u001B[${38 + offset};5;${code}m`;
 };
 
-const wrapAnsi16m = (fn, offset) => function () {
-	const rgb = fn.apply(colorConvert, arguments);
+const wrapAnsi16m = (fn, offset) => (...args) => {
+	const rgb = fn(...args);
 	return `\u001B[${38 + offset};2;${rgb[0]};${rgb[1]};${rgb[2]}m`;
+};
+
+const ansi2ansi = n => n;
+const rgb2rgb = (r, g, b) => [r, g, b];
+
+const setLazyProperty = (object, property, get) => {
+	Object.defineProperty(object, property, {
+		get: () => {
+			const value = get();
+
+			Object.defineProperty(object, property, {
+				value,
+				enumerable: true,
+				configurable: true
+			});
+
+			return value;
+		},
+		enumerable: true,
+		configurable: true
+	});
+};
+
+/** @type {typeof import('color-convert')} */
+let colorConvert;
+const makeDynamicStyles = (wrap, targetSpace, identity, isBackground) => {
+	if (colorConvert === undefined) {
+		colorConvert = __webpack_require__(115);
+	}
+
+	const offset = isBackground ? 10 : 0;
+	const styles = {};
+
+	for (const [sourceSpace, suite] of Object.entries(colorConvert)) {
+		const name = sourceSpace === 'ansi16' ? 'ansi' : sourceSpace;
+		if (sourceSpace === targetSpace) {
+			styles[name] = wrap(identity, offset);
+		} else if (typeof suite === 'object') {
+			styles[name] = wrap(suite[targetSpace], offset);
+		}
+	}
+
+	return styles;
 };
 
 function assembleStyles() {
@@ -6210,9 +6240,9 @@ function assembleStyles() {
 			magenta: [35, 39],
 			cyan: [36, 39],
 			white: [37, 39],
-			gray: [90, 39],
 
 			// Bright color
+			blackBright: [90, 39],
 			redBright: [91, 39],
 			greenBright: [92, 39],
 			yellowBright: [93, 39],
@@ -6243,15 +6273,14 @@ function assembleStyles() {
 		}
 	};
 
-	// Fix humans
-	styles.color.grey = styles.color.gray;
+	// Alias bright black as gray (and grey)
+	styles.color.gray = styles.color.blackBright;
+	styles.bgColor.bgGray = styles.bgColor.bgBlackBright;
+	styles.color.grey = styles.color.blackBright;
+	styles.bgColor.bgGrey = styles.bgColor.bgBlackBright;
 
-	for (const groupName of Object.keys(styles)) {
-		const group = styles[groupName];
-
-		for (const styleName of Object.keys(group)) {
-			const style = group[styleName];
-
+	for (const [groupName, group] of Object.entries(styles)) {
+		for (const [styleName, style] of Object.entries(group)) {
 			styles[styleName] = {
 				open: `\u001B[${style[0]}m`,
 				close: `\u001B[${style[1]}m`
@@ -6266,65 +6295,22 @@ function assembleStyles() {
 			value: group,
 			enumerable: false
 		});
-
-		Object.defineProperty(styles, 'codes', {
-			value: codes,
-			enumerable: false
-		});
 	}
 
-	const ansi2ansi = n => n;
-	const rgb2rgb = (r, g, b) => [r, g, b];
+	Object.defineProperty(styles, 'codes', {
+		value: codes,
+		enumerable: false
+	});
 
 	styles.color.close = '\u001B[39m';
 	styles.bgColor.close = '\u001B[49m';
 
-	styles.color.ansi = {
-		ansi: wrapAnsi16(ansi2ansi, 0)
-	};
-	styles.color.ansi256 = {
-		ansi256: wrapAnsi256(ansi2ansi, 0)
-	};
-	styles.color.ansi16m = {
-		rgb: wrapAnsi16m(rgb2rgb, 0)
-	};
-
-	styles.bgColor.ansi = {
-		ansi: wrapAnsi16(ansi2ansi, 10)
-	};
-	styles.bgColor.ansi256 = {
-		ansi256: wrapAnsi256(ansi2ansi, 10)
-	};
-	styles.bgColor.ansi16m = {
-		rgb: wrapAnsi16m(rgb2rgb, 10)
-	};
-
-	for (let key of Object.keys(colorConvert)) {
-		if (typeof colorConvert[key] !== 'object') {
-			continue;
-		}
-
-		const suite = colorConvert[key];
-
-		if (key === 'ansi16') {
-			key = 'ansi';
-		}
-
-		if ('ansi16' in suite) {
-			styles.color.ansi[key] = wrapAnsi16(suite.ansi16, 0);
-			styles.bgColor.ansi[key] = wrapAnsi16(suite.ansi16, 10);
-		}
-
-		if ('ansi256' in suite) {
-			styles.color.ansi256[key] = wrapAnsi256(suite.ansi256, 0);
-			styles.bgColor.ansi256[key] = wrapAnsi256(suite.ansi256, 10);
-		}
-
-		if ('rgb' in suite) {
-			styles.color.ansi16m[key] = wrapAnsi16m(suite.rgb, 0);
-			styles.bgColor.ansi16m[key] = wrapAnsi16m(suite.rgb, 10);
-		}
-	}
+	setLazyProperty(styles.color, 'ansi', () => makeDynamicStyles(wrapAnsi16, 'ansi16', ansi2ansi, false));
+	setLazyProperty(styles.color, 'ansi256', () => makeDynamicStyles(wrapAnsi256, 'ansi256', ansi2ansi, false));
+	setLazyProperty(styles.color, 'ansi16m', () => makeDynamicStyles(wrapAnsi16m, 'rgb', rgb2rgb, false));
+	setLazyProperty(styles.bgColor, 'ansi', () => makeDynamicStyles(wrapAnsi16, 'ansi16', ansi2ansi, true));
+	setLazyProperty(styles.bgColor, 'ansi256', () => makeDynamicStyles(wrapAnsi256, 'ansi256', ansi2ansi, true));
+	setLazyProperty(styles.bgColor, 'ansi16m', () => makeDynamicStyles(wrapAnsi16m, 'rgb', rgb2rgb, true));
 
 	return styles;
 }
@@ -6335,33 +6321,34 @@ Object.defineProperty(module, 'exports', {
 	get: assembleStyles
 });
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(44)(module)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(46)(module)))
 
 /***/ }),
 /* 115 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var conversions = __webpack_require__(59);
-var route = __webpack_require__(117);
+const conversions = __webpack_require__(61);
+const route = __webpack_require__(117);
 
-var convert = {};
+const convert = {};
 
-var models = Object.keys(conversions);
+const models = Object.keys(conversions);
 
 function wrapRaw(fn) {
-	var wrappedFn = function (args) {
-		if (args === undefined || args === null) {
-			return args;
+	const wrappedFn = function (...args) {
+		const arg0 = args[0];
+		if (arg0 === undefined || arg0 === null) {
+			return arg0;
 		}
 
-		if (arguments.length > 1) {
-			args = Array.prototype.slice.call(arguments);
+		if (arg0.length > 1) {
+			args = arg0;
 		}
 
 		return fn(args);
 	};
 
-	// preserve .conversion property if there is one
+	// Preserve .conversion property if there is one
 	if ('conversion' in fn) {
 		wrappedFn.conversion = fn.conversion;
 	}
@@ -6370,22 +6357,24 @@ function wrapRaw(fn) {
 }
 
 function wrapRounded(fn) {
-	var wrappedFn = function (args) {
-		if (args === undefined || args === null) {
-			return args;
+	const wrappedFn = function (...args) {
+		const arg0 = args[0];
+
+		if (arg0 === undefined || arg0 === null) {
+			return arg0;
 		}
 
-		if (arguments.length > 1) {
-			args = Array.prototype.slice.call(arguments);
+		if (arg0.length > 1) {
+			args = arg0;
 		}
 
-		var result = fn(args);
+		const result = fn(args);
 
-		// we're assuming the result is an array here.
+		// We're assuming the result is an array here.
 		// see notice in conversions.js; don't use box types
 		// in conversion functions.
 		if (typeof result === 'object') {
-			for (var len = result.length, i = 0; i < len; i++) {
+			for (let len = result.length, i = 0; i < len; i++) {
 				result[i] = Math.round(result[i]);
 			}
 		}
@@ -6393,7 +6382,7 @@ function wrapRounded(fn) {
 		return result;
 	};
 
-	// preserve .conversion property if there is one
+	// Preserve .conversion property if there is one
 	if ('conversion' in fn) {
 		wrappedFn.conversion = fn.conversion;
 	}
@@ -6401,17 +6390,17 @@ function wrapRounded(fn) {
 	return wrappedFn;
 }
 
-models.forEach(function (fromModel) {
+models.forEach(fromModel => {
 	convert[fromModel] = {};
 
 	Object.defineProperty(convert[fromModel], 'channels', {value: conversions[fromModel].channels});
 	Object.defineProperty(convert[fromModel], 'labels', {value: conversions[fromModel].labels});
 
-	var routes = route(fromModel);
-	var routeModels = Object.keys(routes);
+	const routes = route(fromModel);
+	const routeModels = Object.keys(routes);
 
-	routeModels.forEach(function (toModel) {
-		var fn = routes[toModel];
+	routeModels.forEach(toModel => {
+		const fn = routes[toModel];
 
 		convert[fromModel][toModel] = wrapRounded(fn);
 		convert[fromModel][toModel].raw = wrapRaw(fn);
@@ -6584,10 +6573,10 @@ module.exports = {
 /* 117 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var conversions = __webpack_require__(59);
+const conversions = __webpack_require__(61);
 
 /*
-	this function routes a model to all other models.
+	This function routes a model to all other models.
 
 	all functions that are routed have a property `.conversion` attached
 	to the returned synthetic function. This property is an array
@@ -6598,11 +6587,11 @@ var conversions = __webpack_require__(59);
 */
 
 function buildGraph() {
-	var graph = {};
+	const graph = {};
 	// https://jsperf.com/object-keys-vs-for-in-with-closure/3
-	var models = Object.keys(conversions);
+	const models = Object.keys(conversions);
 
-	for (var len = models.length, i = 0; i < len; i++) {
+	for (let len = models.length, i = 0; i < len; i++) {
 		graph[models[i]] = {
 			// http://jsperf.com/1-vs-infinity
 			// micro-opt, but this is simple.
@@ -6616,18 +6605,18 @@ function buildGraph() {
 
 // https://en.wikipedia.org/wiki/Breadth-first_search
 function deriveBFS(fromModel) {
-	var graph = buildGraph();
-	var queue = [fromModel]; // unshift -> queue -> pop
+	const graph = buildGraph();
+	const queue = [fromModel]; // Unshift -> queue -> pop
 
 	graph[fromModel].distance = 0;
 
 	while (queue.length) {
-		var current = queue.pop();
-		var adjacents = Object.keys(conversions[current]);
+		const current = queue.pop();
+		const adjacents = Object.keys(conversions[current]);
 
-		for (var len = adjacents.length, i = 0; i < len; i++) {
-			var adjacent = adjacents[i];
-			var node = graph[adjacent];
+		for (let len = adjacents.length, i = 0; i < len; i++) {
+			const adjacent = adjacents[i];
+			const node = graph[adjacent];
 
 			if (node.distance === -1) {
 				node.distance = graph[current].distance + 1;
@@ -6647,10 +6636,10 @@ function link(from, to) {
 }
 
 function wrapConversion(toModel, graph) {
-	var path = [graph[toModel].parent, toModel];
-	var fn = conversions[graph[toModel].parent][toModel];
+	const path = [graph[toModel].parent, toModel];
+	let fn = conversions[graph[toModel].parent][toModel];
 
-	var cur = graph[toModel].parent;
+	let cur = graph[toModel].parent;
 	while (graph[cur].parent) {
 		path.unshift(graph[cur].parent);
 		fn = link(conversions[graph[cur].parent][cur], fn);
@@ -6662,16 +6651,16 @@ function wrapConversion(toModel, graph) {
 }
 
 module.exports = function (fromModel) {
-	var graph = deriveBFS(fromModel);
-	var conversion = {};
+	const graph = deriveBFS(fromModel);
+	const conversion = {};
 
-	var models = Object.keys(graph);
-	for (var len = models.length, i = 0; i < len; i++) {
-		var toModel = models[i];
-		var node = graph[toModel];
+	const models = Object.keys(graph);
+	for (let len = models.length, i = 0; i < len; i++) {
+		const toModel = models[i];
+		const node = graph[toModel];
 
 		if (node.parent === null) {
-			// no possible conversion, or this node is the source model.
+			// No possible conversion, or this node is the source model.
 			continue;
 		}
 
@@ -6689,10 +6678,217 @@ module.exports = function (fromModel) {
 
 "use strict";
 
-const TEMPLATE_REGEX = /(?:\\(u[a-f\d]{4}|x[a-f\d]{2}|.))|(?:\{(~)?(\w+(?:\([^)]*\))?(?:\.\w+(?:\([^)]*\))?)*)(?:[ \t]|(?=\r?\n)))|(\})|((?:.|[\r\n\f])+?)/gi;
+const os = __webpack_require__(20);
+const tty = __webpack_require__(34);
+const hasFlag = __webpack_require__(119);
+
+const {env} = process;
+
+let forceColor;
+if (hasFlag('no-color') ||
+	hasFlag('no-colors') ||
+	hasFlag('color=false') ||
+	hasFlag('color=never')) {
+	forceColor = 0;
+} else if (hasFlag('color') ||
+	hasFlag('colors') ||
+	hasFlag('color=true') ||
+	hasFlag('color=always')) {
+	forceColor = 1;
+}
+
+if ('FORCE_COLOR' in env) {
+	if (env.FORCE_COLOR === 'true') {
+		forceColor = 1;
+	} else if (env.FORCE_COLOR === 'false') {
+		forceColor = 0;
+	} else {
+		forceColor = env.FORCE_COLOR.length === 0 ? 1 : Math.min(parseInt(env.FORCE_COLOR, 10), 3);
+	}
+}
+
+function translateLevel(level) {
+	if (level === 0) {
+		return false;
+	}
+
+	return {
+		level,
+		hasBasic: true,
+		has256: level >= 2,
+		has16m: level >= 3
+	};
+}
+
+function supportsColor(haveStream, streamIsTTY) {
+	if (forceColor === 0) {
+		return 0;
+	}
+
+	if (hasFlag('color=16m') ||
+		hasFlag('color=full') ||
+		hasFlag('color=truecolor')) {
+		return 3;
+	}
+
+	if (hasFlag('color=256')) {
+		return 2;
+	}
+
+	if (haveStream && !streamIsTTY && forceColor === undefined) {
+		return 0;
+	}
+
+	const min = forceColor || 0;
+
+	if (env.TERM === 'dumb') {
+		return min;
+	}
+
+	if (process.platform === 'win32') {
+		// Windows 10 build 10586 is the first Windows release that supports 256 colors.
+		// Windows 10 build 14931 is the first release that supports 16m/TrueColor.
+		const osRelease = os.release().split('.');
+		if (
+			Number(osRelease[0]) >= 10 &&
+			Number(osRelease[2]) >= 10586
+		) {
+			return Number(osRelease[2]) >= 14931 ? 3 : 2;
+		}
+
+		return 1;
+	}
+
+	if ('CI' in env) {
+		if (['TRAVIS', 'CIRCLECI', 'APPVEYOR', 'GITLAB_CI'].some(sign => sign in env) || env.CI_NAME === 'codeship') {
+			return 1;
+		}
+
+		return min;
+	}
+
+	if ('TEAMCITY_VERSION' in env) {
+		return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env.TEAMCITY_VERSION) ? 1 : 0;
+	}
+
+	if ('GITHUB_ACTIONS' in env) {
+		return 1;
+	}
+
+	if (env.COLORTERM === 'truecolor') {
+		return 3;
+	}
+
+	if ('TERM_PROGRAM' in env) {
+		const version = parseInt((env.TERM_PROGRAM_VERSION || '').split('.')[0], 10);
+
+		switch (env.TERM_PROGRAM) {
+			case 'iTerm.app':
+				return version >= 3 ? 3 : 2;
+			case 'Apple_Terminal':
+				return 2;
+			// No default
+		}
+	}
+
+	if (/-256(color)?$/i.test(env.TERM)) {
+		return 2;
+	}
+
+	if (/^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(env.TERM)) {
+		return 1;
+	}
+
+	if ('COLORTERM' in env) {
+		return 1;
+	}
+
+	return min;
+}
+
+function getSupportLevel(stream) {
+	const level = supportsColor(stream, stream && stream.isTTY);
+	return translateLevel(level);
+}
+
+module.exports = {
+	supportsColor: getSupportLevel,
+	stdout: translateLevel(supportsColor(true, tty.isatty(1))),
+	stderr: translateLevel(supportsColor(true, tty.isatty(2)))
+};
+
+
+/***/ }),
+/* 119 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = (flag, argv = process.argv) => {
+	const prefix = flag.startsWith('-') ? '' : (flag.length === 1 ? '-' : '--');
+	const position = argv.indexOf(prefix + flag);
+	const terminatorPosition = argv.indexOf('--');
+	return position !== -1 && (terminatorPosition === -1 || position < terminatorPosition);
+};
+
+
+/***/ }),
+/* 120 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+const stringReplaceAll = (string, substring, replacer) => {
+	let index = string.indexOf(substring);
+	if (index === -1) {
+		return string;
+	}
+
+	const substringLength = substring.length;
+	let endIndex = 0;
+	let returnValue = '';
+	do {
+		returnValue += string.substr(endIndex, index - endIndex) + substring + replacer;
+		endIndex = index + substringLength;
+		index = string.indexOf(substring, endIndex);
+	} while (index !== -1);
+
+	returnValue += string.substr(endIndex);
+	return returnValue;
+};
+
+const stringEncaseCRLFWithFirstIndex = (string, prefix, postfix, index) => {
+	let endIndex = 0;
+	let returnValue = '';
+	do {
+		const gotCR = string[index - 1] === '\r';
+		returnValue += string.substr(endIndex, (gotCR ? index - 1 : index) - endIndex) + prefix + (gotCR ? '\r\n' : '\n') + postfix;
+		endIndex = index + 1;
+		index = string.indexOf('\n', endIndex);
+	} while (index !== -1);
+
+	returnValue += string.substr(endIndex);
+	return returnValue;
+};
+
+module.exports = {
+	stringReplaceAll,
+	stringEncaseCRLFWithFirstIndex
+};
+
+
+/***/ }),
+/* 121 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+const TEMPLATE_REGEX = /(?:\\(u(?:[a-f\d]{4}|\{[a-f\d]{1,6}\})|x[a-f\d]{2}|.))|(?:\{(~)?(\w+(?:\([^)]*\))?(?:\.\w+(?:\([^)]*\))?)*)(?:[ \t]|(?=\r?\n)))|(\})|((?:.|[\r\n\f])+?)/gi;
 const STYLE_REGEX = /(?:^|\.)(\w+)(?:\(([^)]*)\))?/g;
 const STRING_REGEX = /^(['"])((?:\\.|(?!\1)[^\\])*)\1$/;
-const ESCAPE_REGEX = /\\(u[a-f\d]{4}|x[a-f\d]{2}|.)|([^\\])/gi;
+const ESCAPE_REGEX = /\\(u(?:[a-f\d]{4}|\{[a-f\d]{1,6}\})|x[a-f\d]{2}|.)|([^\\])/gi;
 
 const ESCAPES = new Map([
 	['n', '\n'],
@@ -6708,23 +6904,31 @@ const ESCAPES = new Map([
 ]);
 
 function unescape(c) {
-	if ((c[0] === 'u' && c.length === 5) || (c[0] === 'x' && c.length === 3)) {
+	const u = c[0] === 'u';
+	const bracket = c[1] === '{';
+
+	if ((u && !bracket && c.length === 5) || (c[0] === 'x' && c.length === 3)) {
 		return String.fromCharCode(parseInt(c.slice(1), 16));
+	}
+
+	if (u && bracket) {
+		return String.fromCodePoint(parseInt(c.slice(2, -1), 16));
 	}
 
 	return ESCAPES.get(c) || c;
 }
 
-function parseArguments(name, args) {
+function parseArguments(name, arguments_) {
 	const results = [];
-	const chunks = args.trim().split(/\s*,\s*/g);
+	const chunks = arguments_.trim().split(/\s*,\s*/g);
 	let matches;
 
 	for (const chunk of chunks) {
-		if (!isNaN(chunk)) {
-			results.push(Number(chunk));
+		const number = Number(chunk);
+		if (!Number.isNaN(number)) {
+			results.push(number);
 		} else if ((matches = chunk.match(STRING_REGEX))) {
-			results.push(matches[2].replace(ESCAPE_REGEX, (m, escape, chr) => escape ? unescape(escape) : chr));
+			results.push(matches[2].replace(ESCAPE_REGEX, (m, escape, character) => escape ? unescape(escape) : character));
 		} else {
 			throw new Error(`Invalid Chalk template style argument: ${chunk} (in style '${name}')`);
 		}
@@ -6763,36 +6967,34 @@ function buildStyle(chalk, styles) {
 	}
 
 	let current = chalk;
-	for (const styleName of Object.keys(enabled)) {
-		if (Array.isArray(enabled[styleName])) {
-			if (!(styleName in current)) {
-				throw new Error(`Unknown Chalk style: ${styleName}`);
-			}
-
-			if (enabled[styleName].length > 0) {
-				current = current[styleName].apply(current, enabled[styleName]);
-			} else {
-				current = current[styleName];
-			}
+	for (const [styleName, styles] of Object.entries(enabled)) {
+		if (!Array.isArray(styles)) {
+			continue;
 		}
+
+		if (!(styleName in current)) {
+			throw new Error(`Unknown Chalk style: ${styleName}`);
+		}
+
+		current = styles.length > 0 ? current[styleName](...styles) : current[styleName];
 	}
 
 	return current;
 }
 
-module.exports = (chalk, tmp) => {
+module.exports = (chalk, temporary) => {
 	const styles = [];
 	const chunks = [];
 	let chunk = [];
 
 	// eslint-disable-next-line max-params
-	tmp.replace(TEMPLATE_REGEX, (m, escapeChar, inverse, style, close, chr) => {
-		if (escapeChar) {
-			chunk.push(unescape(escapeChar));
+	temporary.replace(TEMPLATE_REGEX, (m, escapeCharacter, inverse, style, close, character) => {
+		if (escapeCharacter) {
+			chunk.push(unescape(escapeCharacter));
 		} else if (style) {
-			const str = chunk.join('');
+			const string = chunk.join('');
 			chunk = [];
-			chunks.push(styles.length === 0 ? str : buildStyle(chalk, styles)(str));
+			chunks.push(styles.length === 0 ? string : buildStyle(chalk, styles)(string));
 			styles.push({inverse, styles: parseStyle(style)});
 		} else if (close) {
 			if (styles.length === 0) {
@@ -6803,7 +7005,7 @@ module.exports = (chalk, tmp) => {
 			chunk = [];
 			styles.pop();
 		} else {
-			chunk.push(chr);
+			chunk.push(character);
 		}
 	});
 
@@ -6819,7 +7021,7 @@ module.exports = (chalk, tmp) => {
 
 
 /***/ }),
-/* 119 */
+/* 122 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6830,7 +7032,7 @@ Object.defineProperty(exports, "__esModule", {
 }); // https://docs.sentry.io/error-reporting/quickstart/?platform=node
 // https://httptoolkit.tech/blog/netlify-function-error-reporting-with-sentry/
 
-const Sentry = __webpack_require__(236);
+const Sentry = __webpack_require__(240);
 
 const channel_1 = __webpack_require__(33);
 
@@ -6875,7 +7077,7 @@ exports.on_user_recognized = on_user_recognized; // TODO self-triage?
 // TODO breadcrumb
 
 /***/ }),
-/* 120 */
+/* 123 */
 /***/ (function(module, exports) {
 
 module.exports = function(originalModule) {
@@ -6905,14 +7107,14 @@ module.exports = function(originalModule) {
 
 
 /***/ }),
-/* 121 */
+/* 124 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-__webpack_require__(122);
+__webpack_require__(125);
 const inherits = __webpack_require__(4).inherits;
-const promisify = __webpack_require__(123);
+const promisify = __webpack_require__(126);
 const EventEmitter = __webpack_require__(7).EventEmitter;
 
 module.exports = Agent;
@@ -7082,13 +7284,13 @@ Agent.prototype.freeSocket = function freeSocket(socket, opts) {
 
 
 /***/ }),
-/* 122 */
+/* 125 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 const url = __webpack_require__(16);
-const https = __webpack_require__(41);
+const https = __webpack_require__(42);
 
 /**
  * This currently needs to be applied to all Node.js versions
@@ -7140,7 +7342,7 @@ https.get = function (_url, _options, cb) {
 
 
 /***/ }),
-/* 123 */
+/* 126 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7153,7 +7355,7 @@ module.exports = function () {
 
     // Get a promise object. This may be native, or it may be polyfilled
 
-    var ES6Promise = __webpack_require__(124);
+    var ES6Promise = __webpack_require__(127);
 
     /**
      * thatLooksLikeAPromiseToMe()
@@ -7231,7 +7433,7 @@ module.exports = function () {
 }();
 
 /***/ }),
-/* 124 */
+/* 127 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7306,11 +7508,11 @@ module.exports = function () {
     }
 
     //  Otherwise, return the es6-promise polyfill by @jaffathecake.
-    return __webpack_require__(125).Promise;
+    return __webpack_require__(128).Promise;
 }();
 
 /***/ }),
-/* 125 */
+/* 128 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*!
@@ -8489,7 +8691,7 @@ return Promise$1;
 
 
 /***/ }),
-/* 126 */
+/* 129 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8500,15 +8702,15 @@ return Promise$1;
  * treat as a browser.
  */
 if (typeof process === 'undefined' || process.type === 'renderer' || process.browser === true || process.__nwjs) {
-  module.exports = __webpack_require__(127);
+  module.exports = __webpack_require__(130);
 } else {
-  module.exports = __webpack_require__(129);
+  module.exports = __webpack_require__(132);
 }
 
 
 
 /***/ }),
-/* 127 */
+/* 130 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8678,7 +8880,7 @@ function localstorage() {
   }
 }
 
-module.exports = __webpack_require__(60)(exports);
+module.exports = __webpack_require__(62)(exports);
 var formatters = module.exports.formatters;
 /**
  * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
@@ -8695,7 +8897,7 @@ formatters.j = function (v) {
 
 
 /***/ }),
-/* 128 */
+/* 131 */
 /***/ (function(module, exports) {
 
 /**
@@ -8863,7 +9065,7 @@ function plural(ms, msAbs, n, name) {
 
 
 /***/ }),
-/* 129 */
+/* 132 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8872,7 +9074,7 @@ function plural(ms, msAbs, n, name) {
 /**
  * Module dependencies.
  */
-var tty = __webpack_require__(48);
+var tty = __webpack_require__(34);
 
 var util = __webpack_require__(4);
 /**
@@ -8895,7 +9097,7 @@ exports.colors = [6, 2, 3, 4, 5, 1];
 try {
   // Optional dependency (as in, doesn't need to be installed, NOT like optionalDependencies in package.json)
   // eslint-disable-next-line import/no-extraneous-dependencies
-  var supportsColor = __webpack_require__(34);
+  var supportsColor = __webpack_require__(49);
 
   if (supportsColor && (supportsColor.stderr || supportsColor).level >= 2) {
     exports.colors = [20, 21, 26, 27, 32, 33, 38, 39, 40, 41, 42, 43, 44, 45, 56, 57, 62, 63, 68, 69, 74, 75, 76, 77, 78, 79, 80, 81, 92, 93, 98, 99, 112, 113, 128, 129, 134, 135, 148, 149, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 178, 179, 184, 185, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 214, 215, 220, 221];
@@ -9021,7 +9223,7 @@ function init(debug) {
   }
 }
 
-module.exports = __webpack_require__(60)(exports);
+module.exports = __webpack_require__(62)(exports);
 var formatters = module.exports.formatters;
 /**
  * Map %o to `util.inspect()`, all on a single line.
@@ -9044,13 +9246,13 @@ formatters.O = function (v) {
 
 
 /***/ }),
-/* 130 */
+/* 133 */
 /***/ (function(module, exports) {
 
 module.exports = require("console");
 
 /***/ }),
-/* 131 */
+/* 134 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9062,7 +9264,7 @@ Object.defineProperty(exports, "__esModule", {
 
 const typescript_string_enums_1 = __webpack_require__(10);
 
-const utils_1 = __webpack_require__(22);
+const utils_1 = __webpack_require__(23);
 
 exports.HttpMethod = typescript_string_enums_1.Enum('GET', 'PUT');
 
@@ -9076,7 +9278,7 @@ function require_http_method(required_method) {
 exports.require_http_method = require_http_method;
 
 /***/ }),
-/* 132 */
+/* 135 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -9092,7 +9294,7 @@ const typescript_string_enums_1 = __webpack_require__(10);
 
 const tiny_invariant_1 = tslib_1.__importDefault(__webpack_require__(17));
 
-const utils_1 = __webpack_require__(22);
+const utils_1 = __webpack_require__(23);
 
 exports.FailureMode = typescript_string_enums_1.Enum('none', 'manual', 'uncaught-sync', 'uncaught-async', 'timeout', 'unhandled-rejection', 'mess-with-response', 'non-stringified-body');
 
@@ -9164,9 +9366,6 @@ async function test_failure(SEC, event, context, response, next) {
 exports.test_failure = test_failure;
 
 /***/ }),
-/* 133 */,
-/* 134 */,
-/* 135 */,
 /* 136 */,
 /* 137 */,
 /* 138 */,
@@ -9267,7 +9466,11 @@ exports.test_failure = test_failure;
 /* 233 */,
 /* 234 */,
 /* 235 */,
-/* 236 */
+/* 236 */,
+/* 237 */,
+/* 238 */,
+/* 239 */,
+/* 240 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -9286,7 +9489,7 @@ __webpack_require__.r(handlers_namespaceObject);
 __webpack_require__.d(handlers_namespaceObject, "parseRequest", function() { return parseRequest; });
 __webpack_require__.d(handlers_namespaceObject, "requestHandler", function() { return requestHandler; });
 __webpack_require__.d(handlers_namespaceObject, "errorHandler", function() { return errorHandler; });
-__webpack_require__.d(handlers_namespaceObject, "defaultOnFatalError", function() { return defaultOnFatalError; });
+__webpack_require__.d(handlers_namespaceObject, "logAndExitProcess", function() { return logAndExitProcess; });
 var esm_integrations_namespaceObject = {};
 __webpack_require__.r(esm_integrations_namespaceObject);
 __webpack_require__.d(esm_integrations_namespaceObject, "Console", function() { return console_Console; });
@@ -9395,10 +9598,10 @@ var Status;
 })(Status || (Status = {}));
 //# sourceMappingURL=status.js.map
 // EXTERNAL MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/@sentry/hub/esm/scope.js
-var esm_scope = __webpack_require__(43);
+var esm_scope = __webpack_require__(44);
 
 // EXTERNAL MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/@sentry/hub/esm/hub.js
-var esm_hub = __webpack_require__(240);
+var esm_hub = __webpack_require__(245);
 
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/@sentry/minimal/esm/index.js
 
@@ -9566,10 +9769,10 @@ function _callOnClient(method) {
 }
 //# sourceMappingURL=index.js.map
 // EXTERNAL MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/@sentry/hub/esm/span.js
-var esm_span = __webpack_require__(96);
+var esm_span = __webpack_require__(98);
 
 // EXTERNAL MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/@sentry/utils/esm/logger.js
-var logger = __webpack_require__(239);
+var logger = __webpack_require__(243);
 
 // EXTERNAL MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/@sentry/utils/esm/is.js
 var is = __webpack_require__(9);
@@ -9578,7 +9781,7 @@ var is = __webpack_require__(9);
 var syncpromise = __webpack_require__(29);
 
 // EXTERNAL MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/@sentry/utils/esm/string.js
-var string = __webpack_require__(56);
+var string = __webpack_require__(58);
 
 // EXTERNAL MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/@sentry/utils/esm/misc.js
 var misc = __webpack_require__(6);
@@ -9739,7 +9942,13 @@ function getIntegrationsToSetup(options) {
         integrations = Array.isArray(integrations) ? integrations : [integrations];
     }
     else {
-        return tslib_es6["__spread"](defaultIntegrations);
+        integrations = tslib_es6["__spread"](defaultIntegrations);
+    }
+    // Make sure that if present, `Debug` integration will always run last
+    var integrationsNames = integrations.map(function (i) { return i.name; });
+    var alwaysLastToRun = 'Debug';
+    if (integrationsNames.indexOf(alwaysLastToRun) !== -1) {
+        integrations.push.apply(integrations, tslib_es6["__spread"](integrations.splice(integrationsNames.indexOf(alwaysLastToRun), 1)));
     }
     return integrations;
 }
@@ -10014,7 +10223,7 @@ var baseclient_BaseClient = /** @class */ (function () {
             request.url = Object(string["c" /* truncate */])(request.url, maxValueLength);
         }
         if (prepared.event_id === undefined) {
-            prepared.event_id = Object(misc["i" /* uuid4 */])();
+            prepared.event_id = Object(misc["j" /* uuid4 */])();
         }
         this._addIntegrations(prepared.sdk);
         // We prepare the result here with a resolved Event.
@@ -10077,6 +10286,7 @@ var baseclient_BaseClient = /** @class */ (function () {
                         return;
                     }
                     var beforeSendResult = beforeSend(prepared, hint);
+                    // tslint:disable-next-line:strict-type-predicates
                     if (typeof beforeSendResult === 'undefined') {
                         logger["a" /* logger */].error('`beforeSend` method has to return `null` or a valid event.');
                     }
@@ -10377,7 +10587,7 @@ function basename(path, ext) {
 var external_fs_ = __webpack_require__(8);
 
 // EXTERNAL MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/lru_map/lru.js
-var lru = __webpack_require__(97);
+var lru = __webpack_require__(99);
 
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/@sentry/node/esm/stacktrace.js
 /**
@@ -10875,7 +11085,7 @@ var promisebuffer_PromiseBuffer = /** @class */ (function () {
 //# sourceMappingURL=promisebuffer.js.map
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/@sentry/node/esm/version.js
 var SDK_NAME = 'sentry.javascript.node';
-var SDK_VERSION = '5.7.1';
+var SDK_VERSION = '5.9.0';
 //# sourceMappingURL=version.js.map
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/@sentry/node/esm/transports/base.js
 
@@ -10891,6 +11101,8 @@ var base_BaseTransport = /** @class */ (function () {
         this.options = options;
         /** A simple buffer holding all requests. */
         this._buffer = new promisebuffer_PromiseBuffer(30);
+        /** Locks transport after receiving 429 response */
+        this._disabledUntil = new Date(Date.now());
         this._api = new api_API(options.dsn);
     }
     /** Returns a build request option object used by request */
@@ -10916,27 +11128,35 @@ var base_BaseTransport = /** @class */ (function () {
         return tslib_es6["__awaiter"](this, void 0, void 0, function () {
             var _this = this;
             return tslib_es6["__generator"](this, function (_a) {
+                if (new Date(Date.now()) < this._disabledUntil) {
+                    return [2 /*return*/, Promise.reject(new error_SentryError("Transport locked till " + this._disabledUntil + " due to too many requests."))];
+                }
                 if (!this._buffer.isReady()) {
                     return [2 /*return*/, Promise.reject(new error_SentryError('Not adding Promise due to buffer limit reached.'))];
                 }
                 return [2 /*return*/, this._buffer.add(new Promise(function (resolve, reject) {
                         var req = httpModule.request(_this._getRequestOptions(), function (res) {
+                            var statusCode = res.statusCode || 500;
+                            var status = Status.fromHttpCode(statusCode);
                             res.setEncoding('utf8');
-                            if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
-                                resolve({
-                                    status: Status.fromHttpCode(res.statusCode),
-                                });
+                            if (status === Status.Success) {
+                                resolve({ status: status });
                             }
                             else {
+                                if (status === Status.RateLimit) {
+                                    var now = Date.now();
+                                    var header = res.headers ? res.headers['Retry-After'] : '';
+                                    header = Array.isArray(header) ? header[0] : header;
+                                    _this._disabledUntil = new Date(now + Object(misc["i" /* parseRetryAfterHeader */])(now, header));
+                                    logger["a" /* logger */].warn("Too many requests, backing off till: " + _this._disabledUntil);
+                                }
+                                var rejectionMessage = "HTTP Error (" + statusCode + ")";
                                 if (res.headers && res.headers['x-sentry-error']) {
-                                    var reason = res.headers['x-sentry-error'];
-                                    reject(new error_SentryError("HTTP Error (" + res.statusCode + "): " + reason));
+                                    rejectionMessage += ": " + res.headers['x-sentry-error'];
                                 }
-                                else {
-                                    reject(new error_SentryError("HTTP Error (" + res.statusCode + ")"));
-                                }
+                                reject(new error_SentryError(rejectionMessage));
                             }
-                            // force the socket to drain
+                            // Force the socket to drain
                             res.on('data', function () {
                                 // Drain
                             });
@@ -10967,10 +11187,10 @@ var base_BaseTransport = /** @class */ (function () {
 
 //# sourceMappingURL=base.js.map
 // EXTERNAL MODULE: external "http"
-var external_http_ = __webpack_require__(20);
+var external_http_ = __webpack_require__(21);
 
 // EXTERNAL MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/https-proxy-agent/index.js
-var https_proxy_agent = __webpack_require__(40);
+var https_proxy_agent = __webpack_require__(41);
 
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/@sentry/node/esm/transports/http.js
 
@@ -11007,7 +11227,7 @@ var http_HTTPTransport = /** @class */ (function (_super) {
 
 //# sourceMappingURL=http.js.map
 // EXTERNAL MODULE: external "https"
-var external_https_ = __webpack_require__(41);
+var external_https_ = __webpack_require__(42);
 
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/@sentry/node/esm/transports/https.js
 
@@ -11292,8 +11512,12 @@ var inboundfilters_InboundFilters = /** @class */ (function () {
             return false;
         }
         try {
-            // tslint:disable-next-line:no-unsafe-any
-            return event.exception.values[0].type === 'SentryError';
+            return ((event &&
+                event.exception &&
+                event.exception.values &&
+                event.exception.values[0] &&
+                event.exception.values[0].type === 'SentryError') ||
+                false);
         }
         catch (_oO) {
             return false;
@@ -11347,8 +11571,7 @@ var inboundfilters_InboundFilters = /** @class */ (function () {
         }
         if (event.exception) {
             try {
-                // tslint:disable-next-line:no-unsafe-any
-                var _a = event.exception.values[0], type = _a.type, value = _a.value;
+                var _a = (event.exception.values && event.exception.values[0]) || {}, _b = _a.type, type = _b === void 0 ? '' : _b, _c = _a.value, value = _c === void 0 ? '' : _c;
                 return ["" + value, type + ": " + value];
             }
             catch (oO) {
@@ -11362,14 +11585,12 @@ var inboundfilters_InboundFilters = /** @class */ (function () {
     InboundFilters.prototype._getEventFilterUrl = function (event) {
         try {
             if (event.stacktrace) {
-                // tslint:disable:no-unsafe-any
                 var frames_1 = event.stacktrace.frames;
-                return frames_1[frames_1.length - 1].filename;
+                return (frames_1 && frames_1[frames_1.length - 1].filename) || null;
             }
             if (event.exception) {
-                // tslint:disable:no-unsafe-any
-                var frames_2 = event.exception.values[0].stacktrace.frames;
-                return frames_2[frames_2.length - 1].filename;
+                var frames_2 = event.exception.values && event.exception.values[0].stacktrace && event.exception.values[0].stacktrace.frames;
+                return (frames_2 && frames_2[frames_2.length - 1].filename) || null;
             }
             return null;
         }
@@ -11420,7 +11641,7 @@ function initAndBind(clientClass, options) {
 }
 //# sourceMappingURL=sdk.js.map
 // EXTERNAL MODULE: external "domain"
-var external_domain_ = __webpack_require__(42);
+var external_domain_ = __webpack_require__(43);
 
 // EXTERNAL MODULE: external "util"
 var external_util_ = __webpack_require__(4);
@@ -11443,10 +11664,10 @@ var console_Console = /** @class */ (function () {
      * @inheritDoc
      */
     Console.prototype.setupOnce = function () {
-        var nativeModule = __webpack_require__(61);
+        var nativeModule = __webpack_require__(63);
         Object(object["b" /* fill */])(nativeModule, '_load', loadWrapper(nativeModule));
         // special case: since console is built-in and app-level code won't require() it, do that here
-        __webpack_require__(130);
+        __webpack_require__(133);
     };
     /**
      * @inheritDoc
@@ -11534,14 +11755,14 @@ var http_Http = /** @class */ (function () {
      * @inheritDoc
      */
     Http.prototype.setupOnce = function () {
-        var nativeModule = __webpack_require__(61);
+        var nativeModule = __webpack_require__(63);
         Object(object["b" /* fill */])(nativeModule, '_load', http_loadWrapper(nativeModule));
         // observation: when the https module does its own require('http'), it *does not* hit our hooked require to instrument http on the fly
         // but if we've previously instrumented http, https *does* get our already-instrumented version
         // this is because raven's transports are required before this instrumentation takes place, which loads https (and http)
         // so module cache will have uninstrumented http; proactively loading it here ensures instrumented version is in module cache
         // alternatively we could refactor to load our transports later, but this is easier and doesn't have much drawback
-        __webpack_require__(20);
+        __webpack_require__(21);
     };
     /**
      * @inheritDoc
@@ -11670,10 +11891,10 @@ function forget(promise) {
 }
 //# sourceMappingURL=async.js.map
 // EXTERNAL MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/cookie/index.js
-var cookie = __webpack_require__(98);
+var cookie = __webpack_require__(100);
 
 // EXTERNAL MODULE: external "os"
-var external_os_ = __webpack_require__(25);
+var external_os_ = __webpack_require__(20);
 
 // EXTERNAL MODULE: external "url"
 var external_url_ = __webpack_require__(16);
@@ -11907,7 +12128,7 @@ function errorHandler(options) {
 /**
  * @hidden
  */
-function defaultOnFatalError(error) {
+function logAndExitProcess(error) {
     console.error(error && error.stack ? error.stack : error);
     var client = Object(esm_hub["b" /* getCurrentHub */])().getClient();
     if (client === undefined) {
@@ -11965,7 +12186,7 @@ var onuncaughtexception_OnUncaughtException = /** @class */ (function () {
         var calledFatalError = false;
         var firstError;
         return function (error) {
-            var onFatalError = defaultOnFatalError;
+            var onFatalError = logAndExitProcess;
             var client = Object(esm_hub["b" /* getCurrentHub */])().getClient();
             if (_this._options.onFatalError) {
                 onFatalError = _this._options.onFatalError;
@@ -12000,7 +12221,7 @@ var onuncaughtexception_OnUncaughtException = /** @class */ (function () {
             else if (calledFatalError) {
                 // we hit an error *after* calling onFatalError - pretty boned at this point, just shut it down
                 logger["a" /* logger */].warn('uncaught exception after calling fatal error shutdown callback - this is bad! forcing shutdown');
-                defaultOnFatalError(error);
+                logAndExitProcess(error);
             }
             else if (!caughtSecondError) {
                 // two cases for how we can hit this branch:
@@ -12041,9 +12262,16 @@ var onuncaughtexception_OnUncaughtException = /** @class */ (function () {
 //# sourceMappingURL=onuncaughtexception.js.map
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/@sentry/node/esm/integrations/onunhandledrejection.js
 
+
+
 /** Global Promise Rejection handler */
 var onunhandledrejection_OnUnhandledRejection = /** @class */ (function () {
-    function OnUnhandledRejection() {
+    /**
+     * @inheritDoc
+     */
+    function OnUnhandledRejection(_options) {
+        if (_options === void 0) { _options = { mode: 'warn' }; }
+        this._options = _options;
         /**
          * @inheritDoc
          */
@@ -12063,6 +12291,7 @@ var onunhandledrejection_OnUnhandledRejection = /** @class */ (function () {
     OnUnhandledRejection.prototype.sendUnhandledPromise = function (reason, promise) {
         var hub = Object(esm_hub["b" /* getCurrentHub */])();
         if (!hub.getIntegration(OnUnhandledRejection)) {
+            this._handleRejection(reason);
             return;
         }
         var context = (promise.domain && promise.domain.sentryContext) || {};
@@ -12080,6 +12309,29 @@ var onunhandledrejection_OnUnhandledRejection = /** @class */ (function () {
             }
             hub.captureException(reason, { originalException: promise });
         });
+        this._handleRejection(reason);
+    };
+    /**
+     * Handler for `mode` option
+     */
+    OnUnhandledRejection.prototype._handleRejection = function (reason) {
+        // https://github.com/nodejs/node/blob/7cf6f9e964aa00772965391c23acda6d71972a9a/lib/internal/process/promises.js#L234-L240
+        var rejectionWarning = 'This error originated either by ' +
+            'throwing inside of an async function without a catch block, ' +
+            'or by rejecting a promise which was not handled with .catch().' +
+            ' The promise rejected with the reason:';
+        if (this._options.mode === 'warn') {
+            Object(misc["c" /* consoleSandbox */])(function () {
+                console.warn(rejectionWarning);
+                console.error(reason && reason.stack ? reason.stack : reason);
+            });
+        }
+        else if (this._options.mode === 'strict') {
+            Object(misc["c" /* consoleSandbox */])(function () {
+                console.warn(rejectionWarning);
+            });
+            logAndExitProcess(reason);
+        }
     };
     /**
      * @inheritDoc
@@ -12456,12 +12708,15 @@ var INTEGRATIONS = tslib_es6["__assign"]({}, integrations_namespaceObject, esm_i
 //# sourceMappingURL=index.js.map
 
 /***/ }),
-/* 237 */,
-/* 238 */
+/* 241 */,
+/* 242 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+
+// EXTERNAL MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/0-stdlib/globalthis-ponyfill/dist/src.es2019/index.js
+var src_es2019 = __webpack_require__(40);
 
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/1-foundation/practical-logger-core/dist/src.es2019/consts.js
 const LIB = '@offirmo/practical-logger-core'; // level to a numerical value, for ordering and filtering.
@@ -12483,25 +12738,18 @@ const LOG_LEVEL_TO_INTEGER = {
   debug: 81,
   trace: 90,
   silly: 100
-}; // rationalization to a clear, human understandable string
-
-const LOG_LEVEL_TO_HUMAN = {
-  fatal: 'fatal',
-  emerg: 'emergency',
-  alert: 'alert',
-  crit: 'critical',
-  error: 'error',
-  warning: 'warn',
-  warn: 'warn',
-  notice: 'notice',
-  info: 'info',
-  verbose: 'verbose',
-  log: 'log',
-  debug: 'debug',
-  trace: 'trace',
-  silly: 'silly'
 };
-const ALL_LOG_LEVELS = Object.keys(LOG_LEVEL_TO_INTEGER).map(s => s).sort((a, b) => LOG_LEVEL_TO_INTEGER[a] - LOG_LEVEL_TO_INTEGER[b]);
+const ALL_LOG_LEVELS = Object.keys(LOG_LEVEL_TO_INTEGER).map(s => s).sort((a, b) => LOG_LEVEL_TO_INTEGER[a] - LOG_LEVEL_TO_INTEGER[b]); // rationalization to a clear, human understandable string
+// generated to shave a few bytes
+// not using fromEntries bc not available in node <12
+
+const LOG_LEVEL_TO_HUMAN = ALL_LOG_LEVELS.reduce((acc, ll) => {
+  acc[ll] = {
+    em: 'emergency',
+    wa: 'warn'
+  }[ll.slice(0, 1)] || ll;
+  return acc;
+}, {});
 
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/1-foundation/practical-logger-core/dist/src.es2019/consts-base.js
 // base to be directly importable from other modules
@@ -12511,90 +12759,49 @@ const DEFAULT_LOG_LEVEL = 'error';
 const DEFAULT_LOGGER_KEY = ''; // yes, can be used as a key
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/1-foundation/practical-logger-core/dist/src.es2019/normalize-args.js
 function looksLikeAnError(x) {
-  return !!(x.name && x.message && x.stack);
-} // harmonize
-// also try to recover from some common errors
-// TODO assess whether it's really good to be that permissive (also: hurts perfs)
+  var _a, _b, _c;
 
-function normalizeArguments(args) {
-  //console.log('>>> NA', Array.from(args))
-  let message = '';
+  return !!(((_a = x) === null || _a === void 0 ? void 0 : _a.name) && ((_b = x) === null || _b === void 0 ? void 0 : _b.message) && ((_c = x) === null || _c === void 0 ? void 0 : _c.stack));
+} // harmonize
+// also try to recover from incorrect invocations
+
+function normalizeArguments(raw_args) {
+  var _a;
+
+  const message_parts = [];
   let details = {};
   let err = undefined;
+  Array.from(raw_args).forEach(arg => {
+    if (!arg) return; // errors are first class, look for them first
 
-  if (args.length > 2) {
-    //console.warn('NA 1', args)
-    // wrong invocation,
-    // most likely a "console.log" style invocation from an untyped codebase.
-    // "best effort" fallback:
-    message = Array.prototype.join.call(args, ' ');
-    details = {};
-  } else {
-    //console.log('NA 2')
-    message = args[0] || '';
-    details = args[1] || {}; // optimization
+    if (looksLikeAnError(arg)) {
+      if (!err) err = arg; // extract it
 
-    if (!message || typeof args[0] !== 'string' || typeof details !== 'object') {
-      // non-nominal call
-      //console.warn('NA 2.1')
-      // try to fix message (attempt 1)
-      if (typeof message !== 'string') {
-        //console.warn('NA 2.1.1', { message, details })
-        if (looksLikeAnError(message)) {
-          //console.warn('NA 2.1.1.1')
-          // Another bad invocation
-          // "best effort" fallback:
-          err = message;
-          message = err.message;
-        } else if (typeof message === 'object' && !args[1]) {
-          // no message, direct details
-          //console.warn('NA 2.1.1.2')
-          details = message;
-          message = '';
-        } else {
-          //console.warn('NA 2.1.1.3')
-          message = String(message);
-        }
-      } // try to fix details
-
-
-      if (typeof details !== 'object') {
-        //console.warn('NA 2.1.2', { details })
-        // Another bad invocation
-        // "best effort" fallback:
-        message = [message, String(details)].join(' ');
-        details = {};
-      } // ensure we picked up err
-
-
-      err = err || details.err; // attempt to fix message (attempt 2, after uniformizing details)
-
-      if (!message && details.message) {
-        //console.warn('NA 2.1.3', { details })
-        const {
-          message: m2,
-          ...d2
-        } = details;
-        message = m2;
-        details = d2;
-      }
-
-      message = message || err && err.message || '(no message)';
+      return;
     }
 
-    if (!err && looksLikeAnError(details)) {
-      //console.warn('NA 2.2', { details })
-      // details is in fact an error, extract it
-      err = details;
-      details = {
-        err
+    if (!err && looksLikeAnError(arg.err)) {
+      err = arg.err; // extract it
+      // don't return, still stuff to pick
+    }
+
+    if (typeof arg === 'object') {
+      details = { ...details,
+        ...arg
       };
-    } else if (err) details = {
-      err,
-      ...details
-    };else details = { ...details
-    };
+      return;
+    }
+
+    message_parts.push(String(arg));
+  });
+
+  if (typeof details.message === 'string' && !message_parts.length) {
+    message_parts.push(details.message);
+    delete details.message;
   }
+
+  const message = message_parts.join(' ') || ((_a = err) === null || _a === void 0 ? void 0 : _a.message) || '(no message)';
+  if (err) details.err = err;else delete details.err; // because could be present but not be a correct err type
 
   return [message, details];
 }
@@ -12684,9 +12891,9 @@ function create({
 
   return logger;
 }
-// EXTERNAL MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/chalk/index.js
-var chalk = __webpack_require__(1);
-var chalk_default = /*#__PURE__*/__webpack_require__.n(chalk);
+// EXTERNAL MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/node_modules/chalk/source/index.js
+var source = __webpack_require__(1);
+var source_default = /*#__PURE__*/__webpack_require__.n(source);
 
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/1-foundation/practical-logger-node/dist/src.es2019/sinks/common.js
 
@@ -12704,36 +12911,36 @@ function to_aligned_ascii(level) {
 }
 
 const LEVEL_TO_ASCII = {
-  fatal: chalk_default.a.bgRed.white.bold(to_aligned_ascii(' ' + LOG_LEVEL_TO_HUMAN['fatal'])),
-  emerg: chalk_default.a.bgRed.white.bold(to_aligned_ascii(LOG_LEVEL_TO_HUMAN['emerg'])),
-  alert: chalk_default.a.bgRed.white.bold(to_aligned_ascii(' ' + LOG_LEVEL_TO_HUMAN['alert'])),
-  crit: chalk_default.a.bgRed.white.bold(to_aligned_ascii(LOG_LEVEL_TO_HUMAN['crit'])),
-  error: chalk_default.a.red.bold(to_aligned_ascii(LOG_LEVEL_TO_HUMAN['error'])),
-  warning: chalk_default.a.yellow.bold(to_aligned_ascii(LOG_LEVEL_TO_HUMAN['warning'])),
-  warn: chalk_default.a.yellow.bold(to_aligned_ascii(LOG_LEVEL_TO_HUMAN['warn'])),
-  notice: chalk_default.a.blue(to_aligned_ascii(LOG_LEVEL_TO_HUMAN['notice'])),
-  info: chalk_default.a.blue(to_aligned_ascii(LOG_LEVEL_TO_HUMAN['info'])),
+  fatal: source_default.a.bgRed.white.bold(to_aligned_ascii(' ' + LOG_LEVEL_TO_HUMAN['fatal'])),
+  emerg: source_default.a.bgRed.white.bold(to_aligned_ascii(LOG_LEVEL_TO_HUMAN['emerg'])),
+  alert: source_default.a.bgRed.white.bold(to_aligned_ascii(' ' + LOG_LEVEL_TO_HUMAN['alert'])),
+  crit: source_default.a.bgRed.white.bold(to_aligned_ascii(LOG_LEVEL_TO_HUMAN['crit'])),
+  error: source_default.a.red.bold(to_aligned_ascii(LOG_LEVEL_TO_HUMAN['error'])),
+  warning: source_default.a.yellow.bold(to_aligned_ascii(LOG_LEVEL_TO_HUMAN['warning'])),
+  warn: source_default.a.yellow.bold(to_aligned_ascii(LOG_LEVEL_TO_HUMAN['warn'])),
+  notice: source_default.a.blue(to_aligned_ascii(LOG_LEVEL_TO_HUMAN['notice'])),
+  info: source_default.a.blue(to_aligned_ascii(LOG_LEVEL_TO_HUMAN['info'])),
   verbose: to_aligned_ascii(LOG_LEVEL_TO_HUMAN['verbose']),
   log: to_aligned_ascii(LOG_LEVEL_TO_HUMAN['log']),
   debug: to_aligned_ascii(LOG_LEVEL_TO_HUMAN['debug']),
-  trace: chalk_default.a.dim(to_aligned_ascii(LOG_LEVEL_TO_HUMAN['trace'])),
-  silly: chalk_default.a.dim(to_aligned_ascii(LOG_LEVEL_TO_HUMAN['silly']))
+  trace: source_default.a.dim(to_aligned_ascii(LOG_LEVEL_TO_HUMAN['trace'])),
+  silly: source_default.a.dim(to_aligned_ascii(LOG_LEVEL_TO_HUMAN['silly']))
 };
 const LEVEL_TO_STYLIZE = {
-  fatal: s => chalk_default.a.red.bold(s),
-  emerg: s => chalk_default.a.red.bold(s),
-  alert: s => chalk_default.a.red.bold(s),
-  crit: s => chalk_default.a.red.bold(s),
-  error: s => chalk_default.a.red.bold(s),
-  warning: s => chalk_default.a.yellow(s),
-  warn: s => chalk_default.a.yellow(s),
-  notice: s => chalk_default.a.blue(s),
-  info: s => chalk_default.a.blue(s),
+  fatal: s => source_default.a.red.bold(s),
+  emerg: s => source_default.a.red.bold(s),
+  alert: s => source_default.a.red.bold(s),
+  crit: s => source_default.a.red.bold(s),
+  error: s => source_default.a.red.bold(s),
+  warning: s => source_default.a.yellow(s),
+  warn: s => source_default.a.yellow(s),
+  notice: s => source_default.a.blue(s),
+  info: s => source_default.a.blue(s),
   verbose: s => s,
   log: s => s,
   debug: s => s,
-  trace: s => chalk_default.a.dim(s),
-  silly: s => chalk_default.a.dim(s)
+  trace: s => source_default.a.dim(s),
+  silly: s => source_default.a.dim(s)
 };
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/1-foundation/practical-logger-node/dist/src.es2019/sinks/to-console.js
 /* eslint-disable no-console */
@@ -12752,15 +12959,15 @@ const COMMON_ERROR_FIELDS = [// standard fields
 function displayErrProp(errLike, prop) {
   if (prop === 'details') {
     const details = errLike.details;
-    console.error(chalk_default.a.red(chalk_default.a.dim(`🔥  ${prop}:`)));
+    console.error(source_default.a.red(source_default.a.dim(`🔥  ${prop}:`)));
     Object.entries(details).forEach(([key, value]) => {
-      console.error(chalk_default.a.red(chalk_default.a.dim(`    ${key}: "`) + value + chalk_default.a.dim('"')));
+      console.error(source_default.a.red(source_default.a.dim(`    ${key}: "`) + value + source_default.a.dim('"')));
     });
-  } else console.error(chalk_default.a.red(chalk_default.a.dim(`🔥  ${prop}: "`) + errLike[prop] + chalk_default.a.dim('"')));
+  } else console.error(source_default.a.red(source_default.a.dim(`🔥  ${prop}: "`) + errLike[prop] + source_default.a.dim('"')));
 }
 
 function displayError(errLike = {}) {
-  console.error(chalk_default.a.red(`🔥🔥🔥🔥🔥🔥🔥  ${chalk_default.a.bold(errLike.name || 'Error')} 🔥🔥🔥🔥🔥🔥🔥`));
+  console.error(source_default.a.red(`🔥🔥🔥🔥🔥🔥🔥  ${source_default.a.bold(errLike.name || 'Error')} 🔥🔥🔥🔥🔥🔥🔥`));
   const displayedProps = new Set();
   displayedProps.add('name');
 
@@ -12799,7 +13006,7 @@ function createSink(options = {}) {
     } = payload;
     const prettified_details = JSON.stringify(details);
     const line = '' // TODO evaluate if time display is needed
-    + (displayTime ? chalk_default.a.dim(String(time)) + ' ' : '') + LEVEL_TO_ASCII[level] + '› ' + LEVEL_TO_STYLIZE[level]('' + name + (name ? '›' : '') + (msg ? ' ' : '') + msg) + (prettified_details !== '{}' ? ' ' + prettified_details : '');
+    + (displayTime ? source_default.a.dim(String(time)) + ' ' : '') + LEVEL_TO_ASCII[level] + '› ' + LEVEL_TO_STYLIZE[level]('' + name + (name ? '›' : '') + (msg ? ' ' : '') + msg) + (prettified_details !== '{}' ? ' ' + prettified_details : '');
     console.log(line); // eslint-disable-line no-console
 
     if (err) displayError(err);
@@ -12807,7 +13014,6 @@ function createSink(options = {}) {
 }
 /* harmony default export */ var to_console = (createSink);
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/1-foundation/practical-logger-node/dist/src.es2019/index.js
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createLogger", function() { return createLogger; });
 
 
 const ORIGINAL_CONSOLE = console;
@@ -12815,27 +13021,226 @@ const ORIGINAL_CONSOLE = console;
 function createLogger(p = {}) {
   var _a;
 
+  const {
+    group,
+    groupCollapsed,
+    groupEnd
+  } = ORIGINAL_CONSOLE;
   return { ...create(p, ((_a = p.sinkOptions) === null || _a === void 0 ? void 0 : _a.sink) || to_console(p.sinkOptions)),
-
-    group(groupTitle) {
-      ORIGINAL_CONSOLE.group(groupTitle);
-    },
-
-    groupCollapsed(groupTitle) {
-      ORIGINAL_CONSOLE.groupCollapsed(groupTitle);
-    },
-
-    groupEnd() {
-      ORIGINAL_CONSOLE.groupEnd();
-    }
-
+    group,
+    groupCollapsed,
+    groupEnd
   };
 }
 
 
 
+// CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/2-advanced/universal-debug-api-node/dist/src.es2019/consts.js
+const ENV_ROOT = 'UDA';
+// CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/2-advanced/universal-debug-api-node/dist/src.es2019/v1/keys.js
+
+
+
+function normalizeKey(key) {
+  key = key.split('-').join('_');
+  key = key.split('.').join('_');
+  return key;
+}
+
+function getOverrideKeyForLogger(name) {
+  return `logger_${name || 'default'}_logLevel`.toUpperCase();
+}
+function getEnvKeyForOverride(key) {
+  // should we put v1 somewhere? no, most likely overkill.
+  return `${ENV_ROOT}_override__${normalizeKey(key)}`.toUpperCase();
+}
+// CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/2-advanced/universal-debug-api-node/dist/src.es2019/v1/index.js
+
+
+ ////////////////////////////////////
+
+const v1_LIB = ENV_ROOT; ////////////////////////////////////
+
+function v1_create() {
+  ////////////////////////////////////
+  const loggers = {}; // to avoid creating duplicates
+
+  const debugCommands = {}; // TODO check
+
+  const exposed = {};
+  const overrides = {}; // we'll expose them for clarity
+  ////////////////////////////////////
+  // TODO override?
+  // TODO allow off?
+
+  const _ownLogger = (() => {
+    return createLogger({
+      name: v1_LIB
+    });
+  })();
+
+  function _getOverrideRequestedSJson(ovKey) {
+    try {
+      const EnvKey = getEnvKeyForOverride(ovKey); //console.log(`EnvKey = "${EnvKey}"`)
+
+      const rawValue = process.env[EnvKey] || null; //console.log(`EnvKey "${EnvKey}" content = "${rawValue}"`)
+
+      return rawValue;
+    } catch (err) {
+      _ownLogger.warn(`🔴 error reading ENV for override "${ovKey}"!`, {
+        err
+      });
+
+      return null;
+    }
+  }
+
+  function _getOverride(key) {
+    if (!overrides[key]) {
+      // we only read the env once for speed reason
+      overrides[key] = {
+        // so far:
+        isOn: false,
+        value: undefined
+      };
+
+      const rawValue = _getOverrideRequestedSJson(key);
+
+      if (rawValue) {
+        overrides[key].isOn = true; // for the node version where escaping is hard, as a convenience, we auto-type common cases
+
+        const value = (() => {
+          // we allow the non-JSON "undefined"
+          if (rawValue === 'undefined') return undefined;
+          if (String(Number(rawValue)) === rawValue) return Number(rawValue);
+
+          try {
+            return JSON.parse(rawValue);
+          } catch {
+            return rawValue; // as a string
+          }
+        })();
+
+        overrides[key].value = value;
+
+        _ownLogger.log(` 🔵 overriden "${key}"`, {
+          value
+        });
+      }
+    }
+
+    return overrides[key];
+  } ////////////////////////////////////
+
+
+  const api = {
+    getLogger,
+    exposeInternal,
+    overrideHook,
+    addDebugCommand,
+    _: {
+      exposed,
+      overrides
+    }
+  }; ////////////////////////////////////
+
+  function overrideHook(key, defaultValue) {
+    try {
+      const status = _getOverride(key);
+
+      if (status.isOn) return status.value;
+    } catch (err) {
+      // should never happen because _getOverride() already catch
+      // TODO check!
+      _ownLogger.warn('overrideHook(): error retrieving override!', {
+        key,
+        err
+      });
+    }
+
+    return defaultValue;
+  }
+
+  function getLogger(p = {}) {
+    const name = p.name || DEFAULT_LOGGER_KEY; // we need a name immediately
+
+    if (!loggers[name]) {
+      try {
+        const ovKey = getOverrideKeyForLogger(name);
+
+        if (!p.forcedLevel && _getOverrideRequestedSJson(ovKey)) {
+          p = { ...p,
+            forcedLevel: overrideHook(ovKey, p.suggestedLevel || DEFAULT_LOG_LEVEL)
+          };
+        }
+      } catch (err) {
+        // this warning should appear only once on creation ✔
+        _ownLogger.warn('getLogger(): error overriding the level!', {
+          name,
+          err
+        });
+      }
+
+      loggers[name] = createLogger(p);
+    }
+
+    return loggers[name];
+  }
+
+  function exposeInternal(path, value) {
+    try {
+      const pathParts = path.split('.'); // TODO switch to / ?
+
+      const lastIndex = pathParts.length - 1;
+      let root = exposed;
+      pathParts.forEach((p, index) => {
+        root[p] = root[p] || (index === lastIndex ? value : {});
+        root = root[p];
+      });
+    } catch (err) {
+      _ownLogger.warn(`[${v1_LIB}] exposeInternal(): error exposing!`, {
+        path,
+        err
+      });
+    }
+  }
+
+  function addDebugCommand(commandName, callback) {
+    // TODO
+    // TODO try catch
+    debugCommands[commandName] = callback;
+  }
+
+  return api;
+}
+// CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/2-advanced/universal-debug-api-node/dist/src.es2019/index.js
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getLogger", function() { return src_es2019_getLogger; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "exposeInternal", function() { return src_es2019_exposeInternal; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "overrideHook", function() { return src_es2019_overrideHook; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "addDebugCommand", function() { return src_es2019_addDebugCommand; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "globalThis", function() { return globalThis; });
+/* concated harmony reexport createV1 */__webpack_require__.d(__webpack_exports__, "createV1", function() { return v1_create; });
+
+ // ensure the root is present
+
+const globalThis = Object(src_es2019["a" /* getGlobalThis */])();
+globalThis._debug = globalThis._debug || {}; // install globally if no other implementation already present
+// TODO do a minor version check?
+// TODO always override since final?
+
+globalThis._debug.v1 = globalThis._debug.v1 || v1_create(); // expose the current implementation
+
+const instance = globalThis._debug.v1;
+const {
+  getLogger: src_es2019_getLogger,
+  exposeInternal: src_es2019_exposeInternal,
+  overrideHook: src_es2019_overrideHook,
+  addDebugCommand: src_es2019_addDebugCommand
+} = instance;
+
+
 /***/ }),
-/* 239 */
+/* 243 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -12908,7 +13313,8 @@ var logger = global.__SENTRY__.logger || (global.__SENTRY__.logger = new Logger(
 //# sourceMappingURL=logger.js.map
 
 /***/ }),
-/* 240 */
+/* 244 */,
+/* 245 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -12921,8 +13327,8 @@ var logger = global.__SENTRY__.logger || (global.__SENTRY__.logger = new Logger(
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return setHubOnCarrier; });
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(0);
 /* harmony import */ var _sentry_utils__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(6);
-/* harmony import */ var _sentry_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(239);
-/* harmony import */ var _scope__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(43);
+/* harmony import */ var _sentry_utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(243);
+/* harmony import */ var _scope__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(44);
 
 
 
@@ -13049,7 +13455,7 @@ var Hub = /** @class */ (function () {
      * @inheritDoc
      */
     Hub.prototype.captureException = function (exception, hint) {
-        var eventId = (this._lastEventId = Object(_sentry_utils__WEBPACK_IMPORTED_MODULE_1__[/* uuid4 */ "i"])());
+        var eventId = (this._lastEventId = Object(_sentry_utils__WEBPACK_IMPORTED_MODULE_1__[/* uuid4 */ "j"])());
         var finalHint = hint;
         // If there's no explicit hint provided, mimick the same thing that would happen
         // in the minimal itself to create a consistent behavior.
@@ -13075,7 +13481,7 @@ var Hub = /** @class */ (function () {
      * @inheritDoc
      */
     Hub.prototype.captureMessage = function (message, level, hint) {
-        var eventId = (this._lastEventId = Object(_sentry_utils__WEBPACK_IMPORTED_MODULE_1__[/* uuid4 */ "i"])());
+        var eventId = (this._lastEventId = Object(_sentry_utils__WEBPACK_IMPORTED_MODULE_1__[/* uuid4 */ "j"])());
         var finalHint = hint;
         // If there's no explicit hint provided, mimick the same thing that would happen
         // in the minimal itself to create a consistent behavior.
@@ -13101,7 +13507,7 @@ var Hub = /** @class */ (function () {
      * @inheritDoc
      */
     Hub.prototype.captureEvent = function (event, hint) {
-        var eventId = (this._lastEventId = Object(_sentry_utils__WEBPACK_IMPORTED_MODULE_1__[/* uuid4 */ "i"])());
+        var eventId = (this._lastEventId = Object(_sentry_utils__WEBPACK_IMPORTED_MODULE_1__[/* uuid4 */ "j"])());
         this._invokeClient('captureEvent', event, tslib__WEBPACK_IMPORTED_MODULE_0__["__assign"]({}, hint, { event_id: eventId }));
         return eventId;
     };
@@ -13354,7 +13760,7 @@ function setHubOnCarrier(carrier, hub) {
     return true;
 }
 //# sourceMappingURL=hub.js.map
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(120)(module)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(123)(module)))
 
 /***/ })
 /******/ ])));
