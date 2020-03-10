@@ -81,71 +81,16 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 239);
+/******/ 	return __webpack_require__(__webpack_require__.s = 206);
 /******/ })
 /************************************************************************/
 /******/ ({
 
-/***/ 10:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-function Enum() {
-    var values = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        values[_i] = arguments[_i];
-    }
-    if (typeof values[0] === "string") {
-        var result = {};
-        for (var _a = 0, values_1 = values; _a < values_1.length; _a++) {
-            var value = values_1[_a];
-            result[value] = value;
-        }
-        return result;
-    }
-    else {
-        return values[0];
-    }
-}
-exports.Enum = Enum;
-(function (Enum) {
-    function ofKeys(e) {
-        var result = {};
-        for (var _i = 0, _a = Object.keys(e); _i < _a.length; _i++) {
-            var key = _a[_i];
-            result[key] = key;
-        }
-        return result;
-    }
-    Enum.ofKeys = ofKeys;
-    function keys(e) {
-        return Object.keys(e);
-    }
-    Enum.keys = keys;
-    function values(e) {
-        var result = [];
-        for (var _i = 0, _a = Object.keys(e); _i < _a.length; _i++) {
-            var key = _a[_i];
-            result.push(e[key]);
-        }
-        return result;
-    }
-    Enum.values = values;
-    function isType(e, value) {
-        return values(e).indexOf(value) !== -1;
-    }
-    Enum.isType = isType;
-})(Enum = exports.Enum || (exports.Enum = {}));
-//# sourceMappingURL=index.js.map
-
-/***/ }),
-
-/***/ 14:
+/***/ 13:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+/* unused harmony export default */
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return getGlobalThis; });
 /* global globalThis, self, window, global */
 const lastResort = {};
@@ -163,16 +108,17 @@ function getGlobalThis() {
   return lastResort; // should never happen
 }
 
+
 /***/ }),
 
-/***/ 17:
+/***/ 15:
 /***/ (function(module, exports) {
 
 module.exports = require("http");
 
 /***/ }),
 
-/***/ 21:
+/***/ 18:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -182,9 +128,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-const typescript_string_enums_1 = __webpack_require__(10);
+const typescript_string_enums_1 = __webpack_require__(8);
 
-const functions_interface_1 = __webpack_require__(46);
+const functions_interface_1 = __webpack_require__(48);
 
 exports.CHANNEL = (() => {
   if (typescript_string_enums_1.Enum.isType(functions_interface_1.ReleaseChannel, process.env.CHANNEL)) return process.env.CHANNEL;
@@ -194,72 +140,72 @@ exports.CHANNEL = (() => {
 
 /***/ }),
 
-/***/ 22:
+/***/ 20:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 
+// EXPORTS
+__webpack_require__.d(__webpack_exports__, "a", function() { return /* binding */ getLogger; });
+__webpack_require__.d(__webpack_exports__, "b", function() { return /* binding */ overrideHook; });
+
+// UNUSED EXPORTS: exposeInternal, addDebugCommand, globalThis, createV1
+
 // EXTERNAL MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/1-stdlib/globalthis-ponyfill/dist/src.es2019/index.js
-var src_es2019 = __webpack_require__(14);
+var src_es2019 = __webpack_require__(13);
 
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/2-foundation/practical-logger-minimal-noop/dist/src.es2019/index.js
-const src_es2019_NO_OP = () => {};
+function src_es2019_NOP() {}
 
-const src_es2019_NO_OP_LOGGER = {
-  setLevel: src_es2019_NO_OP,
+const src_es2019_NOP_LOGGER = {
+  setLevel: src_es2019_NOP,
   getLevel: () => 'silly',
-  addCommonDetails: src_es2019_NO_OP,
-  fatal: src_es2019_NO_OP,
-  emerg: src_es2019_NO_OP,
-  alert: src_es2019_NO_OP,
-  crit: src_es2019_NO_OP,
-  error: src_es2019_NO_OP,
-  warning: src_es2019_NO_OP,
-  warn: src_es2019_NO_OP,
-  notice: src_es2019_NO_OP,
-  info: src_es2019_NO_OP,
-  verbose: src_es2019_NO_OP,
-  log: src_es2019_NO_OP,
-  debug: src_es2019_NO_OP,
-  trace: src_es2019_NO_OP,
-  silly: src_es2019_NO_OP,
-  group: src_es2019_NO_OP,
-  groupCollapsed: src_es2019_NO_OP,
-  groupEnd: src_es2019_NO_OP
+  addCommonDetails: src_es2019_NOP,
+  fatal: src_es2019_NOP,
+  emerg: src_es2019_NOP,
+  alert: src_es2019_NOP,
+  crit: src_es2019_NOP,
+  error: src_es2019_NOP,
+  warning: src_es2019_NOP,
+  warn: src_es2019_NOP,
+  notice: src_es2019_NOP,
+  info: src_es2019_NOP,
+  verbose: src_es2019_NOP,
+  log: src_es2019_NOP,
+  debug: src_es2019_NOP,
+  trace: src_es2019_NOP,
+  silly: src_es2019_NOP,
+  group: src_es2019_NOP,
+  groupCollapsed: src_es2019_NOP,
+  groupEnd: src_es2019_NOP
 };
 
 function createLogger(_) {
-  return src_es2019_NO_OP_LOGGER;
+  return src_es2019_NOP_LOGGER;
 }
 
 
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/3-advanced/universal-debug-api-placeholder/dist/src.es2019/v1.js
 
 function create() {
-  const NO_OP = () => {};
+  function NOP() {}
 
-  const NO_OP_LOGGER = createLogger();
+  const NOP_LOGGER = createLogger();
   return {
-    getLogger: () => NO_OP_LOGGER,
-    exposeInternal: NO_OP,
+    getLogger: () => NOP_LOGGER,
     overrideHook: (k, v) => v,
-    addDebugCommand: NO_OP
+    exposeInternal: NOP,
+    addDebugCommand: NOP
   };
 }
 // CONCATENATED MODULE: /Users/yjutard/work/src/off/offirmo-monorepo/3-advanced/universal-debug-api-placeholder/dist/src.es2019/index.js
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return getLogger; });
-/* unused harmony export exposeInternal */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return overrideHook; });
-/* unused harmony export addDebugCommand */
-/* unused harmony export globalThis */
-/* unused concated harmony import createV1 */
 
- // ensure the root is present
 
-const globalThis = Object(src_es2019["a" /* getGlobalThis */])();
+const globalThis = Object(src_es2019["a" /* getGlobalThis */])(); // ensure the root is present
+
 globalThis._debug = globalThis._debug || {}; // install globally if no other implementation already present
 
-globalThis._debug.v1 = globalThis._debug.v1 || create(); // expose the current implementation
+globalThis._debug.v1 = globalThis._debug.v1 || create(); // expose the installed implementation
 
 const instance = globalThis._debug.v1;
 const {
@@ -272,7 +218,7 @@ const {
 
 /***/ }),
 
-/***/ 239:
+/***/ 206:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -282,7 +228,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-const netlify_1 = __webpack_require__(98);
+const netlify_1 = __webpack_require__(95);
 
 exports.handler = async (event, badly_typed_context) => {
   const context = badly_typed_context;
@@ -338,7 +284,7 @@ function filter_out_secrets(env) {
 
 /***/ }),
 
-/***/ 27:
+/***/ 25:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -348,9 +294,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-const http_1 = __webpack_require__(17);
+const http_1 = __webpack_require__(15);
 
-const common_error_fields_1 = __webpack_require__(43); // TODO extern
+const common_error_fields_1 = __webpack_require__(44); // TODO extern
 
 
 function create_error(message, details = {}) {
@@ -386,7 +332,7 @@ exports.create_error = create_error;
 
 /***/ }),
 
-/***/ 37:
+/***/ 36:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -410,12 +356,12 @@ const COMMON_ERROR_FIELDS = DEFAULT_INSTANCE;
 
 /***/ }),
 
-/***/ 43:
+/***/ 44:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _field_set__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(37);
+/* harmony import */ var _field_set__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(36);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "COMMON_ERROR_FIELDS", function() { return _field_set__WEBPACK_IMPORTED_MODULE_0__["a"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "create", function() { return _field_set__WEBPACK_IMPORTED_MODULE_0__["b"]; });
@@ -424,7 +370,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ 46:
+/***/ 48:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -433,9 +379,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Endpoint", function() { return Endpoint; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "get_allowed_origin", function() { return get_allowed_origin; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "get_base_url", function() { return get_base_url; });
-/* harmony import */ var typescript_string_enums__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(10);
+/* harmony import */ var typescript_string_enums__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(8);
 /* harmony import */ var typescript_string_enums__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(typescript_string_enums__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _offirmo_universal_debug_api_placeholder__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(22);
+/* harmony import */ var _offirmo_universal_debug_api_placeholder__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(20);
 
  // tslint:disable-next-line: variable-name
 
@@ -480,7 +426,63 @@ function get_base_url(channel) {
 
 /***/ }),
 
-/***/ 98:
+/***/ 8:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+function Enum() {
+    var values = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        values[_i] = arguments[_i];
+    }
+    if (typeof values[0] === "string") {
+        var result = {};
+        for (var _a = 0, values_1 = values; _a < values_1.length; _a++) {
+            var value = values_1[_a];
+            result[value] = value;
+        }
+        return result;
+    }
+    else {
+        return values[0];
+    }
+}
+exports.Enum = Enum;
+(function (Enum) {
+    function ofKeys(e) {
+        var result = {};
+        for (var _i = 0, _a = Object.keys(e); _i < _a.length; _i++) {
+            var key = _a[_i];
+            result[key] = key;
+        }
+        return result;
+    }
+    Enum.ofKeys = ofKeys;
+    function keys(e) {
+        return Object.keys(e);
+    }
+    Enum.keys = keys;
+    function values(e) {
+        var result = [];
+        for (var _i = 0, _a = Object.keys(e); _i < _a.length; _i++) {
+            var key = _a[_i];
+            result.push(e[key]);
+        }
+        return result;
+    }
+    Enum.values = values;
+    function isType(e, value) {
+        return values(e).indexOf(value) !== -1;
+    }
+    Enum.isType = isType;
+})(Enum = exports.Enum || (exports.Enum = {}));
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ 95:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -490,9 +492,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-const channel_1 = __webpack_require__(21);
+const channel_1 = __webpack_require__(18);
 
-const utils_1 = __webpack_require__(27);
+const utils_1 = __webpack_require__(25);
 
 function ensure_netlify_logged_in(context) {
   if (!context.clientContext) throw utils_1.create_error('No/bad/outdated token [1]! (not logged in?)', {
