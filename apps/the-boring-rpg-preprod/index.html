@@ -1,21 +1,23 @@
-<!DOCTYPE html><html lang="en" xml:lang="en" class="o⋄top-container"><head><meta charset="utf-8"><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta http-equiv="Content-Language" content="en"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"><meta name="description" content="(Browser game) The simplest RPG ever!"><meta name="keywords" content="game, incremental, fantasy, rpg"><meta name="author" content="Offirmo"><title>Loading…</title><link rel="icon" href="favicon.de951dce.svg"><link rel="apple-touch-icon" href="apple-touch-icon-180x180.1584907c.png"><link rel="mask-icon" href="safari-mask-icon.f95ea502.svg" color="#543d46"><link rel="manifest" href="site.webmanifest"><meta name="theme-color" content="#543d46"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="format-detection" content="telephone=no"><meta name="google-site-verification" content="wf2jOlvKH7eHC1UKByJfrzR55dvhIQI74uzskmYg5MY"><link rel="preconnect" href="https://www.googletagmanager.com"><link rel="preconnect" href="https://identity.netlify.com"><link rel="preconnect" href="https://tlk.io"><style>:root{--bg:#000;--fg:#fafafa;--font:-apple-system,BlinkMacSystemFont,"lucida grande",roboto,noto,ubuntu,sans-serif}body,html{width:100%;margin:0;padding:0;background-color:var(--bg);color:var(--fg);font-family:var(--font)}iframe{position:absolute;width:100%;border:0;background-color:#fff}.o⋄top-container{display:flex;flex-direction:column;height:100%}.blinking{animation:blinkingText 1.2s ease-in-out infinite}@keyframes blinkingText{0%{color:inherit}33%{color:transparent}}.progressive{display:none}#loader{position:absolute;width:100%;background-color:var(--bg)}#loader>div{margin:auto;text-align:center;font-size:x-large}</style></head><body class="o⋄top-container o⋄body⁚full-page"> <noscript>You need to enable JavaScript to run this app.</noscript>  <iframe class="o⋄top-container progressive" importance="high" loading="eager" scrolling="no"> <p>Error. Your app should be here.</p> </iframe>  <div id="loader" class="o⋄top-container"> <div> <p id="legend"></p> <p class="blinking">Loading…</p> <label class="progressive"> <progress></progress> 0% </label> </div> </div> </body><script type="module">
+<!DOCTYPE html><html lang="en" xml:lang="en" class="o⋄top-container"><head><meta charset="utf-8"><meta http-equiv="Content-Type" content="text/html; charset=utf-8"><meta http-equiv="Content-Language" content="en"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"><meta name="description" content="(Browser game) The simplest RPG ever!"><meta name="keywords" content="game, incremental, fantasy, rpg"><meta name="author" content="Offirmo"><title>Loading…</title><link rel="icon" href="favicon.de951dce.svg"><link rel="apple-touch-icon" href="apple-touch-icon-180x180.1584907c.png"><link rel="mask-icon" href="safari-mask-icon.f95ea502.svg" color="#543d46"><link rel="manifest" href="site.webmanifest"><meta name="theme-color" content="#543d46"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black"><meta name="format-detection" content="telephone=no"><meta name="google-site-verification" content="wf2jOlvKH7eHC1UKByJfrzR55dvhIQI74uzskmYg5MY"><link rel="preconnect" href="https://www.googletagmanager.com"><link rel="preconnect" href="https://identity.netlify.com"><link rel="preconnect" href="https://tlk.io"><style>:root{--bg:#000;--fg:#fafafa;--font:-apple-system,BlinkMacSystemFont,"lucida grande",roboto,noto,ubuntu,sans-serif}body,html{width:100%;margin:0;padding:0;background-color:var(--bg);color:var(--fg);font-family:var(--font)}iframe{position:absolute;width:100%;border:0;background-color:#fff}.o⋄top-container{display:flex;flex-direction:column;height:100%}.blinking{animation:blinkingText 1.2s ease-in-out infinite}@keyframes blinkingText{0%{color:inherit}33%{color:transparent}}.progressive{display:none}#loader{position:absolute;width:100%;background-color:var(--bg)}#loader>div{margin:auto;text-align:center;font-size:x-large}</style></head><body class="o⋄top-container o⋄body⁚full-page"> <noscript>You need to enable JavaScript to run this app.</noscript>  <iframe class="o⋄top-container progressive" importance="high" loading="eager" scrolling="no"> <p>Error. Your app should be here.</p> <p>Check your add blocker?</p> </iframe>  <div id="loader" class="o⋄top-container"> <div> <p id="legend"></p> <p class="blinking">Loading…</p> <label class="progressive"> <progress></progress> 0% </label> </div> </div> </body><script type="module">
 
+		const PROP = 'oᐧloader'
 		const DEFAULT_RSRC_ID = 'overall'
-		const LOGGER_NAME = 'loading-iframe'
+		const LIB = 'iframe-loading'
 		const logger = (() => {
 			try {
-				return window._debug.v1.getLogger({name: LOGGER_NAME})
+				return window._debug.v1.getLogger({name: LIB})
 			} catch {}
-			if (!!window.localStorage.getItem(`🛠UDA.override.logger.${LOGGER_NAME}.logLevel`))
+			if (!!window.localStorage.getItem(`🛠UDA.override.logger.${LIB}.logLevel`))
 				return console
 
 			return {
 				log() {},
+				info() {},
 				warn() {},
 				error() {},
 			}
 		})()
-		logger.log('[IL] starting…', { user_settings })
+		logger.log('[IL] starting…', { user_settings, location })
 
 		/////////////////////
 
@@ -25,10 +27,17 @@
 				bg_color: 'black',
 				fg_color: 'hsl(0, 0%, 98%)',
 				// TODO font, bg picture etc.
-				app_url: get_current_path() + '/index-2.html' + window.location.search,
+				app_queryparams: [
+					user_settings.app_queryparams,
+					user_settings.app_url && new URLSearchParams(user_settings.app_url.split('?')[1]).toString(),
+					new URLSearchParams(location.search).toString(),
+				].filter(s => !!s).join('&'),
 				legend: undefined,
 				expected_rsrc_count: 1,
 				...user_settings,
+				app_url: user_settings.app_url // normalize
+					? user_settings.app_url.split('?')[0]
+					: './index-2.html',
 			},
 
 			is_rsrc_loaded: {
@@ -37,7 +46,7 @@
 
 			error: null,
 		}
-		const LS_KEY_CACHED_CONFIG = `XOF.loading-iframe.config_cache.url(${state.settings.app_url})`
+		const LS_KEY_CACHED_CONFIG = `XOF.${LIB}.config_cache.url(${state.settings.app_url})`
 
 		/////////////////////
 
@@ -95,11 +104,12 @@
 
 		/////////////////////
 
-		if (window.oᐧloader) {
+		if (window[PROP]) {
 			logger.error('[IL] Error! iframe-loading recursion!')
 			// TODO immediately hide our own loader
 		} else {
-			window.oᐧloader = {
+			// TODO useful? always postmessage?
+			window[PROP] = {
 				configure({legend, expected_rsrc_count, bg_color, fg_color, ...others} = {}) {
 					if (Object.keys(others).length > 0) logger.error(`[IL] configure_loader() unknown params:`, others)
 
@@ -155,16 +165,20 @@
 				//sub_frame: sub_frame_window,
 			})
 
-			// TODO improve error handling
 			if (load_infos.is_loaded || state.error) {
-				window.document.title = sub_frame_window.document.title
-
+				try { window.document.title = sub_frame_window.document.title } catch {}
 				if (elt_iframe.style.display !== 'block') {
 					// transition
-					//logger.log('[IL] !!! LOADED !!!')
+					logger.log('[IL] !!! LOADED !!!')
 					elt_iframe.style.display = 'block'
 					elt_progress_area.display = 'none'
 					elt_loader.style.pointerEvents = 'none'
+					function hide_loader() {
+						elt_loader.style.display = 'none'
+						// bg back to black to avoid bleeding it on notches on mobile devices (seen on cordova iOs)
+						// TODO revisit that, bleeding still looks better than square on notched
+						//document.documentElement.style.setProperty('--bg', 'black')
+					}
 					try {
 						// https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API/Using_the_Web_Animations_API
 						const animation = elt_loader.animate(
@@ -177,16 +191,14 @@
 									fill: 'forwards',
 								}
 							)
-						if (animation.finished)
-							animation.finished.then(() => {
-								// for easier inspection. Not really needed.
-								elt_loader.style.display = 'none'
-							})
+						// for easier inspection. Not really needed.
+						setTimeout(hide_loader, 700)
 					} catch (err) {
-						logger.warn('[IL] Web Animation API error:', err)
+						logger.warn('[IL] [optional feature] Web Animation API error:', err)
+						hide_loader()
 					}
 					/*if (state.error) {
-						// TODO remove this ugly confirm which is interrupting at OS level
+						// TODO improve error handling
 						if (!confirm('Load timeout. Does it look OK? (If not, I’ll try reloading.)'))
 							window.location.reload()
 					}*/
@@ -195,11 +207,17 @@
 			}
 
 			if (!elt_iframe.src) {
-				// TODO pass query params
-				elt_iframe.src = state.settings.app_url
+				logger.log('[IL] 1st render!')
 
+				const searchParams = new URLSearchParams(state.settings.app_queryparams)
+				searchParams.set(PROP, true)
+				searchParams.sort()
+
+				elt_iframe.src = state.settings.app_url + '?' + searchParams.toString()
+
+				// just logging, not reliable since the iframe can rewrite them
 				elt_iframe.onload = (args) => logger.log(`[IL] iframe loaded`, { args })
-				elt_iframe.onerror = (args) => logger.warn(`[IL] iframe something wrong happened`, { args })
+				elt_iframe.onerror = (args) => logger.warn(`[IL] iframe something wrong happened`, { args }) // TODO error on this one?
 			}
 
 			if (state.settings.legend) {
@@ -215,14 +233,25 @@
 				state.settings.bg_color
 			)
 
-			window.document.title = sub_frame_window.document.title || state.settings.legend || ''
+			let sub_frame_title = null
+			try { sub_frame_title = sub_frame_window.document.title } catch {}
+			window.document.title = sub_frame_title || state.settings.legend || ''
+
+
+			// TODO really needed?
+			// https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-splashscreen/index.html#preferences
+			if ('splashscreen' in navigator) {
+				// take over the loading feature
+				logger.log('[IL] hiding cordova loader')
+				navigator.splashscreen.hide()
+			}
 		}
 
 		try {
 			const cached_config = JSON.parse(localStorage.getItem(LS_KEY_CACHED_CONFIG))
 			if (cached_config) {
 				logger.log('[IL] restoring cached config', { cached_config })
-				window.oᐧloader.configure(cached_config)
+				window[PROP].configure(cached_config)
 			}
 		} catch (err) {
 			logger.warn(err)
@@ -240,13 +269,23 @@
 
 			setTimeout(() => {
 				if (!get_load_infos(state).is_loaded) {
-					state = on_error(state, new Error('Timeout waiting for iframe load!'))
+					state = on_error(state, new Error('Timeout waiting for sub-frame load!'))
 					render(state)
 				}
 			}, additional_wait_time_s * 1000)
 		}, 10 * 1000)
 
 		/////////////////////
-	</script><script>function get_current_path(){return window.location.pathname.endsWith("/index.html")?window.location.pathname.slice(0,-11):window.location.pathname.endsWith("/")?window.location.pathname.slice(0,-1):window.location.pathname}window.ga=window.parent.ga||window.ga||function(){(ga.q=ga.q||[]).push(arguments)},ga.l=+new Date,ga("create","UA-103238291-2","auto"),ga("send","pageview"),user_settings={},"https://www.online-adventur.es/apps/the-boring-rpg"===document.URL&&(console.warn("strange non-/ case, redirecting..."),window.location=document.URL+"/"),window.addEventListener("message",({data:data,origin:origin,source:source})=>{console.log("⬆️ received",{data:data,origin:origin,source:source}),(data.xoff||{}).code&&eval(data.xoff.code)},!1);</script><script type="module">
+
+		// PM listener for cross origin sub-frames
+		window.addEventListener('message', ({data, origin, source}) => {
+			if (!data[PROP]) return
+			logger.log('[IL] 📥 PM received', data[PROP])
+			const { method, args } = data[PROP]
+			window[PROP][method](...args)
+		}, false)
+
+		/////////////////////
+	</script><script>console.log("I1",{location:location});try{window.ga=window.parent.ga}catch{}if(window.ga=window.ga||function(){console.log("ga1",arguments),(ga.q=ga.q||[]).push(arguments)},user_settings={},"https://www.online-adventur.es/apps/the-boring-rpg"===document.URL&&(console.warn("strange non-/ case, redirecting..."),window.location=document.URL+"/"),location.pathname.endsWith("-cordova.html")){user_settings.app_queryparams="container=cordova";const o=document.createElement("script");o.type="text/javascript",o.src="cordova.js",document.body.appendChild(o),document.addEventListener("deviceready",()=>{console.info("[I1+] cordova deviceready")},!1)}window.addEventListener("message",({data:data,origin:origin,source:source})=>{console.log("[IL+/xoff] 📥 PM received",{data:data,origin:origin,source:source}),(data.xoff||{}).code&&eval(data.xoff.code)},!1);</script><script type="module">
 		// TODO progressive enhancements
 	</script></html>
