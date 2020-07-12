@@ -81,7 +81,7 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 519);
+/******/ 	return __webpack_require__(__webpack_require__.s = 517);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -199,7 +199,7 @@ module.exports = function(originalModule) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-const events_1 = __webpack_require__(13);
+const events_1 = __webpack_require__(14);
 const promisify_1 = __importDefault(__webpack_require__(110));
 function isAgentBase(v) {
     return Boolean(v) && typeof v.addRequest === 'function';
@@ -1102,6 +1102,13 @@ function isMatchingPattern(value, pattern) {
 /***/ }),
 
 /***/ 13:
+/***/ (function(module, exports) {
+
+module.exports = require("url");
+
+/***/ }),
+
+/***/ 14:
 /***/ (function(module, exports) {
 
 module.exports = require("events");
@@ -4885,7 +4892,7 @@ function basename(path, ext) {
 }
 //# sourceMappingURL=path.js.map
 // EXTERNAL MODULE: external "fs"
-var external_fs_ = __webpack_require__(5);
+var external_fs_ = __webpack_require__(6);
 
 // EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/lru_map/lru.js
 var lru = __webpack_require__(69);
@@ -5440,11 +5447,11 @@ var promisebuffer_PromiseBuffer = /** @class */ (function () {
 
 //# sourceMappingURL=promisebuffer.js.map
 // EXTERNAL MODULE: external "url"
-var external_url_ = __webpack_require__(15);
+var external_url_ = __webpack_require__(13);
 
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/node/esm/version.js
 var SDK_NAME = 'sentry.javascript.node';
-var SDK_VERSION = '5.18.1';
+var SDK_VERSION = '5.19.1';
 //# sourceMappingURL=version.js.map
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/node/esm/transports/base.js
 
@@ -6745,7 +6752,7 @@ function forget(promise) {
     });
 }
 //# sourceMappingURL=async.js.map
-// EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/cookie/index.js
+// EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/node/node_modules/cookie/index.js
 var cookie = __webpack_require__(70);
 
 // EXTERNAL MODULE: external "os"
@@ -6774,6 +6781,7 @@ function tracingHandler() {
         var reqUrl = req.url;
         var traceId;
         var parentSpanId;
+        var sampled;
         // If there is a trace header set, we extract the data from it and set the span on the scope
         // to be the origin an created transaction set the parent_span_id / trace_id
         if (req.headers && Object(is["h" /* isString */])(req.headers['sentry-trace'])) {
@@ -6781,12 +6789,14 @@ function tracingHandler() {
             if (span) {
                 traceId = span.traceId;
                 parentSpanId = span.parentSpanId;
+                sampled = span.sampled;
             }
         }
         var transaction = startTransaction({
             name: reqMethod + " " + reqUrl,
             op: 'http.server',
             parentSpanId: parentSpanId,
+            sampled: sampled,
             traceId: traceId,
         });
         // We put the transaction on the scope so users can attach children to it
@@ -6808,9 +6818,16 @@ function extractTransaction(req, type) {
     try {
         // Express.js shape
         var request = req;
+        var routePath = void 0;
+        try {
+            routePath = external_url_["parse"](request.originalUrl || request.url).pathname;
+        }
+        catch (_oO) {
+            routePath = request.route.path;
+        }
         switch (type) {
             case 'path': {
-                return request.route.path;
+                return routePath;
             }
             case 'handler': {
                 return request.route.stack[0].name;
@@ -6818,8 +6835,7 @@ function extractTransaction(req, type) {
             case 'methodPath':
             default: {
                 var method = request.method.toUpperCase();
-                var path = request.route.path;
-                return method + "|" + path;
+                return method + "|" + routePath;
             }
         }
     }
@@ -7581,13 +7597,6 @@ if (esm_carrier.__SENTRY__) {
 
 /***/ }),
 
-/***/ 15:
-/***/ (function(module, exports) {
-
-module.exports = require("url");
-
-/***/ }),
-
 /***/ 16:
 /***/ (function(module, exports) {
 
@@ -7904,7 +7913,7 @@ function createLogger(_) {
 }
 
 
-// CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/3-advanced/universal-debug-api-placeholder/dist/src.es2019/v1.js
+// CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/3-advanced--multi/universal-debug-api-placeholder/dist/src.es2019/v1.js
 
 function create() {
   function NOP() {}
@@ -7934,13 +7943,6 @@ module.exports = require("assert");
 
 /***/ }),
 
-/***/ 5:
-/***/ (function(module, exports) {
-
-module.exports = require("fs");
-
-/***/ }),
-
 /***/ 51:
 /***/ (function(module, exports) {
 
@@ -7948,7 +7950,7 @@ module.exports = require("tty");
 
 /***/ }),
 
-/***/ 519:
+/***/ 517:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8122,6 +8124,13 @@ module.exports = {
 
 /***/ }),
 
+/***/ 6:
+/***/ (function(module, exports) {
+
+module.exports = require("fs");
+
+/***/ }),
+
 /***/ 67:
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -8131,7 +8140,7 @@ module.exports = {
 
 var net = __webpack_require__(88);
 var tls = __webpack_require__(89);
-var url = __webpack_require__(15);
+var url = __webpack_require__(13);
 var assert = __webpack_require__(42);
 var Agent = __webpack_require__(109);
 var inherits = __webpack_require__(4).inherits;
