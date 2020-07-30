@@ -81,17 +81,10 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 526);
+/******/ 	return __webpack_require__(__webpack_require__.s = 525);
 /******/ })
 /************************************************************************/
 /******/ ({
-
-/***/ 10:
-/***/ (function(module, exports) {
-
-module.exports = require("events");
-
-/***/ }),
 
 /***/ 12:
 /***/ (function(module, exports) {
@@ -137,7 +130,7 @@ exports.on_user_recognized = exports.on_error = void 0; // https://docs.sentry.i
 
 const Sentry = __webpack_require__(171);
 
-const channel_1 = __webpack_require__(29);
+const channel_1 = __webpack_require__(28);
 
 Sentry.init({
   // http://getsentry.github.io/sentry-javascript/interfaces/node.nodeoptions.html
@@ -700,7 +693,7 @@ exports.colors = [6, 2, 3, 4, 5, 1];
 try {
 	// Optional dependency (as in, doesn't need to be installed, NOT like optionalDependencies in package.json)
 	// eslint-disable-next-line import/no-extraneous-dependencies
-	const supportsColor = __webpack_require__(50);
+	const supportsColor = __webpack_require__(49);
 
 	if (supportsColor && (supportsColor.stderr || supportsColor).level >= 2) {
 		exports.colors = [
@@ -942,7 +935,7 @@ formatters.O = function (v) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-const events_1 = __webpack_require__(10);
+const events_1 = __webpack_require__(9);
 const debug_1 = __importDefault(__webpack_require__(139));
 const promisify_1 = __importDefault(__webpack_require__(142));
 const debug = debug_1.default('agent-base');
@@ -1516,7 +1509,7 @@ exports.colors = [6, 2, 3, 4, 5, 1];
 try {
 	// Optional dependency (as in, doesn't need to be installed, NOT like optionalDependencies in package.json)
 	// eslint-disable-next-line import/no-extraneous-dependencies
-	const supportsColor = __webpack_require__(50);
+	const supportsColor = __webpack_require__(49);
 
 	if (supportsColor && (supportsColor.stderr || supportsColor).level >= 2) {
 		exports.colors = [
@@ -1990,6 +1983,7 @@ __webpack_require__.d(__webpack_exports__, "setTag", function() { return /* reex
 __webpack_require__.d(__webpack_exports__, "setTags", function() { return /* reexport */ setTags; });
 __webpack_require__.d(__webpack_exports__, "setUser", function() { return /* reexport */ setUser; });
 __webpack_require__.d(__webpack_exports__, "withScope", function() { return /* reexport */ withScope; });
+__webpack_require__.d(__webpack_exports__, "NodeBackend", function() { return /* reexport */ backend_NodeBackend; });
 __webpack_require__.d(__webpack_exports__, "NodeClient", function() { return /* reexport */ client_NodeClient; });
 __webpack_require__.d(__webpack_exports__, "defaultIntegrations", function() { return /* reexport */ sdk_defaultIntegrations; });
 __webpack_require__.d(__webpack_exports__, "init", function() { return /* reexport */ init; });
@@ -4071,7 +4065,7 @@ function startTransaction(context) {
     return callOnHub('startTransaction', tslib_tslib_es6_assign({}, context));
 }
 //# sourceMappingURL=index.js.map
-// CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/core/node_modules/tslib/tslib.es6.js
+// CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/utils/node_modules/tslib/tslib.es6.js
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
 
@@ -4291,226 +4285,6 @@ function node_modules_tslib_tslib_es6_classPrivateFieldSet(receiver, privateMap,
     return value;
 }
 
-// CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/utils/node_modules/tslib/tslib.es6.js
-/*! *****************************************************************************
-Copyright (c) Microsoft Corporation.
-
-Permission to use, copy, modify, and/or distribute this software for any
-purpose with or without fee is hereby granted.
-
-THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
-AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
-LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-PERFORMANCE OF THIS SOFTWARE.
-***************************************************************************** */
-/* global Reflect, Promise */
-
-var utils_node_modules_tslib_tslib_es6_extendStatics = function(d, b) {
-    utils_node_modules_tslib_tslib_es6_extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return utils_node_modules_tslib_tslib_es6_extendStatics(d, b);
-};
-
-function utils_node_modules_tslib_tslib_es6_extends(d, b) {
-    utils_node_modules_tslib_tslib_es6_extendStatics(d, b);
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-}
-
-var utils_node_modules_tslib_tslib_es6_assign = function() {
-    utils_node_modules_tslib_tslib_es6_assign = Object.assign || function __assign(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
-        }
-        return t;
-    }
-    return utils_node_modules_tslib_tslib_es6_assign.apply(this, arguments);
-}
-
-function utils_node_modules_tslib_tslib_es6_rest(s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-}
-
-function utils_node_modules_tslib_tslib_es6_decorate(decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-}
-
-function utils_node_modules_tslib_tslib_es6_param(paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-}
-
-function utils_node_modules_tslib_tslib_es6_metadata(metadataKey, metadataValue) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
-}
-
-function utils_node_modules_tslib_tslib_es6_awaiter(thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-}
-
-function utils_node_modules_tslib_tslib_es6_generator(thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-}
-
-function utils_node_modules_tslib_tslib_es6_createBinding(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}
-
-function utils_node_modules_tslib_tslib_es6_exportStar(m, exports) {
-    for (var p in m) if (p !== "default" && !exports.hasOwnProperty(p)) exports[p] = m[p];
-}
-
-function utils_node_modules_tslib_tslib_es6_values(o) {
-    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
-    if (m) return m.call(o);
-    if (o && typeof o.length === "number") return {
-        next: function () {
-            if (o && i >= o.length) o = void 0;
-            return { value: o && o[i++], done: !o };
-        }
-    };
-    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
-}
-
-function utils_node_modules_tslib_tslib_es6_read(o, n) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator];
-    if (!m) return o;
-    var i = m.call(o), r, ar = [], e;
-    try {
-        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
-    }
-    catch (error) { e = { error: error }; }
-    finally {
-        try {
-            if (r && !r.done && (m = i["return"])) m.call(i);
-        }
-        finally { if (e) throw e.error; }
-    }
-    return ar;
-}
-
-function utils_node_modules_tslib_tslib_es6_spread() {
-    for (var ar = [], i = 0; i < arguments.length; i++)
-        ar = ar.concat(utils_node_modules_tslib_tslib_es6_read(arguments[i]));
-    return ar;
-}
-
-function utils_node_modules_tslib_tslib_es6_spreadArrays() {
-    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
-    for (var r = Array(s), k = 0, i = 0; i < il; i++)
-        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
-            r[k] = a[j];
-    return r;
-};
-
-function utils_node_modules_tslib_tslib_es6_await(v) {
-    return this instanceof utils_node_modules_tslib_tslib_es6_await ? (this.v = v, this) : new utils_node_modules_tslib_tslib_es6_await(v);
-}
-
-function utils_node_modules_tslib_tslib_es6_asyncGenerator(thisArg, _arguments, generator) {
-    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
-    var g = generator.apply(thisArg, _arguments || []), i, q = [];
-    return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i;
-    function verb(n) { if (g[n]) i[n] = function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]) > 1 || resume(n, v); }); }; }
-    function resume(n, v) { try { step(g[n](v)); } catch (e) { settle(q[0][3], e); } }
-    function step(r) { r.value instanceof utils_node_modules_tslib_tslib_es6_await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r); }
-    function fulfill(value) { resume("next", value); }
-    function reject(value) { resume("throw", value); }
-    function settle(f, v) { if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]); }
-}
-
-function utils_node_modules_tslib_tslib_es6_asyncDelegator(o) {
-    var i, p;
-    return i = {}, verb("next"), verb("throw", function (e) { throw e; }), verb("return"), i[Symbol.iterator] = function () { return this; }, i;
-    function verb(n, f) { i[n] = o[n] ? function (v) { return (p = !p) ? { value: utils_node_modules_tslib_tslib_es6_await(o[n](v)), done: n === "return" } : f ? f(v) : v; } : f; }
-}
-
-function utils_node_modules_tslib_tslib_es6_asyncValues(o) {
-    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
-    var m = o[Symbol.asyncIterator], i;
-    return m ? m.call(o) : (o = typeof utils_node_modules_tslib_tslib_es6_values === "function" ? utils_node_modules_tslib_tslib_es6_values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
-    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
-    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
-}
-
-function utils_node_modules_tslib_tslib_es6_makeTemplateObject(cooked, raw) {
-    if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
-    return cooked;
-};
-
-function utils_node_modules_tslib_tslib_es6_importStar(mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result.default = mod;
-    return result;
-}
-
-function utils_node_modules_tslib_tslib_es6_importDefault(mod) {
-    return (mod && mod.__esModule) ? mod : { default: mod };
-}
-
-function utils_node_modules_tslib_tslib_es6_classPrivateFieldGet(receiver, privateMap) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to get private field on non-instance");
-    }
-    return privateMap.get(receiver);
-}
-
-function utils_node_modules_tslib_tslib_es6_classPrivateFieldSet(receiver, privateMap, value) {
-    if (!privateMap.has(receiver)) {
-        throw new TypeError("attempted to set private field on non-instance");
-    }
-    privateMap.set(receiver, value);
-    return value;
-}
-
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/utils/esm/polyfill.js
 var setPrototypeOf = Object.setPrototypeOf || ({ __proto__: [] } instanceof Array ? setProtoOf : mixinProperties); // tslint:disable-line:no-unbound-method
 /**
@@ -4539,7 +4313,7 @@ function mixinProperties(obj, proto) {
 
 /** An error emitted by Sentry SDKs and related utilities. */
 var error_SentryError = /** @class */ (function (_super) {
-    utils_node_modules_tslib_tslib_es6_extends(SentryError, _super);
+    node_modules_tslib_tslib_es6_extends(SentryError, _super);
     function SentryError(message) {
         var _newTarget = this.constructor;
         var _this = _super.call(this, message) || this;
@@ -4553,6 +4327,84 @@ var error_SentryError = /** @class */ (function (_super) {
 }(Error));
 
 //# sourceMappingURL=error.js.map
+// CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/core/esm/transports/noop.js
+
+
+/** Noop transport */
+var noop_NoopTransport = /** @class */ (function () {
+    function NoopTransport() {
+    }
+    /**
+     * @inheritDoc
+     */
+    NoopTransport.prototype.sendEvent = function (_) {
+        return syncpromise_SyncPromise.resolve({
+            reason: "NoopTransport: Event has been skipped because no Dsn is configured.",
+            status: Status.Skipped,
+        });
+    };
+    /**
+     * @inheritDoc
+     */
+    NoopTransport.prototype.close = function (_) {
+        return syncpromise_SyncPromise.resolve(true);
+    };
+    return NoopTransport;
+}());
+
+//# sourceMappingURL=noop.js.map
+// CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/core/esm/basebackend.js
+
+
+/**
+ * This is the base implemention of a Backend.
+ * @hidden
+ */
+var basebackend_BaseBackend = /** @class */ (function () {
+    /** Creates a new backend instance. */
+    function BaseBackend(options) {
+        this._options = options;
+        if (!this._options.dsn) {
+            logger.warn('No DSN provided, backend will not do anything.');
+        }
+        this._transport = this._setupTransport();
+    }
+    /**
+     * Sets up the transport so it can be used later to send requests.
+     */
+    BaseBackend.prototype._setupTransport = function () {
+        return new noop_NoopTransport();
+    };
+    /**
+     * @inheritDoc
+     */
+    BaseBackend.prototype.eventFromException = function (_exception, _hint) {
+        throw new error_SentryError('Backend has to implement `eventFromException` method');
+    };
+    /**
+     * @inheritDoc
+     */
+    BaseBackend.prototype.eventFromMessage = function (_message, _level, _hint) {
+        throw new error_SentryError('Backend has to implement `eventFromMessage` method');
+    };
+    /**
+     * @inheritDoc
+     */
+    BaseBackend.prototype.sendEvent = function (event) {
+        this._transport.sendEvent(event).then(null, function (reason) {
+            logger.error("Error while sending event: " + reason);
+        });
+    };
+    /**
+     * @inheritDoc
+     */
+    BaseBackend.prototype.getTransport = function () {
+        return this._transport;
+    };
+    return BaseBackend;
+}());
+
+//# sourceMappingURL=basebackend.js.map
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/utils/esm/dsn.js
 
 
@@ -4594,7 +4446,7 @@ var dsn_Dsn = /** @class */ (function () {
         if (!match) {
             throw new error_SentryError(ERROR_MESSAGE);
         }
-        var _a = utils_node_modules_tslib_tslib_es6_read(match.slice(1), 6), protocol = _a[0], user = _a[1], _b = _a[2], pass = _b === void 0 ? '' : _b, host = _a[3], _c = _a[4], port = _c === void 0 ? '' : _c, lastPath = _a[5];
+        var _a = node_modules_tslib_tslib_es6_read(match.slice(1), 6), protocol = _a[0], user = _a[1], _b = _a[2], pass = _b === void 0 ? '' : _b, host = _a[3], _c = _a[4], port = _c === void 0 ? '' : _c, lastPath = _a[5];
         var path = '';
         var projectId = lastPath;
         var split = projectId.split('/');
@@ -4995,7 +4847,7 @@ function dropUndefinedKeys(val) {
         var obj = val;
         var rv = {};
         try {
-            for (var _b = utils_node_modules_tslib_tslib_es6_values(Object.keys(obj)), _c = _b.next(); !_c.done; _c = _b.next()) {
+            for (var _b = node_modules_tslib_tslib_es6_values(Object.keys(obj)), _c = _b.next(); !_c.done; _c = _b.next()) {
                 var key = _c.value;
                 if (typeof obj[key] !== 'undefined') {
                     rv[key] = dropUndefinedKeys(obj[key]);
@@ -5017,567 +4869,6 @@ function dropUndefinedKeys(val) {
     return val;
 }
 //# sourceMappingURL=object.js.map
-// CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/core/esm/integration.js
-
-
-
-var installedIntegrations = [];
-/** Gets integration to install */
-function getIntegrationsToSetup(options) {
-    var defaultIntegrations = (options.defaultIntegrations && node_modules_tslib_tslib_es6_spread(options.defaultIntegrations)) || [];
-    var userIntegrations = options.integrations;
-    var integrations = [];
-    if (Array.isArray(userIntegrations)) {
-        var userIntegrationsNames_1 = userIntegrations.map(function (i) { return i.name; });
-        var pickedIntegrationsNames_1 = [];
-        // Leave only unique default integrations, that were not overridden with provided user integrations
-        defaultIntegrations.forEach(function (defaultIntegration) {
-            if (userIntegrationsNames_1.indexOf(defaultIntegration.name) === -1 &&
-                pickedIntegrationsNames_1.indexOf(defaultIntegration.name) === -1) {
-                integrations.push(defaultIntegration);
-                pickedIntegrationsNames_1.push(defaultIntegration.name);
-            }
-        });
-        // Don't add same user integration twice
-        userIntegrations.forEach(function (userIntegration) {
-            if (pickedIntegrationsNames_1.indexOf(userIntegration.name) === -1) {
-                integrations.push(userIntegration);
-                pickedIntegrationsNames_1.push(userIntegration.name);
-            }
-        });
-    }
-    else if (typeof userIntegrations === 'function') {
-        integrations = userIntegrations(defaultIntegrations);
-        integrations = Array.isArray(integrations) ? integrations : [integrations];
-    }
-    else {
-        integrations = node_modules_tslib_tslib_es6_spread(defaultIntegrations);
-    }
-    // Make sure that if present, `Debug` integration will always run last
-    var integrationsNames = integrations.map(function (i) { return i.name; });
-    var alwaysLastToRun = 'Debug';
-    if (integrationsNames.indexOf(alwaysLastToRun) !== -1) {
-        integrations.push.apply(integrations, node_modules_tslib_tslib_es6_spread(integrations.splice(integrationsNames.indexOf(alwaysLastToRun), 1)));
-    }
-    return integrations;
-}
-/** Setup given integration */
-function setupIntegration(integration) {
-    if (installedIntegrations.indexOf(integration.name) !== -1) {
-        return;
-    }
-    integration.setupOnce(scope_addGlobalEventProcessor, hub_getCurrentHub);
-    installedIntegrations.push(integration.name);
-    logger.log("Integration installed: " + integration.name);
-}
-/**
- * Given a list of integration instances this installs them all. When `withDefaults` is set to `true` then all default
- * integrations are added unless they were already provided before.
- * @param integrations array of integration instances
- * @param withDefault should enable default integrations
- */
-function setupIntegrations(options) {
-    var integrations = {};
-    getIntegrationsToSetup(options).forEach(function (integration) {
-        integrations[integration.name] = integration;
-        setupIntegration(integration);
-    });
-    return integrations;
-}
-//# sourceMappingURL=integration.js.map
-// CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/core/esm/baseclient.js
-
-
-
-
-/**
- * Base implementation for all JavaScript SDK clients.
- *
- * Call the constructor with the corresponding backend constructor and options
- * specific to the client subclass. To access these options later, use
- * {@link Client.getOptions}. Also, the Backend instance is available via
- * {@link Client.getBackend}.
- *
- * If a Dsn is specified in the options, it will be parsed and stored. Use
- * {@link Client.getDsn} to retrieve the Dsn at any moment. In case the Dsn is
- * invalid, the constructor will throw a {@link SentryException}. Note that
- * without a valid Dsn, the SDK will not send any events to Sentry.
- *
- * Before sending an event via the backend, it is passed through
- * {@link BaseClient.prepareEvent} to add SDK information and scope data
- * (breadcrumbs and context). To add more custom information, override this
- * method and extend the resulting prepared event.
- *
- * To issue automatically created events (e.g. via instrumentation), use
- * {@link Client.captureEvent}. It will prepare the event and pass it through
- * the callback lifecycle. To issue auto-breadcrumbs, use
- * {@link Client.addBreadcrumb}.
- *
- * @example
- * class NodeClient extends BaseClient<NodeBackend, NodeOptions> {
- *   public constructor(options: NodeOptions) {
- *     super(NodeBackend, options);
- *   }
- *
- *   // ...
- * }
- */
-var baseclient_BaseClient = /** @class */ (function () {
-    /**
-     * Initializes this client instance.
-     *
-     * @param backendClass A constructor function to create the backend.
-     * @param options Options for the client.
-     */
-    function BaseClient(backendClass, options) {
-        /** Array of used integrations. */
-        this._integrations = {};
-        /** Is the client still processing a call? */
-        this._processing = false;
-        this._backend = new backendClass(options);
-        this._options = options;
-        if (options.dsn) {
-            this._dsn = new dsn_Dsn(options.dsn);
-        }
-    }
-    /**
-     * @inheritDoc
-     */
-    BaseClient.prototype.captureException = function (exception, hint, scope) {
-        var _this = this;
-        var eventId = hint && hint.event_id;
-        this._processing = true;
-        this._getBackend()
-            .eventFromException(exception, hint)
-            .then(function (event) {
-            eventId = _this.captureEvent(event, hint, scope);
-        });
-        return eventId;
-    };
-    /**
-     * @inheritDoc
-     */
-    BaseClient.prototype.captureMessage = function (message, level, hint, scope) {
-        var _this = this;
-        var eventId = hint && hint.event_id;
-        this._processing = true;
-        var promisedEvent = Object(is["f" /* isPrimitive */])(message)
-            ? this._getBackend().eventFromMessage("" + message, level, hint)
-            : this._getBackend().eventFromException(message, hint);
-        promisedEvent.then(function (event) {
-            eventId = _this.captureEvent(event, hint, scope);
-        });
-        return eventId;
-    };
-    /**
-     * @inheritDoc
-     */
-    BaseClient.prototype.captureEvent = function (event, hint, scope) {
-        var _this = this;
-        var eventId = hint && hint.event_id;
-        this._processing = true;
-        this._processEvent(event, hint, scope)
-            .then(function (finalEvent) {
-            // We need to check for finalEvent in case beforeSend returned null
-            eventId = finalEvent && finalEvent.event_id;
-            _this._processing = false;
-        })
-            .then(null, function (reason) {
-            logger.error(reason);
-            _this._processing = false;
-        });
-        return eventId;
-    };
-    /**
-     * @inheritDoc
-     */
-    BaseClient.prototype.getDsn = function () {
-        return this._dsn;
-    };
-    /**
-     * @inheritDoc
-     */
-    BaseClient.prototype.getOptions = function () {
-        return this._options;
-    };
-    /**
-     * @inheritDoc
-     */
-    BaseClient.prototype.flush = function (timeout) {
-        var _this = this;
-        return this._isClientProcessing(timeout).then(function (status) {
-            clearInterval(status.interval);
-            return _this._getBackend()
-                .getTransport()
-                .close(timeout)
-                .then(function (transportFlushed) { return status.ready && transportFlushed; });
-        });
-    };
-    /**
-     * @inheritDoc
-     */
-    BaseClient.prototype.close = function (timeout) {
-        var _this = this;
-        return this.flush(timeout).then(function (result) {
-            _this.getOptions().enabled = false;
-            return result;
-        });
-    };
-    /**
-     * Sets up the integrations
-     */
-    BaseClient.prototype.setupIntegrations = function () {
-        if (this._isEnabled()) {
-            this._integrations = setupIntegrations(this._options);
-        }
-    };
-    /**
-     * @inheritDoc
-     */
-    BaseClient.prototype.getIntegration = function (integration) {
-        try {
-            return this._integrations[integration.id] || null;
-        }
-        catch (_oO) {
-            logger.warn("Cannot retrieve integration " + integration.id + " from the current Client");
-            return null;
-        }
-    };
-    /** Waits for the client to be done with processing. */
-    BaseClient.prototype._isClientProcessing = function (timeout) {
-        var _this = this;
-        return new syncpromise_SyncPromise(function (resolve) {
-            var ticked = 0;
-            var tick = 1;
-            var interval = 0;
-            clearInterval(interval);
-            interval = setInterval(function () {
-                if (!_this._processing) {
-                    resolve({
-                        interval: interval,
-                        ready: true,
-                    });
-                }
-                else {
-                    ticked += tick;
-                    if (timeout && ticked >= timeout) {
-                        resolve({
-                            interval: interval,
-                            ready: false,
-                        });
-                    }
-                }
-            }, tick);
-        });
-    };
-    /** Returns the current backend. */
-    BaseClient.prototype._getBackend = function () {
-        return this._backend;
-    };
-    /** Determines whether this SDK is enabled and a valid Dsn is present. */
-    BaseClient.prototype._isEnabled = function () {
-        return this.getOptions().enabled !== false && this._dsn !== undefined;
-    };
-    /**
-     * Adds common information to events.
-     *
-     * The information includes release and environment from `options`,
-     * breadcrumbs and context (extra, tags and user) from the scope.
-     *
-     * Information that is already present in the event is never overwritten. For
-     * nested objects, such as the context, keys are merged.
-     *
-     * @param event The original event.
-     * @param hint May contain additional information about the original exception.
-     * @param scope A scope containing event metadata.
-     * @returns A new event with more information.
-     */
-    BaseClient.prototype._prepareEvent = function (event, scope, hint) {
-        var _this = this;
-        var _a = this.getOptions().normalizeDepth, normalizeDepth = _a === void 0 ? 3 : _a;
-        var prepared = node_modules_tslib_tslib_es6_assign({}, event, { event_id: event.event_id || (hint && hint.event_id ? hint.event_id : Object(misc["m" /* uuid4 */])()), timestamp: event.timestamp || Object(misc["l" /* timestampWithMs */])() });
-        this._applyClientOptions(prepared);
-        this._applyIntegrationsMetadata(prepared);
-        // If we have scope given to us, use it as the base for further modifications.
-        // This allows us to prevent unnecessary copying of data if `captureContext` is not provided.
-        var finalScope = scope;
-        if (hint && hint.captureContext) {
-            finalScope = scope_Scope.clone(finalScope).update(hint.captureContext);
-        }
-        // We prepare the result here with a resolved Event.
-        var result = syncpromise_SyncPromise.resolve(prepared);
-        // This should be the last thing called, since we want that
-        // {@link Hub.addEventProcessor} gets the finished prepared event.
-        if (finalScope) {
-            // In case we have a hub we reassign it.
-            result = finalScope.applyToEvent(prepared, hint);
-        }
-        return result.then(function (evt) {
-            // tslint:disable-next-line:strict-type-predicates
-            if (typeof normalizeDepth === 'number' && normalizeDepth > 0) {
-                return _this._normalizeEvent(evt, normalizeDepth);
-            }
-            return evt;
-        });
-    };
-    /**
-     * Applies `normalize` function on necessary `Event` attributes to make them safe for serialization.
-     * Normalized keys:
-     * - `breadcrumbs.data`
-     * - `user`
-     * - `contexts`
-     * - `extra`
-     * @param event Event
-     * @returns Normalized event
-     */
-    BaseClient.prototype._normalizeEvent = function (event, depth) {
-        if (!event) {
-            return null;
-        }
-        // tslint:disable:no-unsafe-any
-        var normalized = node_modules_tslib_tslib_es6_assign({}, event, (event.breadcrumbs && {
-            breadcrumbs: event.breadcrumbs.map(function (b) { return (node_modules_tslib_tslib_es6_assign({}, b, (b.data && {
-                data: normalize(b.data, depth),
-            }))); }),
-        }), (event.user && {
-            user: normalize(event.user, depth),
-        }), (event.contexts && {
-            contexts: normalize(event.contexts, depth),
-        }), (event.extra && {
-            extra: normalize(event.extra, depth),
-        }));
-        // event.contexts.trace stores information about a Transaction. Similarly,
-        // event.spans[] stores information about child Spans. Given that a
-        // Transaction is conceptually a Span, normalization should apply to both
-        // Transactions and Spans consistently.
-        // For now the decision is to skip normalization of Transactions and Spans,
-        // so this block overwrites the normalized event to add back the original
-        // Transaction information prior to normalization.
-        if (event.contexts && event.contexts.trace) {
-            normalized.contexts.trace = event.contexts.trace;
-        }
-        return normalized;
-    };
-    /**
-     *  Enhances event using the client configuration.
-     *  It takes care of all "static" values like environment, release and `dist`,
-     *  as well as truncating overly long values.
-     * @param event event instance to be enhanced
-     */
-    BaseClient.prototype._applyClientOptions = function (event) {
-        var _a = this.getOptions(), environment = _a.environment, release = _a.release, dist = _a.dist, _b = _a.maxValueLength, maxValueLength = _b === void 0 ? 250 : _b;
-        if (event.environment === undefined && environment !== undefined) {
-            event.environment = environment;
-        }
-        if (event.release === undefined && release !== undefined) {
-            event.release = release;
-        }
-        if (event.dist === undefined && dist !== undefined) {
-            event.dist = dist;
-        }
-        if (event.message) {
-            event.message = Object(string["c" /* truncate */])(event.message, maxValueLength);
-        }
-        var exception = event.exception && event.exception.values && event.exception.values[0];
-        if (exception && exception.value) {
-            exception.value = Object(string["c" /* truncate */])(exception.value, maxValueLength);
-        }
-        var request = event.request;
-        if (request && request.url) {
-            request.url = Object(string["c" /* truncate */])(request.url, maxValueLength);
-        }
-    };
-    /**
-     * This function adds all used integrations to the SDK info in the event.
-     * @param sdkInfo The sdkInfo of the event that will be filled with all integrations.
-     */
-    BaseClient.prototype._applyIntegrationsMetadata = function (event) {
-        var sdkInfo = event.sdk;
-        var integrationsArray = Object.keys(this._integrations);
-        if (sdkInfo && integrationsArray.length > 0) {
-            sdkInfo.integrations = integrationsArray;
-        }
-    };
-    /**
-     * Tells the backend to send this event
-     * @param event The Sentry event to send
-     */
-    BaseClient.prototype._sendEvent = function (event) {
-        this._getBackend().sendEvent(event);
-    };
-    /**
-     * Processes an event (either error or message) and sends it to Sentry.
-     *
-     * This also adds breadcrumbs and context information to the event. However,
-     * platform specific meta data (such as the User's IP address) must be added
-     * by the SDK implementor.
-     *
-     *
-     * @param event The event to send to Sentry.
-     * @param hint May contain additional information about the original exception.
-     * @param scope A scope containing event metadata.
-     * @returns A SyncPromise that resolves with the event or rejects in case event was/will not be send.
-     */
-    BaseClient.prototype._processEvent = function (event, hint, scope) {
-        var _this = this;
-        var _a = this.getOptions(), beforeSend = _a.beforeSend, sampleRate = _a.sampleRate;
-        if (!this._isEnabled()) {
-            return syncpromise_SyncPromise.reject('SDK not enabled, will not send event.');
-        }
-        var isTransaction = event.type === 'transaction';
-        // 1.0 === 100% events are sent
-        // 0.0 === 0% events are sent
-        // Sampling for transaction happens somewhere else
-        if (!isTransaction && typeof sampleRate === 'number' && Math.random() > sampleRate) {
-            return syncpromise_SyncPromise.reject('This event has been sampled, will not send event.');
-        }
-        return new syncpromise_SyncPromise(function (resolve, reject) {
-            _this._prepareEvent(event, scope, hint)
-                .then(function (prepared) {
-                if (prepared === null) {
-                    reject('An event processor returned null, will not send event.');
-                    return;
-                }
-                var finalEvent = prepared;
-                var isInternalException = hint && hint.data && hint.data.__sentry__ === true;
-                // We skip beforeSend in case of transactions
-                if (isInternalException || !beforeSend || isTransaction) {
-                    _this._sendEvent(finalEvent);
-                    resolve(finalEvent);
-                    return;
-                }
-                var beforeSendResult = beforeSend(prepared, hint);
-                // tslint:disable-next-line:strict-type-predicates
-                if (typeof beforeSendResult === 'undefined') {
-                    logger.error('`beforeSend` method has to return `null` or a valid event.');
-                }
-                else if (Object(is["j" /* isThenable */])(beforeSendResult)) {
-                    _this._handleAsyncBeforeSend(beforeSendResult, resolve, reject);
-                }
-                else {
-                    finalEvent = beforeSendResult;
-                    if (finalEvent === null) {
-                        logger.log('`beforeSend` returned `null`, will not send event.');
-                        resolve(null);
-                        return;
-                    }
-                    // From here on we are really async
-                    _this._sendEvent(finalEvent);
-                    resolve(finalEvent);
-                }
-            })
-                .then(null, function (reason) {
-                _this.captureException(reason, {
-                    data: {
-                        __sentry__: true,
-                    },
-                    originalException: reason,
-                });
-                reject("Event processing pipeline threw an error, original event will not be sent. Details have been sent as a new event.\nReason: " + reason);
-            });
-        });
-    };
-    /**
-     * Resolves before send Promise and calls resolve/reject on parent SyncPromise.
-     */
-    BaseClient.prototype._handleAsyncBeforeSend = function (beforeSend, resolve, reject) {
-        var _this = this;
-        beforeSend
-            .then(function (processedEvent) {
-            if (processedEvent === null) {
-                reject('`beforeSend` returned `null`, will not send event.');
-                return;
-            }
-            // From here on we are really async
-            _this._sendEvent(processedEvent);
-            resolve(processedEvent);
-        })
-            .then(null, function (e) {
-            reject("beforeSend rejected with " + e);
-        });
-    };
-    return BaseClient;
-}());
-
-//# sourceMappingURL=baseclient.js.map
-// CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/core/esm/transports/noop.js
-
-
-/** Noop transport */
-var noop_NoopTransport = /** @class */ (function () {
-    function NoopTransport() {
-    }
-    /**
-     * @inheritDoc
-     */
-    NoopTransport.prototype.sendEvent = function (_) {
-        return syncpromise_SyncPromise.resolve({
-            reason: "NoopTransport: Event has been skipped because no Dsn is configured.",
-            status: Status.Skipped,
-        });
-    };
-    /**
-     * @inheritDoc
-     */
-    NoopTransport.prototype.close = function (_) {
-        return syncpromise_SyncPromise.resolve(true);
-    };
-    return NoopTransport;
-}());
-
-//# sourceMappingURL=noop.js.map
-// CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/core/esm/basebackend.js
-
-
-/**
- * This is the base implemention of a Backend.
- * @hidden
- */
-var basebackend_BaseBackend = /** @class */ (function () {
-    /** Creates a new backend instance. */
-    function BaseBackend(options) {
-        this._options = options;
-        if (!this._options.dsn) {
-            logger.warn('No DSN provided, backend will not do anything.');
-        }
-        this._transport = this._setupTransport();
-    }
-    /**
-     * Sets up the transport so it can be used later to send requests.
-     */
-    BaseBackend.prototype._setupTransport = function () {
-        return new noop_NoopTransport();
-    };
-    /**
-     * @inheritDoc
-     */
-    BaseBackend.prototype.eventFromException = function (_exception, _hint) {
-        throw new error_SentryError('Backend has to implement `eventFromException` method');
-    };
-    /**
-     * @inheritDoc
-     */
-    BaseBackend.prototype.eventFromMessage = function (_message, _level, _hint) {
-        throw new error_SentryError('Backend has to implement `eventFromMessage` method');
-    };
-    /**
-     * @inheritDoc
-     */
-    BaseBackend.prototype.sendEvent = function (event) {
-        this._transport.sendEvent(event).then(null, function (reason) {
-            logger.error("Error while sending event: " + reason);
-        });
-    };
-    /**
-     * @inheritDoc
-     */
-    BaseBackend.prototype.getTransport = function () {
-        return this._transport;
-    };
-    return BaseBackend;
-}());
-
-//# sourceMappingURL=basebackend.js.map
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/utils/esm/path.js
 // Slightly modified (no IE8 support, ES6) and transcribed to TypeScript
 // https://raw.githubusercontent.com/calvinmetcalf/rollup-plugin-node-builtins/master/src/es6/path.js
@@ -6297,7 +5588,7 @@ var external_url_ = __webpack_require__(13);
 
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/node/esm/version.js
 var SDK_NAME = 'sentry.javascript.node';
-var SDK_VERSION = '5.19.2';
+var SDK_VERSION = '5.20.0';
 //# sourceMappingURL=version.js.map
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/node/esm/transports/base.js
 
@@ -6398,7 +5689,7 @@ var base_BaseTransport = /** @class */ (function () {
 
 //# sourceMappingURL=base.js.map
 // EXTERNAL MODULE: external "http"
-var external_http_ = __webpack_require__(25);
+var external_http_ = __webpack_require__(24);
 
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/node/esm/transports/http.js
 
@@ -6578,6 +5869,709 @@ var backend_NodeBackend = /** @class */ (function (_super) {
 }(basebackend_BaseBackend));
 
 //# sourceMappingURL=backend.js.map
+// CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/core/node_modules/tslib/tslib.es6.js
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation.
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+***************************************************************************** */
+/* global Reflect, Promise */
+
+var core_node_modules_tslib_tslib_es6_extendStatics = function(d, b) {
+    core_node_modules_tslib_tslib_es6_extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return core_node_modules_tslib_tslib_es6_extendStatics(d, b);
+};
+
+function core_node_modules_tslib_tslib_es6_extends(d, b) {
+    core_node_modules_tslib_tslib_es6_extendStatics(d, b);
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
+
+var core_node_modules_tslib_tslib_es6_assign = function() {
+    core_node_modules_tslib_tslib_es6_assign = Object.assign || function __assign(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+        }
+        return t;
+    }
+    return core_node_modules_tslib_tslib_es6_assign.apply(this, arguments);
+}
+
+function core_node_modules_tslib_tslib_es6_rest(s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+}
+
+function core_node_modules_tslib_tslib_es6_decorate(decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+}
+
+function core_node_modules_tslib_tslib_es6_param(paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+}
+
+function core_node_modules_tslib_tslib_es6_metadata(metadataKey, metadataValue) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
+}
+
+function core_node_modules_tslib_tslib_es6_awaiter(thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+}
+
+function core_node_modules_tslib_tslib_es6_generator(thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+}
+
+function core_node_modules_tslib_tslib_es6_createBinding(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}
+
+function core_node_modules_tslib_tslib_es6_exportStar(m, exports) {
+    for (var p in m) if (p !== "default" && !exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+
+function core_node_modules_tslib_tslib_es6_values(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+}
+
+function core_node_modules_tslib_tslib_es6_read(o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+}
+
+function core_node_modules_tslib_tslib_es6_spread() {
+    for (var ar = [], i = 0; i < arguments.length; i++)
+        ar = ar.concat(core_node_modules_tslib_tslib_es6_read(arguments[i]));
+    return ar;
+}
+
+function core_node_modules_tslib_tslib_es6_spreadArrays() {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
+
+function core_node_modules_tslib_tslib_es6_await(v) {
+    return this instanceof core_node_modules_tslib_tslib_es6_await ? (this.v = v, this) : new core_node_modules_tslib_tslib_es6_await(v);
+}
+
+function core_node_modules_tslib_tslib_es6_asyncGenerator(thisArg, _arguments, generator) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var g = generator.apply(thisArg, _arguments || []), i, q = [];
+    return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i;
+    function verb(n) { if (g[n]) i[n] = function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]) > 1 || resume(n, v); }); }; }
+    function resume(n, v) { try { step(g[n](v)); } catch (e) { settle(q[0][3], e); } }
+    function step(r) { r.value instanceof core_node_modules_tslib_tslib_es6_await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r); }
+    function fulfill(value) { resume("next", value); }
+    function reject(value) { resume("throw", value); }
+    function settle(f, v) { if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]); }
+}
+
+function core_node_modules_tslib_tslib_es6_asyncDelegator(o) {
+    var i, p;
+    return i = {}, verb("next"), verb("throw", function (e) { throw e; }), verb("return"), i[Symbol.iterator] = function () { return this; }, i;
+    function verb(n, f) { i[n] = o[n] ? function (v) { return (p = !p) ? { value: core_node_modules_tslib_tslib_es6_await(o[n](v)), done: n === "return" } : f ? f(v) : v; } : f; }
+}
+
+function core_node_modules_tslib_tslib_es6_asyncValues(o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator], i;
+    return m ? m.call(o) : (o = typeof core_node_modules_tslib_tslib_es6_values === "function" ? core_node_modules_tslib_tslib_es6_values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+}
+
+function core_node_modules_tslib_tslib_es6_makeTemplateObject(cooked, raw) {
+    if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
+    return cooked;
+};
+
+function core_node_modules_tslib_tslib_es6_importStar(mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result.default = mod;
+    return result;
+}
+
+function core_node_modules_tslib_tslib_es6_importDefault(mod) {
+    return (mod && mod.__esModule) ? mod : { default: mod };
+}
+
+function core_node_modules_tslib_tslib_es6_classPrivateFieldGet(receiver, privateMap) {
+    if (!privateMap.has(receiver)) {
+        throw new TypeError("attempted to get private field on non-instance");
+    }
+    return privateMap.get(receiver);
+}
+
+function core_node_modules_tslib_tslib_es6_classPrivateFieldSet(receiver, privateMap, value) {
+    if (!privateMap.has(receiver)) {
+        throw new TypeError("attempted to set private field on non-instance");
+    }
+    privateMap.set(receiver, value);
+    return value;
+}
+
+// CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/core/esm/integration.js
+
+
+
+var installedIntegrations = [];
+/** Gets integration to install */
+function getIntegrationsToSetup(options) {
+    var defaultIntegrations = (options.defaultIntegrations && core_node_modules_tslib_tslib_es6_spread(options.defaultIntegrations)) || [];
+    var userIntegrations = options.integrations;
+    var integrations = [];
+    if (Array.isArray(userIntegrations)) {
+        var userIntegrationsNames_1 = userIntegrations.map(function (i) { return i.name; });
+        var pickedIntegrationsNames_1 = [];
+        // Leave only unique default integrations, that were not overridden with provided user integrations
+        defaultIntegrations.forEach(function (defaultIntegration) {
+            if (userIntegrationsNames_1.indexOf(defaultIntegration.name) === -1 &&
+                pickedIntegrationsNames_1.indexOf(defaultIntegration.name) === -1) {
+                integrations.push(defaultIntegration);
+                pickedIntegrationsNames_1.push(defaultIntegration.name);
+            }
+        });
+        // Don't add same user integration twice
+        userIntegrations.forEach(function (userIntegration) {
+            if (pickedIntegrationsNames_1.indexOf(userIntegration.name) === -1) {
+                integrations.push(userIntegration);
+                pickedIntegrationsNames_1.push(userIntegration.name);
+            }
+        });
+    }
+    else if (typeof userIntegrations === 'function') {
+        integrations = userIntegrations(defaultIntegrations);
+        integrations = Array.isArray(integrations) ? integrations : [integrations];
+    }
+    else {
+        integrations = core_node_modules_tslib_tslib_es6_spread(defaultIntegrations);
+    }
+    // Make sure that if present, `Debug` integration will always run last
+    var integrationsNames = integrations.map(function (i) { return i.name; });
+    var alwaysLastToRun = 'Debug';
+    if (integrationsNames.indexOf(alwaysLastToRun) !== -1) {
+        integrations.push.apply(integrations, core_node_modules_tslib_tslib_es6_spread(integrations.splice(integrationsNames.indexOf(alwaysLastToRun), 1)));
+    }
+    return integrations;
+}
+/** Setup given integration */
+function setupIntegration(integration) {
+    if (installedIntegrations.indexOf(integration.name) !== -1) {
+        return;
+    }
+    integration.setupOnce(scope_addGlobalEventProcessor, hub_getCurrentHub);
+    installedIntegrations.push(integration.name);
+    logger.log("Integration installed: " + integration.name);
+}
+/**
+ * Given a list of integration instances this installs them all. When `withDefaults` is set to `true` then all default
+ * integrations are added unless they were already provided before.
+ * @param integrations array of integration instances
+ * @param withDefault should enable default integrations
+ */
+function setupIntegrations(options) {
+    var integrations = {};
+    getIntegrationsToSetup(options).forEach(function (integration) {
+        integrations[integration.name] = integration;
+        setupIntegration(integration);
+    });
+    return integrations;
+}
+//# sourceMappingURL=integration.js.map
+// CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/core/esm/baseclient.js
+
+
+
+
+/**
+ * Base implementation for all JavaScript SDK clients.
+ *
+ * Call the constructor with the corresponding backend constructor and options
+ * specific to the client subclass. To access these options later, use
+ * {@link Client.getOptions}. Also, the Backend instance is available via
+ * {@link Client.getBackend}.
+ *
+ * If a Dsn is specified in the options, it will be parsed and stored. Use
+ * {@link Client.getDsn} to retrieve the Dsn at any moment. In case the Dsn is
+ * invalid, the constructor will throw a {@link SentryException}. Note that
+ * without a valid Dsn, the SDK will not send any events to Sentry.
+ *
+ * Before sending an event via the backend, it is passed through
+ * {@link BaseClient.prepareEvent} to add SDK information and scope data
+ * (breadcrumbs and context). To add more custom information, override this
+ * method and extend the resulting prepared event.
+ *
+ * To issue automatically created events (e.g. via instrumentation), use
+ * {@link Client.captureEvent}. It will prepare the event and pass it through
+ * the callback lifecycle. To issue auto-breadcrumbs, use
+ * {@link Client.addBreadcrumb}.
+ *
+ * @example
+ * class NodeClient extends BaseClient<NodeBackend, NodeOptions> {
+ *   public constructor(options: NodeOptions) {
+ *     super(NodeBackend, options);
+ *   }
+ *
+ *   // ...
+ * }
+ */
+var baseclient_BaseClient = /** @class */ (function () {
+    /**
+     * Initializes this client instance.
+     *
+     * @param backendClass A constructor function to create the backend.
+     * @param options Options for the client.
+     */
+    function BaseClient(backendClass, options) {
+        /** Array of used integrations. */
+        this._integrations = {};
+        /** Is the client still processing a call? */
+        this._processing = false;
+        this._backend = new backendClass(options);
+        this._options = options;
+        if (options.dsn) {
+            this._dsn = new dsn_Dsn(options.dsn);
+        }
+    }
+    /**
+     * @inheritDoc
+     */
+    BaseClient.prototype.captureException = function (exception, hint, scope) {
+        var _this = this;
+        var eventId = hint && hint.event_id;
+        this._processing = true;
+        this._getBackend()
+            .eventFromException(exception, hint)
+            .then(function (event) {
+            eventId = _this.captureEvent(event, hint, scope);
+        });
+        return eventId;
+    };
+    /**
+     * @inheritDoc
+     */
+    BaseClient.prototype.captureMessage = function (message, level, hint, scope) {
+        var _this = this;
+        var eventId = hint && hint.event_id;
+        this._processing = true;
+        var promisedEvent = Object(is["f" /* isPrimitive */])(message)
+            ? this._getBackend().eventFromMessage("" + message, level, hint)
+            : this._getBackend().eventFromException(message, hint);
+        promisedEvent.then(function (event) {
+            eventId = _this.captureEvent(event, hint, scope);
+        });
+        return eventId;
+    };
+    /**
+     * @inheritDoc
+     */
+    BaseClient.prototype.captureEvent = function (event, hint, scope) {
+        var _this = this;
+        var eventId = hint && hint.event_id;
+        this._processing = true;
+        this._processEvent(event, hint, scope)
+            .then(function (finalEvent) {
+            // We need to check for finalEvent in case beforeSend returned null
+            eventId = finalEvent && finalEvent.event_id;
+            _this._processing = false;
+        })
+            .then(null, function (reason) {
+            logger.error(reason);
+            _this._processing = false;
+        });
+        return eventId;
+    };
+    /**
+     * @inheritDoc
+     */
+    BaseClient.prototype.getDsn = function () {
+        return this._dsn;
+    };
+    /**
+     * @inheritDoc
+     */
+    BaseClient.prototype.getOptions = function () {
+        return this._options;
+    };
+    /**
+     * @inheritDoc
+     */
+    BaseClient.prototype.flush = function (timeout) {
+        var _this = this;
+        return this._isClientProcessing(timeout).then(function (status) {
+            clearInterval(status.interval);
+            return _this._getBackend()
+                .getTransport()
+                .close(timeout)
+                .then(function (transportFlushed) { return status.ready && transportFlushed; });
+        });
+    };
+    /**
+     * @inheritDoc
+     */
+    BaseClient.prototype.close = function (timeout) {
+        var _this = this;
+        return this.flush(timeout).then(function (result) {
+            _this.getOptions().enabled = false;
+            return result;
+        });
+    };
+    /**
+     * Sets up the integrations
+     */
+    BaseClient.prototype.setupIntegrations = function () {
+        if (this._isEnabled()) {
+            this._integrations = setupIntegrations(this._options);
+        }
+    };
+    /**
+     * @inheritDoc
+     */
+    BaseClient.prototype.getIntegration = function (integration) {
+        try {
+            return this._integrations[integration.id] || null;
+        }
+        catch (_oO) {
+            logger.warn("Cannot retrieve integration " + integration.id + " from the current Client");
+            return null;
+        }
+    };
+    /** Waits for the client to be done with processing. */
+    BaseClient.prototype._isClientProcessing = function (timeout) {
+        var _this = this;
+        return new syncpromise_SyncPromise(function (resolve) {
+            var ticked = 0;
+            var tick = 1;
+            var interval = 0;
+            clearInterval(interval);
+            interval = setInterval(function () {
+                if (!_this._processing) {
+                    resolve({
+                        interval: interval,
+                        ready: true,
+                    });
+                }
+                else {
+                    ticked += tick;
+                    if (timeout && ticked >= timeout) {
+                        resolve({
+                            interval: interval,
+                            ready: false,
+                        });
+                    }
+                }
+            }, tick);
+        });
+    };
+    /** Returns the current backend. */
+    BaseClient.prototype._getBackend = function () {
+        return this._backend;
+    };
+    /** Determines whether this SDK is enabled and a valid Dsn is present. */
+    BaseClient.prototype._isEnabled = function () {
+        return this.getOptions().enabled !== false && this._dsn !== undefined;
+    };
+    /**
+     * Adds common information to events.
+     *
+     * The information includes release and environment from `options`,
+     * breadcrumbs and context (extra, tags and user) from the scope.
+     *
+     * Information that is already present in the event is never overwritten. For
+     * nested objects, such as the context, keys are merged.
+     *
+     * @param event The original event.
+     * @param hint May contain additional information about the original exception.
+     * @param scope A scope containing event metadata.
+     * @returns A new event with more information.
+     */
+    BaseClient.prototype._prepareEvent = function (event, scope, hint) {
+        var _this = this;
+        var _a = this.getOptions().normalizeDepth, normalizeDepth = _a === void 0 ? 3 : _a;
+        var prepared = core_node_modules_tslib_tslib_es6_assign({}, event, { event_id: event.event_id || (hint && hint.event_id ? hint.event_id : Object(misc["m" /* uuid4 */])()), timestamp: event.timestamp || Object(misc["l" /* timestampWithMs */])() });
+        this._applyClientOptions(prepared);
+        this._applyIntegrationsMetadata(prepared);
+        // If we have scope given to us, use it as the base for further modifications.
+        // This allows us to prevent unnecessary copying of data if `captureContext` is not provided.
+        var finalScope = scope;
+        if (hint && hint.captureContext) {
+            finalScope = scope_Scope.clone(finalScope).update(hint.captureContext);
+        }
+        // We prepare the result here with a resolved Event.
+        var result = syncpromise_SyncPromise.resolve(prepared);
+        // This should be the last thing called, since we want that
+        // {@link Hub.addEventProcessor} gets the finished prepared event.
+        if (finalScope) {
+            // In case we have a hub we reassign it.
+            result = finalScope.applyToEvent(prepared, hint);
+        }
+        return result.then(function (evt) {
+            // tslint:disable-next-line:strict-type-predicates
+            if (typeof normalizeDepth === 'number' && normalizeDepth > 0) {
+                return _this._normalizeEvent(evt, normalizeDepth);
+            }
+            return evt;
+        });
+    };
+    /**
+     * Applies `normalize` function on necessary `Event` attributes to make them safe for serialization.
+     * Normalized keys:
+     * - `breadcrumbs.data`
+     * - `user`
+     * - `contexts`
+     * - `extra`
+     * @param event Event
+     * @returns Normalized event
+     */
+    BaseClient.prototype._normalizeEvent = function (event, depth) {
+        if (!event) {
+            return null;
+        }
+        // tslint:disable:no-unsafe-any
+        var normalized = core_node_modules_tslib_tslib_es6_assign({}, event, (event.breadcrumbs && {
+            breadcrumbs: event.breadcrumbs.map(function (b) { return (core_node_modules_tslib_tslib_es6_assign({}, b, (b.data && {
+                data: normalize(b.data, depth),
+            }))); }),
+        }), (event.user && {
+            user: normalize(event.user, depth),
+        }), (event.contexts && {
+            contexts: normalize(event.contexts, depth),
+        }), (event.extra && {
+            extra: normalize(event.extra, depth),
+        }));
+        // event.contexts.trace stores information about a Transaction. Similarly,
+        // event.spans[] stores information about child Spans. Given that a
+        // Transaction is conceptually a Span, normalization should apply to both
+        // Transactions and Spans consistently.
+        // For now the decision is to skip normalization of Transactions and Spans,
+        // so this block overwrites the normalized event to add back the original
+        // Transaction information prior to normalization.
+        if (event.contexts && event.contexts.trace) {
+            normalized.contexts.trace = event.contexts.trace;
+        }
+        return normalized;
+    };
+    /**
+     *  Enhances event using the client configuration.
+     *  It takes care of all "static" values like environment, release and `dist`,
+     *  as well as truncating overly long values.
+     * @param event event instance to be enhanced
+     */
+    BaseClient.prototype._applyClientOptions = function (event) {
+        var _a = this.getOptions(), environment = _a.environment, release = _a.release, dist = _a.dist, _b = _a.maxValueLength, maxValueLength = _b === void 0 ? 250 : _b;
+        if (event.environment === undefined && environment !== undefined) {
+            event.environment = environment;
+        }
+        if (event.release === undefined && release !== undefined) {
+            event.release = release;
+        }
+        if (event.dist === undefined && dist !== undefined) {
+            event.dist = dist;
+        }
+        if (event.message) {
+            event.message = Object(string["c" /* truncate */])(event.message, maxValueLength);
+        }
+        var exception = event.exception && event.exception.values && event.exception.values[0];
+        if (exception && exception.value) {
+            exception.value = Object(string["c" /* truncate */])(exception.value, maxValueLength);
+        }
+        var request = event.request;
+        if (request && request.url) {
+            request.url = Object(string["c" /* truncate */])(request.url, maxValueLength);
+        }
+    };
+    /**
+     * This function adds all used integrations to the SDK info in the event.
+     * @param sdkInfo The sdkInfo of the event that will be filled with all integrations.
+     */
+    BaseClient.prototype._applyIntegrationsMetadata = function (event) {
+        var sdkInfo = event.sdk;
+        var integrationsArray = Object.keys(this._integrations);
+        if (sdkInfo && integrationsArray.length > 0) {
+            sdkInfo.integrations = integrationsArray;
+        }
+    };
+    /**
+     * Tells the backend to send this event
+     * @param event The Sentry event to send
+     */
+    BaseClient.prototype._sendEvent = function (event) {
+        this._getBackend().sendEvent(event);
+    };
+    /**
+     * Processes an event (either error or message) and sends it to Sentry.
+     *
+     * This also adds breadcrumbs and context information to the event. However,
+     * platform specific meta data (such as the User's IP address) must be added
+     * by the SDK implementor.
+     *
+     *
+     * @param event The event to send to Sentry.
+     * @param hint May contain additional information about the original exception.
+     * @param scope A scope containing event metadata.
+     * @returns A SyncPromise that resolves with the event or rejects in case event was/will not be send.
+     */
+    BaseClient.prototype._processEvent = function (event, hint, scope) {
+        var _this = this;
+        var _a = this.getOptions(), beforeSend = _a.beforeSend, sampleRate = _a.sampleRate;
+        if (!this._isEnabled()) {
+            return syncpromise_SyncPromise.reject('SDK not enabled, will not send event.');
+        }
+        var isTransaction = event.type === 'transaction';
+        // 1.0 === 100% events are sent
+        // 0.0 === 0% events are sent
+        // Sampling for transaction happens somewhere else
+        if (!isTransaction && typeof sampleRate === 'number' && Math.random() > sampleRate) {
+            return syncpromise_SyncPromise.reject('This event has been sampled, will not send event.');
+        }
+        return new syncpromise_SyncPromise(function (resolve, reject) {
+            _this._prepareEvent(event, scope, hint)
+                .then(function (prepared) {
+                if (prepared === null) {
+                    reject('An event processor returned null, will not send event.');
+                    return;
+                }
+                var finalEvent = prepared;
+                var isInternalException = hint && hint.data && hint.data.__sentry__ === true;
+                // We skip beforeSend in case of transactions
+                if (isInternalException || !beforeSend || isTransaction) {
+                    _this._sendEvent(finalEvent);
+                    resolve(finalEvent);
+                    return;
+                }
+                var beforeSendResult = beforeSend(prepared, hint);
+                // tslint:disable-next-line:strict-type-predicates
+                if (typeof beforeSendResult === 'undefined') {
+                    logger.error('`beforeSend` method has to return `null` or a valid event.');
+                }
+                else if (Object(is["j" /* isThenable */])(beforeSendResult)) {
+                    _this._handleAsyncBeforeSend(beforeSendResult, resolve, reject);
+                }
+                else {
+                    finalEvent = beforeSendResult;
+                    if (finalEvent === null) {
+                        logger.log('`beforeSend` returned `null`, will not send event.');
+                        resolve(null);
+                        return;
+                    }
+                    // From here on we are really async
+                    _this._sendEvent(finalEvent);
+                    resolve(finalEvent);
+                }
+            })
+                .then(null, function (reason) {
+                _this.captureException(reason, {
+                    data: {
+                        __sentry__: true,
+                    },
+                    originalException: reason,
+                });
+                reject("Event processing pipeline threw an error, original event will not be sent. Details have been sent as a new event.\nReason: " + reason);
+            });
+        });
+    };
+    /**
+     * Resolves before send Promise and calls resolve/reject on parent SyncPromise.
+     */
+    BaseClient.prototype._handleAsyncBeforeSend = function (beforeSend, resolve, reject) {
+        var _this = this;
+        beforeSend
+            .then(function (processedEvent) {
+            if (processedEvent === null) {
+                reject('`beforeSend` returned `null`, will not send event.');
+                return;
+            }
+            // From here on we are really async
+            _this._sendEvent(processedEvent);
+            resolve(processedEvent);
+        })
+            .then(null, function (e) {
+            reject("beforeSend rejected with " + e);
+        });
+    };
+    return BaseClient;
+}());
+
+//# sourceMappingURL=baseclient.js.map
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/node/esm/client.js
 
 
@@ -6759,9 +6753,9 @@ var inboundfilters_InboundFilters = /** @class */ (function () {
         if (clientOptions === void 0) { clientOptions = {}; }
         // tslint:disable:deprecation
         return {
-            allowUrls: node_modules_tslib_tslib_es6_spread((this._options.whitelistUrls || []), (this._options.allowUrls || []), (clientOptions.whitelistUrls || []), (clientOptions.allowUrls || [])),
-            denyUrls: node_modules_tslib_tslib_es6_spread((this._options.blacklistUrls || []), (this._options.denyUrls || []), (clientOptions.blacklistUrls || []), (clientOptions.denyUrls || [])),
-            ignoreErrors: node_modules_tslib_tslib_es6_spread((this._options.ignoreErrors || []), (clientOptions.ignoreErrors || []), DEFAULT_IGNORE_ERRORS),
+            allowUrls: core_node_modules_tslib_tslib_es6_spread((this._options.whitelistUrls || []), (this._options.allowUrls || []), (clientOptions.whitelistUrls || []), (clientOptions.allowUrls || [])),
+            denyUrls: core_node_modules_tslib_tslib_es6_spread((this._options.blacklistUrls || []), (this._options.denyUrls || []), (clientOptions.blacklistUrls || []), (clientOptions.denyUrls || [])),
+            ignoreErrors: core_node_modules_tslib_tslib_es6_spread((this._options.ignoreErrors || []), (clientOptions.ignoreErrors || []), DEFAULT_IGNORE_ERRORS),
             ignoreInternal: typeof this._options.ignoreInternal !== 'undefined' ? this._options.ignoreInternal : true,
         };
     };
@@ -6955,7 +6949,7 @@ var http_Http = /** @class */ (function () {
             return;
         }
         var handlerWrapper = createHandlerWrapper(this._breadcrumbs, this._tracing);
-        var httpModule = __webpack_require__(25);
+        var httpModule = __webpack_require__(24);
         fill(httpModule, 'get', handlerWrapper);
         fill(httpModule, 'request', handlerWrapper);
         // NOTE: Prior to Node 9, `https` used internals of `http` module, thus we don't patch it.
@@ -7602,7 +7596,7 @@ function forget(promise) {
 var cookie = __webpack_require__(96);
 
 // EXTERNAL MODULE: external "os"
-var external_os_ = __webpack_require__(30);
+var external_os_ = __webpack_require__(29);
 
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/node/esm/handlers.js
 
@@ -8122,7 +8116,8 @@ var linkederrors_LinkedErrors = /** @class */ (function () {
         scope_addGlobalEventProcessor(function (event, hint) {
             var self = hub_getCurrentHub().getIntegration(LinkedErrors);
             if (self) {
-                return self.handler(event, hint);
+                var handler = self._handler && self._handler.bind(self);
+                return typeof handler === 'function' ? handler(event, hint) : event;
             }
             return event;
         });
@@ -8130,13 +8125,13 @@ var linkederrors_LinkedErrors = /** @class */ (function () {
     /**
      * @inheritDoc
      */
-    LinkedErrors.prototype.handler = function (event, hint) {
+    LinkedErrors.prototype._handler = function (event, hint) {
         var _this = this;
         if (!event.exception || !event.exception.values || !hint || !Object(is["d" /* isInstanceOf */])(hint.originalException, Error)) {
             return syncpromise_SyncPromise.resolve(event);
         }
         return new syncpromise_SyncPromise(function (resolve) {
-            _this.walkErrorTree(hint.originalException, _this._key)
+            _this._walkErrorTree(hint.originalException, _this._key)
                 .then(function (linkedErrors) {
                 if (event && event.exception && event.exception.values) {
                     event.exception.values = __spread(linkedErrors, event.exception.values);
@@ -8151,7 +8146,7 @@ var linkederrors_LinkedErrors = /** @class */ (function () {
     /**
      * @inheritDoc
      */
-    LinkedErrors.prototype.walkErrorTree = function (error, key, stack) {
+    LinkedErrors.prototype._walkErrorTree = function (error, key, stack) {
         var _this = this;
         if (stack === void 0) { stack = []; }
         if (!Object(is["d" /* isInstanceOf */])(error[key], Error) || stack.length + 1 >= this._limit) {
@@ -8160,7 +8155,7 @@ var linkederrors_LinkedErrors = /** @class */ (function () {
         return new syncpromise_SyncPromise(function (resolve, reject) {
             getExceptionFromError(error[key])
                 .then(function (exception) {
-                _this.walkErrorTree(error[key], key, __spread([exception], stack))
+                _this._walkErrorTree(error[key], key, __spread([exception], stack))
                     .then(resolve)
                     .then(null, function () {
                     reject();
@@ -8427,6 +8422,7 @@ function sdk_close(timeout) {
 
 
 
+
 var INTEGRATIONS = __assign({}, integrations_namespaceObject, esm_integrations_namespaceObject);
 
 // We need to patch domain on the global __SENTRY__ object to make it work for node
@@ -8475,14 +8471,14 @@ function getGlobalThis() {
 
 /***/ }),
 
-/***/ 25:
+/***/ 24:
 /***/ (function(module, exports) {
 
 module.exports = require("http");
 
 /***/ }),
 
-/***/ 28:
+/***/ 27:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -8514,7 +8510,7 @@ const {
 
 /***/ }),
 
-/***/ 29:
+/***/ 28:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8534,6 +8530,13 @@ exports.CHANNEL = (() => {
   if (process.env.AWS_SECRET_ACCESS_KEY) return functions_interface_1.ReleaseChannel.prod;
   return  false ? undefined : functions_interface_1.ReleaseChannel.prod;
 })();
+
+/***/ }),
+
+/***/ 29:
+/***/ (function(module, exports) {
+
+module.exports = require("os");
 
 /***/ }),
 
@@ -8706,13 +8709,6 @@ function isInstanceOf(wat, base) {
 
 /***/ }),
 
-/***/ 30:
-/***/ (function(module, exports) {
-
-module.exports = require("os");
-
-/***/ }),
-
 /***/ 34:
 /***/ (function(module, exports) {
 
@@ -8796,12 +8792,12 @@ module.exports = require("assert");
 
 /***/ }),
 
-/***/ 50:
+/***/ 49:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const os = __webpack_require__(30);
+const os = __webpack_require__(29);
 const tty = __webpack_require__(40);
 const hasFlag = __webpack_require__(132);
 
@@ -8943,7 +8939,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 526:
+/***/ 525:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -8974,7 +8970,7 @@ exports.handler = handler;
 
 /***/ }),
 
-/***/ 62:
+/***/ 61:
 /***/ (function(module, exports) {
 
 /**
@@ -9630,7 +9626,7 @@ function setup(env) {
 	createDebug.disable = disable;
 	createDebug.enable = enable;
 	createDebug.enabled = enabled;
-	createDebug.humanize = __webpack_require__(62);
+	createDebug.humanize = __webpack_require__(61);
 
 	Object.keys(env).forEach(key => {
 		createDebug[key] = env[key];
@@ -9903,7 +9899,7 @@ function setup(env) {
 	createDebug.disable = disable;
 	createDebug.enable = enable;
 	createDebug.enabled = enabled;
-	createDebug.humanize = __webpack_require__(62);
+	createDebug.humanize = __webpack_require__(61);
 
 	Object.keys(env).forEach(key => {
 		createDebug[key] = env[key];
@@ -10157,6 +10153,13 @@ function setup(env) {
 
 module.exports = setup;
 
+
+/***/ }),
+
+/***/ 9:
+/***/ (function(module, exports) {
+
+module.exports = require("events");
 
 /***/ }),
 
@@ -10602,7 +10605,11 @@ function serialize(name, val, options) {
 
   if (null != opt.maxAge) {
     var maxAge = opt.maxAge - 0;
-    if (isNaN(maxAge)) throw new Error('maxAge should be a Number');
+
+    if (isNaN(maxAge) || !isFinite(maxAge)) {
+      throw new TypeError('option maxAge is invalid')
+    }
+
     str += '; Max-Age=' + Math.floor(maxAge);
   }
 
@@ -10652,6 +10659,9 @@ function serialize(name, val, options) {
       case 'strict':
         str += '; SameSite=Strict';
         break;
+      case 'none':
+        str += '; SameSite=None';
+        break;
       default:
         throw new TypeError('option sameSite is invalid');
     }
@@ -10690,7 +10700,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "get_api_base_url", function() { return get_api_base_url; });
 /* harmony import */ var typescript_string_enums__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(14);
 /* harmony import */ var typescript_string_enums__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(typescript_string_enums__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _offirmo_universal_debug_api_placeholder__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(28);
+/* harmony import */ var _offirmo_universal_debug_api_placeholder__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(27);
 
 
 const LIB = 'functions interface'; // tslint:disable-next-line: variable-name
