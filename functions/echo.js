@@ -81,7 +81,7 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 534);
+/******/ 	return __webpack_require__(__webpack_require__.s = 559);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -91,12 +91,12 @@
 
 "use strict";
 
-const ansiStyles = __webpack_require__(99);
-const {stdout: stdoutColor, stderr: stderrColor} = __webpack_require__(49);
+const ansiStyles = __webpack_require__(108);
+const {stdout: stdoutColor, stderr: stderrColor} = __webpack_require__(54);
 const {
 	stringReplaceAll,
 	stringEncaseCRLFWithFirstIndex
-} = __webpack_require__(104);
+} = __webpack_require__(113);
 
 const {isArray} = Array;
 
@@ -305,7 +305,7 @@ const chalkTag = (chalk, ...strings) => {
 	}
 
 	if (template === undefined) {
-		template = __webpack_require__(105);
+		template = __webpack_require__(114);
 	}
 
 	return template(chalk, parts.join(''));
@@ -327,17 +327,17 @@ module.exports = chalk;
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return is_WithSchemaVersion; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return is_WithRevision; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return is_WithTimestamp; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return is_WithSchemaVersion; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return is_WithRevision; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "i", function() { return is_WithTimestamp; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return has_versioned_schema; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "i", function() { return is_revisioned; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "j", function() { return is_time_stamped; });
-/* unused harmony export is_BaseState */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return is_UState; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return is_TState; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return is_UTBundle; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return is_RootState; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "j", function() { return is_revisioned; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "k", function() { return is_time_stamped; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return is_BaseState; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return is_UState; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return is_TState; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return is_UTBundle; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return is_RootState; });
 /////////////////////////////////////////////////
 function is_WithSchemaVersion(s) {
   return Number.isInteger(s === null || s === void 0 ? void 0 : s.schema_version);
@@ -377,11 +377,408 @@ function is_RootState(s) {
 
 /***/ }),
 
-/***/ 100:
+/***/ 10:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export default */
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return getGlobalThis; });
+/* global globalThis, self, window, global */
+const lastResort = {};
+function getGlobalThis() {
+  // @ts-ignore
+  if (typeof globalThis !== 'undefined') return globalThis; // check node first https://github.com/ljharb/globalThis/issues/2
+  // @ts-ignore
+
+  if (typeof global !== 'undefined') return global; // @ts-ignore
+
+  if (typeof self !== 'undefined') return self; // @ts-ignore
+
+  if (typeof window !== 'undefined') return window;
+  if (typeof this !== 'undefined') return this;
+  return lastResort; // should never happen
+}
+
+
+/***/ }),
+
+/***/ 104:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return get_UTC_timestamp_ms; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return get_human_readable_UTC_timestamp_ms; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return get_human_readable_UTC_timestamp_seconds; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return get_human_readable_UTC_timestamp_minutes; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return get_human_readable_UTC_timestamp_days; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return get_ISO8601_extended_ms; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return get_ISO8601_simplified_minutes; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return get_ISO8601_simplified_day; });
+/////////////////////
+// ex. 1542780045627
+function get_UTC_timestamp_ms(now = new Date()) {
+  return +now;
+} /////////////////////
+// spec:
+// - human readable
+// - as short as possible
+// ex. 20181121
+// assumed side effect of being castable to a number
+
+
+function get_human_readable_UTC_timestamp_days(now = new Date()) {
+  const YYYY = now.getUTCFullYear();
+  const MM = String(now.getUTCMonth() + 1).padStart(2, '0');
+  const DD = String(now.getUTCDate()).padStart(2, '0');
+  return `${YYYY}${MM}${DD}`;
+} // ex. 20181121_06h00
+
+
+function get_human_readable_UTC_timestamp_minutes(now = new Date()) {
+  const hh = String(now.getUTCHours()).padStart(2, '0');
+  const mm = String(now.getUTCMinutes()).padStart(2, '0');
+  return get_human_readable_UTC_timestamp_days(now) + `_${hh}h${mm}`;
+} // ex. 20190608_04h23m15
+
+
+function get_human_readable_UTC_timestamp_seconds(now = new Date()) {
+  const ss = String(now.getUTCSeconds()).padStart(2, '0');
+  return get_human_readable_UTC_timestamp_minutes(now) + `m${ss}`;
+} // ex.      20181121_06h00m45s632
+// formerly 20181121_06h00+45.632
+
+
+function get_human_readable_UTC_timestamp_ms(now = new Date()) {
+  const mmm = String(now.getUTCMilliseconds()).padStart(3, '0');
+  return get_human_readable_UTC_timestamp_seconds(now) + `s${mmm}`;
+} /////////////////////
+// ISO 8601 Extended Format. The format is as follows: YYYY-MM-DDTHH:mm:ss.sssZ
+// http://www.ecma-international.org/ecma-262/5.1/#sec-15.9.1.15
+
+
+function get_ISO8601_extended_ms(now = new Date()) {
+  return now.toISOString();
+}
+
+function get_ISO8601_simplified_minutes(now = new Date()) {
+  return get_ISO8601_extended_ms(now).slice(0, 16);
+}
+
+function get_ISO8601_simplified_day(now = new Date()) {
+  return get_ISO8601_extended_ms(now).slice(0, 10);
+} // fun but unclear
+// https://space.stackexchange.com/questions/36628/utc-timestamp-format-for-launch-vehicles
+
+/*function get_space_timestamp_ms(now: Readonly<Date> = new Date()): string {
+    const YYYY = now.getUTCFullYear()
+    const MM = now.getUTCMonth()
+    const DD = ('0' + now.getUTCDate()).slice(-2)
+    const hh = ('0' + now.getUTCHours()).slice(-2)
+    const mm = ('0' + now.getUTCMinutes()).slice(-2)
+    const ss = ('0' + now.getUTCSeconds()).slice(-2)
+    const mmm = ('00' + now.getUTCMilliseconds()).slice(-3)
+
+    return `${DD} ${hh}:${mm}:${ss}.${mmm}`
+}*/
+/////////////////////
+
+
+ /////////////////////
+
+/***/ }),
+
+/***/ 105:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return enforce_immutability; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return complete_or_cancel_eager_mutation_propagating_possible_child_mutation; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return are_ustate_revision_requirements_met; });
+/* harmony import */ var tiny_invariant__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
+/* harmony import */ var icepick__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(77);
+/* harmony import */ var icepick__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(icepick__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _type_guards__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(1);
+/* harmony import */ var _selectors__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(3);
+
+
+
+
+const enforce_immutability = state => icepick__WEBPACK_IMPORTED_MODULE_1___default.a.freeze(state); // Use this in case of reducing a child state while unsure whether this child state has changed or not.
+// - the best case is to return 'previous' = no mutation
+// - if a child state's revision increased, increase ours and keep the mutation
+// - it's possible that an "update to now" was invoked, it's ok to ignore that if that's the only change
+// - this fn will intentionally NOT go deeper than 1st level, each state is responsible for itself!
+// - this fn will intentionally NOT handle time changes, this should be done separately at the end! (separate update_to_now call)
+
+function complete_or_cancel_eager_mutation_propagating_possible_child_mutation(previous, current, updated = previous, debug_id = 'unknown src') {
+  const PREFIX = `CoCEMPPCM(${debug_id})`;
+  Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(previous, `${PREFIX}: should have previous`);
+  /*if (!previous)
+      return current*/
+
+  if (current === previous) return previous;
+  if (current === updated) return previous;
+
+  if (Object(_type_guards__WEBPACK_IMPORTED_MODULE_2__[/* is_UTBundle */ "f"])(current)) {
+    // this is a more advanced state
+    Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(Object(_type_guards__WEBPACK_IMPORTED_MODULE_2__[/* is_UTBundle */ "f"])(previous), `${PREFIX}: previous also has bundle data structure!`);
+    Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(Object(_type_guards__WEBPACK_IMPORTED_MODULE_2__[/* is_UTBundle */ "f"])(updated), `${PREFIX}: updated also has bundle data structure!`);
+    const final_u_state = complete_or_cancel_eager_mutation_propagating_possible_child_mutation(previous[0], current[0], updated === null || updated === void 0 ? void 0 : updated[0]);
+    const final_t_state = complete_or_cancel_eager_mutation_propagating_possible_child_mutation(previous[1], current[1], updated === null || updated === void 0 ? void 0 : updated[1]);
+    if (final_u_state === previous[0] && final_t_state === previous[1]) return previous;
+    if (final_u_state === updated[0] && final_t_state === updated[1]) return previous;
+    return enforce_immutability([final_u_state, final_t_state]);
+  } else if (Object(_type_guards__WEBPACK_IMPORTED_MODULE_2__[/* is_RootState */ "c"])(current)) {
+    // this is a more advanced state
+    Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(Object(_type_guards__WEBPACK_IMPORTED_MODULE_2__[/* is_RootState */ "c"])(previous), `${PREFIX}: previous also has root data structure!`);
+    Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(Object(_type_guards__WEBPACK_IMPORTED_MODULE_2__[/* is_RootState */ "c"])(updated), `${PREFIX}: updated also has root data structure!`);
+    const final_u_state = complete_or_cancel_eager_mutation_propagating_possible_child_mutation(previous.u_state, current.u_state, updated.u_state, debug_id + '.u_state');
+    const final_t_state = complete_or_cancel_eager_mutation_propagating_possible_child_mutation(previous.t_state, current.t_state, updated.t_state, debug_id + '.t_state');
+    if (final_u_state === previous.u_state && final_t_state === previous.t_state) return previous;
+    if (final_u_state === updated.u_state && final_t_state === updated.t_state) return previous;
+    return enforce_immutability({ ...current,
+      u_state: final_u_state,
+      t_state: final_t_state
+    });
+  } //let is_t_state = is_TState(current)
+
+
+  Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(Object(_type_guards__WEBPACK_IMPORTED_MODULE_2__[/* is_UState */ "e"])(current) || Object(_type_guards__WEBPACK_IMPORTED_MODULE_2__[/* is_TState */ "d"])(current), `${PREFIX}: current has U/TState data structure!`); // unneeded except for helping TS type inference
+
+  Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(Object(_type_guards__WEBPACK_IMPORTED_MODULE_2__[/* is_UState */ "e"])(previous) && Object(_type_guards__WEBPACK_IMPORTED_MODULE_2__[/* is_UState */ "e"])(updated) && Object(_type_guards__WEBPACK_IMPORTED_MODULE_2__[/* is_UState */ "e"])(current) || Object(_type_guards__WEBPACK_IMPORTED_MODULE_2__[/* is_TState */ "d"])(previous) && Object(_type_guards__WEBPACK_IMPORTED_MODULE_2__[/* is_TState */ "d"])(updated) && Object(_type_guards__WEBPACK_IMPORTED_MODULE_2__[/* is_TState */ "d"])(current), `${PREFIX}: current+previous+updated have the same U/TState data structure!`);
+  Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(previous.revision === updated.revision, `${PREFIX}: previous & updated should have the same revision`);
+  Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(current.revision >= previous.revision, `${PREFIX}: current >= previous revision`);
+  if (current.revision !== previous.revision) throw new Error(`${PREFIX}: revision already incremented! This call is not needed since you’re sure there was a change!`);
+  const typed_previous = previous;
+  const typed_updated = updated;
+  const typed_current = current;
+  let has_child_revision_increment = false; //let has_non_child_key_change = false
+  //let has_timestamp_change: boolean | undefined = undefined
+
+  for (const k in typed_current) {
+    const previous_has_revision = Object(_type_guards__WEBPACK_IMPORTED_MODULE_2__[/* is_WithRevision */ "g"])(typed_updated[k]);
+    const current_has_revision = Object(_type_guards__WEBPACK_IMPORTED_MODULE_2__[/* is_WithRevision */ "g"])(typed_current[k]);
+    Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(previous_has_revision === current_has_revision, `${PREFIX}/${k}: revisioning should be coherent!`);
+
+    if (!current_has_revision) {
+      //let has_change = typed_updated[k] !== typed_current[k]
+      //has_non_child_key_change ||= has_change
+      Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(typed_updated[k] === typed_current[k], `${PREFIX}/${k}: manual change on Base/UState non-child key seen! This call is not needed since you’re sure there was a change!`);
+    }
+
+    const previous_revision = Object(_selectors__WEBPACK_IMPORTED_MODULE_3__[/* get_revision_loose */ "c"])(typed_previous[k]);
+    const updated_revision = Object(_selectors__WEBPACK_IMPORTED_MODULE_3__[/* get_revision_loose */ "c"])(typed_updated[k]);
+    Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(previous_revision === updated_revision, `${PREFIX}/${k}: previous & updated child should have the same revision`);
+    const current_revision = Object(_selectors__WEBPACK_IMPORTED_MODULE_3__[/* get_revision_loose */ "c"])(typed_current[k]);
+
+    if (current_revision !== updated_revision) {
+      if (current_revision !== updated_revision + 1) {// NO! It may be normal for a sub to have been stimulated more than once,
+        // ex. gained 3 achievements
+        //throw new Error(...)
+      }
+
+      has_child_revision_increment = true;
+      break;
+    }
+  }
+
+  if (!has_child_revision_increment) return previous;
+  return enforce_immutability({ ...current,
+    revision: Object(_selectors__WEBPACK_IMPORTED_MODULE_3__[/* get_revision */ "b"])(current) + 1
+  });
+} // check if the state is still in the revision we expect
+// ex. for an action, check it's still valid, ex. object already sold?
+
+function are_ustate_revision_requirements_met(state, requirements = {}) {
+  for (const k in requirements) {
+    Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(state.u_state[k], `are_ustate_revision_requirements_met(): sub state not found: "${k}"!`);
+    const current_revision = state.u_state[k].revision;
+    Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(Number.isInteger(current_revision), `are_ustate_revision_requirements_met(): sub state has no/invalid revision: "${k}"!`);
+    if (current_revision !== requirements[k]) return false;
+  }
+
+  return true;
+}
+
+/***/ }),
+
+/***/ 108:
 /***/ (function(module, exports, __webpack_require__) {
 
-const conversions = __webpack_require__(53);
-const route = __webpack_require__(102);
+"use strict";
+/* WEBPACK VAR INJECTION */(function(module) {
+
+const wrapAnsi16 = (fn, offset) => (...args) => {
+	const code = fn(...args);
+	return `\u001B[${code + offset}m`;
+};
+
+const wrapAnsi256 = (fn, offset) => (...args) => {
+	const code = fn(...args);
+	return `\u001B[${38 + offset};5;${code}m`;
+};
+
+const wrapAnsi16m = (fn, offset) => (...args) => {
+	const rgb = fn(...args);
+	return `\u001B[${38 + offset};2;${rgb[0]};${rgb[1]};${rgb[2]}m`;
+};
+
+const ansi2ansi = n => n;
+const rgb2rgb = (r, g, b) => [r, g, b];
+
+const setLazyProperty = (object, property, get) => {
+	Object.defineProperty(object, property, {
+		get: () => {
+			const value = get();
+
+			Object.defineProperty(object, property, {
+				value,
+				enumerable: true,
+				configurable: true
+			});
+
+			return value;
+		},
+		enumerable: true,
+		configurable: true
+	});
+};
+
+/** @type {typeof import('color-convert')} */
+let colorConvert;
+const makeDynamicStyles = (wrap, targetSpace, identity, isBackground) => {
+	if (colorConvert === undefined) {
+		colorConvert = __webpack_require__(109);
+	}
+
+	const offset = isBackground ? 10 : 0;
+	const styles = {};
+
+	for (const [sourceSpace, suite] of Object.entries(colorConvert)) {
+		const name = sourceSpace === 'ansi16' ? 'ansi' : sourceSpace;
+		if (sourceSpace === targetSpace) {
+			styles[name] = wrap(identity, offset);
+		} else if (typeof suite === 'object') {
+			styles[name] = wrap(suite[targetSpace], offset);
+		}
+	}
+
+	return styles;
+};
+
+function assembleStyles() {
+	const codes = new Map();
+	const styles = {
+		modifier: {
+			reset: [0, 0],
+			// 21 isn't widely supported and 22 does the same thing
+			bold: [1, 22],
+			dim: [2, 22],
+			italic: [3, 23],
+			underline: [4, 24],
+			inverse: [7, 27],
+			hidden: [8, 28],
+			strikethrough: [9, 29]
+		},
+		color: {
+			black: [30, 39],
+			red: [31, 39],
+			green: [32, 39],
+			yellow: [33, 39],
+			blue: [34, 39],
+			magenta: [35, 39],
+			cyan: [36, 39],
+			white: [37, 39],
+
+			// Bright color
+			blackBright: [90, 39],
+			redBright: [91, 39],
+			greenBright: [92, 39],
+			yellowBright: [93, 39],
+			blueBright: [94, 39],
+			magentaBright: [95, 39],
+			cyanBright: [96, 39],
+			whiteBright: [97, 39]
+		},
+		bgColor: {
+			bgBlack: [40, 49],
+			bgRed: [41, 49],
+			bgGreen: [42, 49],
+			bgYellow: [43, 49],
+			bgBlue: [44, 49],
+			bgMagenta: [45, 49],
+			bgCyan: [46, 49],
+			bgWhite: [47, 49],
+
+			// Bright color
+			bgBlackBright: [100, 49],
+			bgRedBright: [101, 49],
+			bgGreenBright: [102, 49],
+			bgYellowBright: [103, 49],
+			bgBlueBright: [104, 49],
+			bgMagentaBright: [105, 49],
+			bgCyanBright: [106, 49],
+			bgWhiteBright: [107, 49]
+		}
+	};
+
+	// Alias bright black as gray (and grey)
+	styles.color.gray = styles.color.blackBright;
+	styles.bgColor.bgGray = styles.bgColor.bgBlackBright;
+	styles.color.grey = styles.color.blackBright;
+	styles.bgColor.bgGrey = styles.bgColor.bgBlackBright;
+
+	for (const [groupName, group] of Object.entries(styles)) {
+		for (const [styleName, style] of Object.entries(group)) {
+			styles[styleName] = {
+				open: `\u001B[${style[0]}m`,
+				close: `\u001B[${style[1]}m`
+			};
+
+			group[styleName] = styles[styleName];
+
+			codes.set(style[0], style[1]);
+		}
+
+		Object.defineProperty(styles, groupName, {
+			value: group,
+			enumerable: false
+		});
+	}
+
+	Object.defineProperty(styles, 'codes', {
+		value: codes,
+		enumerable: false
+	});
+
+	styles.color.close = '\u001B[39m';
+	styles.bgColor.close = '\u001B[49m';
+
+	setLazyProperty(styles.color, 'ansi', () => makeDynamicStyles(wrapAnsi16, 'ansi16', ansi2ansi, false));
+	setLazyProperty(styles.color, 'ansi256', () => makeDynamicStyles(wrapAnsi256, 'ansi256', ansi2ansi, false));
+	setLazyProperty(styles.color, 'ansi16m', () => makeDynamicStyles(wrapAnsi16m, 'rgb', rgb2rgb, false));
+	setLazyProperty(styles.bgColor, 'ansi', () => makeDynamicStyles(wrapAnsi16, 'ansi16', ansi2ansi, true));
+	setLazyProperty(styles.bgColor, 'ansi256', () => makeDynamicStyles(wrapAnsi256, 'ansi256', ansi2ansi, true));
+	setLazyProperty(styles.bgColor, 'ansi16m', () => makeDynamicStyles(wrapAnsi16m, 'rgb', rgb2rgb, true));
+
+	return styles;
+}
+
+// Make the export immutable
+Object.defineProperty(module, 'exports', {
+	enumerable: true,
+	get: assembleStyles
+});
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(43)(module)))
+
+/***/ }),
+
+/***/ 109:
+/***/ (function(module, exports, __webpack_require__) {
+
+const conversions = __webpack_require__(58);
+const route = __webpack_require__(111);
 
 const convert = {};
 
@@ -465,7 +862,7 @@ module.exports = convert;
 
 /***/ }),
 
-/***/ 101:
+/***/ 110:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -625,10 +1022,10 @@ module.exports = {
 
 /***/ }),
 
-/***/ 102:
+/***/ 111:
 /***/ (function(module, exports, __webpack_require__) {
 
-const conversions = __webpack_require__(53);
+const conversions = __webpack_require__(58);
 
 /*
 	This function routes a model to all other models.
@@ -729,7 +1126,7 @@ module.exports = function (fromModel) {
 
 /***/ }),
 
-/***/ 103:
+/***/ 112:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -745,7 +1142,7 @@ module.exports = (flag, argv = process.argv) => {
 
 /***/ }),
 
-/***/ 104:
+/***/ 113:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -792,7 +1189,7 @@ module.exports = {
 
 /***/ }),
 
-/***/ 105:
+/***/ 114:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -934,21 +1331,21 @@ module.exports = (chalk, temporary) => {
 
 /***/ }),
 
-/***/ 11:
+/***/ 12:
 /***/ (function(module, exports) {
 
 module.exports = require("zlib");
 
 /***/ }),
 
-/***/ 13:
+/***/ 14:
 /***/ (function(module, exports) {
 
 module.exports = require("http");
 
 /***/ }),
 
-/***/ 135:
+/***/ 146:
 /***/ (function(__webpack_module__, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -957,11 +1354,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Request", function() { return Request; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Response", function() { return Response; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "FetchError", function() { return FetchError; });
-/* harmony import */ var stream__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(5);
-/* harmony import */ var http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(13);
-/* harmony import */ var url__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(8);
-/* harmony import */ var https__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(22);
-/* harmony import */ var zlib__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(11);
+/* harmony import */ var stream__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(6);
+/* harmony import */ var http__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(14);
+/* harmony import */ var url__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(9);
+/* harmony import */ var https__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(25);
+/* harmony import */ var zlib__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(12);
 
 
 
@@ -2608,191 +3005,6 @@ fetch.Promise = global.Promise;
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return STRICT_STANDARD_ERROR_FIELDS; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return QUASI_STANDARD_ERROR_FIELDS; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return COMMON_ERROR_FIELDS; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return COMMON_ERROR_FIELDS_EXTENDED; });
-const STRICT_STANDARD_ERROR_FIELDS = new Set([// standard fields
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/prototype
-'name', 'message']);
-const QUASI_STANDARD_ERROR_FIELDS = new Set([// conv to array needed due to a babel bug 😢
-...Array.from(STRICT_STANDARD_ERROR_FIELDS), // quasi-standard: followed by all browsers + node
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/prototype
-'stack']);
-const COMMON_ERROR_FIELDS = new Set([// conv to array needed due to a babel bug 😢
-...Array.from(QUASI_STANDARD_ERROR_FIELDS), // standard in node only:
-'code', // https://nodejs.org/dist/latest/docs/api/errors.html#errors_node_js_error_codes
-// non standard but widely used:
-'statusCode', 'shouldRedirect', 'framesToPop']);
-const COMMON_ERROR_FIELDS_EXTENDED = new Set([// conv to array needed due to a babel bug 😢
-...Array.from(COMMON_ERROR_FIELDS), // My (Offirmo) extensions:
-'details', '_temp']);
-
-/***/ }),
-
-/***/ 17:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-function Enum() {
-    var values = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        values[_i] = arguments[_i];
-    }
-    if (typeof values[0] === "string") {
-        var result = {};
-        for (var _a = 0, values_1 = values; _a < values_1.length; _a++) {
-            var value = values_1[_a];
-            result[value] = value;
-        }
-        return result;
-    }
-    else {
-        return values[0];
-    }
-}
-exports.Enum = Enum;
-(function (Enum) {
-    function ofKeys(e) {
-        var result = {};
-        for (var _i = 0, _a = Object.keys(e); _i < _a.length; _i++) {
-            var key = _a[_i];
-            result[key] = key;
-        }
-        return result;
-    }
-    Enum.ofKeys = ofKeys;
-    function keys(e) {
-        return Object.keys(e);
-    }
-    Enum.keys = keys;
-    function values(e) {
-        var result = [];
-        for (var _i = 0, _a = Object.keys(e); _i < _a.length; _i++) {
-            var key = _a[_i];
-            result.push(e[key]);
-        }
-        return result;
-    }
-    Enum.values = values;
-    function isType(e, value) {
-        return values(e).indexOf(value) !== -1;
-    }
-    Enum.isType = isType;
-})(Enum = exports.Enum || (exports.Enum = {}));
-//# sourceMappingURL=index.js.map
-
-/***/ }),
-
-/***/ 185:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.get_netlify_user_data = exports.DEV_MOCK_NETLIFY_USER = void 0;
-
-const consts_1 = __webpack_require__(31);
-
-const channel_1 = __webpack_require__(37); /////////////////////////////////////////////////
-
-
-function _ensure_netlify_logged_in(context) {
-  if (!context.clientContext) throw new Error('No/bad/outdated token [1]! (not logged in?)');
-  if (!context.clientContext.user) throw new Error('No/bad/outdated token [2]! (not logged in?)');
-}
-
-exports.DEV_MOCK_NETLIFY_USER = {
-  email: 'dev@online-adventur.es',
-  sub: 'fake-netlify-id',
-  app_metadata: {
-    provider: 'test',
-    roles: ['test', 'admin']
-  },
-  user_metadata: {
-    avatar_url: undefined,
-    full_name: 'Fake User For Dev'
-  },
-  exp: -1
-};
-
-function get_netlify_user_data(context) {
-  try {
-    _ensure_netlify_logged_in(context);
-  } catch (err) {
-    err.statusCode = consts_1.HTTP_STATUS_CODE.error.client.unauthorized;
-
-    if (err.message.includes('No/bad/outdated token') && channel_1.CHANNEL === 'dev') {
-      // pretend
-      context.clientContext.user = exports.DEV_MOCK_NETLIFY_USER;
-      context.clientContext.xxx = "WAS FAKED FOR DEV!";
-    } else throw err;
-  }
-
-  const {
-    email,
-    sub: netlify_id,
-    app_metadata: {
-      provider,
-      roles
-    },
-    user_metadata: {
-      avatar_url,
-      full_name
-    }
-  } = context.clientContext.user;
-  return {
-    netlify_id,
-    email,
-    provider,
-    roles: roles || [],
-    avatar_url,
-    full_name
-  };
-}
-
-exports.get_netlify_user_data = get_netlify_user_data;
-
-/***/ }),
-
-/***/ 2:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-var isProduction = "production" === 'production';
-var prefix = 'Invariant failed';
-function invariant(condition, message) {
-    if (condition) {
-        return;
-    }
-    if (isProduction) {
-        throw new Error(prefix);
-    }
-    throw new Error(prefix + ": " + (message || ''));
-}
-
-/* harmony default export */ __webpack_exports__["default"] = (invariant);
-
-
-/***/ }),
-
-/***/ 22:
-/***/ (function(module, exports) {
-
-module.exports = require("https");
-
-/***/ }),
-
-/***/ 27:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
 // ESM COMPAT FLAG
 __webpack_require__.r(__webpack_exports__);
 
@@ -2833,14 +3045,14 @@ __webpack_require__.d(analytics_state_namespaceObject, "addDetail", function() {
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/3-advanced--multi/soft-execution-context/dist/src.es2019/types.js
 
 // EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/1-stdlib/globalthis-ponyfill/dist/src.es2019/index.js
-var src_es2019 = __webpack_require__(9);
+var src_es2019 = __webpack_require__(10);
 
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/3-advanced--multi/soft-execution-context/dist/src.es2019/consts.js
 const LIB = 'soft-execution-context';
 const INTERNAL_PROP = '_SEC';
 
 // EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/emittery/index.js
-var emittery = __webpack_require__(71);
+var emittery = __webpack_require__(76);
 var emittery_default = /*#__PURE__*/__webpack_require__.n(emittery);
 
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/3-advanced--multi/soft-execution-context/dist/src.es2019/root-prototype.js
@@ -3179,13 +3391,13 @@ function promiseTry(fn) {
 
 
 // EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/1-stdlib/timestamps/dist/src.es2019/generate.js
-var generate = __webpack_require__(97);
+var generate = __webpack_require__(104);
 
 // EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/2-foundation/error-utils/dist/src.es2019/util--normalize.js
-var util_normalize = __webpack_require__(74);
+var util_normalize = __webpack_require__(81);
 
 // EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/2-foundation/error-utils/dist/src.es2019/util--create.js
-var util_create = __webpack_require__(75);
+var util_create = __webpack_require__(82);
 
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/3-advanced--multi/soft-execution-context/dist/src.es2019/plugins/error-handling/state.js
 /////////////////////
@@ -3607,14 +3819,241 @@ function getRootSEC() {
 
 /***/ }),
 
-/***/ 30:
+/***/ 17:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return STRICT_STANDARD_ERROR_FIELDS; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return QUASI_STANDARD_ERROR_FIELDS; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return COMMON_ERROR_FIELDS; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return COMMON_ERROR_FIELDS_EXTENDED; });
+const STRICT_STANDARD_ERROR_FIELDS = new Set([// standard fields
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/prototype
+'name', 'message']);
+const QUASI_STANDARD_ERROR_FIELDS = new Set([// conv to array needed due to a babel bug 😢
+...Array.from(STRICT_STANDARD_ERROR_FIELDS), // quasi-standard: followed by all browsers + node
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/prototype
+'stack']);
+const COMMON_ERROR_FIELDS = new Set([// conv to array needed due to a babel bug 😢
+...Array.from(QUASI_STANDARD_ERROR_FIELDS), // standard in node only:
+'code', // https://nodejs.org/dist/latest/docs/api/errors.html#errors_node_js_error_codes
+// non standard but widely used:
+'statusCode', 'shouldRedirect', 'framesToPop']);
+const COMMON_ERROR_FIELDS_EXTENDED = new Set([// conv to array needed due to a babel bug 😢
+...Array.from(COMMON_ERROR_FIELDS), // My (Offirmo) extensions:
+'details', '_temp']);
+
+/***/ }),
+
+/***/ 2:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+var isProduction = "production" === 'production';
+var prefix = 'Invariant failed';
+function invariant(condition, message) {
+    if (condition) {
+        return;
+    }
+    if (isProduction) {
+        throw new Error(prefix);
+    }
+    throw new Error(prefix + ": " + (message || ''));
+}
+
+/* harmony default export */ __webpack_exports__["default"] = (invariant);
+
+
+/***/ }),
+
+/***/ 206:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.get_netlify_user_data = exports.DEV_MOCK_NETLIFY_USER = void 0;
+
+const consts_1 = __webpack_require__(34);
+
+const channel_1 = __webpack_require__(41); /////////////////////////////////////////////////
+
+
+function _ensure_netlify_logged_in(context) {
+  if (!context.clientContext) throw new Error('No/bad/outdated token [1]! (not logged in?)');
+  if (!context.clientContext.user) throw new Error('No/bad/outdated token [2]! (not logged in?)');
+}
+
+exports.DEV_MOCK_NETLIFY_USER = {
+  email: 'dev@online-adventur.es',
+  sub: 'fake-netlify-id',
+  app_metadata: {
+    provider: 'test',
+    roles: ['test', 'admin']
+  },
+  user_metadata: {
+    avatar_url: undefined,
+    full_name: 'Fake User For Dev'
+  },
+  exp: -1
+};
+
+function get_netlify_user_data(context) {
+  try {
+    _ensure_netlify_logged_in(context);
+  } catch (err) {
+    err.statusCode = consts_1.HTTP_STATUS_CODE.error.client.unauthorized;
+
+    if (err.message.includes('No/bad/outdated token') && channel_1.CHANNEL === 'dev') {
+      // pretend
+      context.clientContext.user = exports.DEV_MOCK_NETLIFY_USER;
+      context.clientContext.xxx = "WAS FAKED FOR DEV!";
+    } else throw err;
+  }
+
+  const {
+    email,
+    sub: netlify_id,
+    app_metadata: {
+      provider,
+      roles
+    },
+    user_metadata: {
+      avatar_url,
+      full_name
+    }
+  } = context.clientContext.user;
+  return {
+    netlify_id,
+    email,
+    provider,
+    roles: roles || [],
+    avatar_url,
+    full_name
+  };
+}
+
+exports.get_netlify_user_data = get_netlify_user_data;
+
+/***/ }),
+
+/***/ 25:
+/***/ (function(module, exports) {
+
+module.exports = require("https");
+
+/***/ }),
+
+/***/ 3:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return get_schema_version; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return get_schema_version_loose; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return get_revision; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return get_revision_loose; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return get_timestamp; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return get_timestamp_loose; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return get_base_loose; });
+/* harmony import */ var tiny_invariant__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
+/* harmony import */ var _type_guards__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1);
+
+
+function get_schema_version(s) {
+  if (Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_UTBundle */ "f"])(s)) {
+    Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(get_schema_version(s[0]) === get_schema_version(s[1]), 'get_schema_version() matching U & T versions!');
+    return get_schema_version(s[0]);
+  }
+
+  if (Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_RootState */ "c"])(s)) {
+    Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(get_schema_version(s.u_state) === get_schema_version(s.t_state), 'get_schema_version() matching U & T versions!');
+    return get_schema_version(s.u_state);
+  }
+
+  Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_WithSchemaVersion */ "h"])(s), 'get_schema_version() structure!');
+  const {
+    schema_version
+  } = s;
+  Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(Number.isSafeInteger(schema_version), 'get_schema_version() safeInteger!');
+  return schema_version;
+}
+function get_schema_version_loose(s) {
+  if (Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* has_versioned_schema */ "a"])(s)) return get_schema_version(s); // specific fallbacks:
+  // loose legacy bundles
+
+  if (Array.isArray(s) && Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* has_versioned_schema */ "a"])(s[0])) return get_schema_version(s[0]); // final fallback
+
+  return 0;
+}
+function get_revision(s) {
+  if (Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_UTBundle */ "f"])(s)) {
+    return get_revision(s[0]) + get_revision(s[1]);
+  }
+
+  if (Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_RootState */ "c"])(s)) {
+    return get_revision(s.u_state) + get_revision(s.t_state);
+  }
+
+  Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_WithRevision */ "g"])(s), 'get_revision() structure');
+  const {
+    revision
+  } = s;
+  Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(Number.isSafeInteger(revision), 'get_revision() safeInteger');
+  return revision;
+}
+function get_revision_loose(s) {
+  if (Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_revisioned */ "j"])(s)) return get_revision(s); // specific fallbacks:
+  // loose legacy bundles
+
+  if (Array.isArray(s) && Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_revisioned */ "j"])(s[0])) return get_revision(s[0]) + get_revision_loose(s[1]); // final fallback
+
+  return 0;
+}
+function get_timestamp(s) {
+  if (Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_UTBundle */ "f"])(s)) {
+    return get_timestamp(s[1]);
+  }
+
+  if (Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_RootState */ "c"])(s)) {
+    return get_timestamp(s.t_state);
+  }
+
+  Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_WithTimestamp */ "i"])(s), 'get_timestamp() structure');
+  const {
+    timestamp_ms
+  } = s;
+  Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(Number.isSafeInteger(timestamp_ms), 'get_timestamp() safeInteger');
+  return timestamp_ms;
+}
+function get_timestamp_loose(s) {
+  if (Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_time_stamped */ "k"])(s)) return get_timestamp(s); // specific fallbacks:
+  // loose bundles
+
+  if (Array.isArray(s) && Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_time_stamped */ "k"])(s[1])) return get_timestamp(s[1]); // final fallback
+
+  return 0;
+}
+function get_base_loose(s) {
+  return {
+    schema_version: get_schema_version_loose(s),
+    revision: get_revision_loose(s)
+  };
+}
+
+/***/ }),
+
+/***/ 31:
 /***/ (function(module, exports) {
 
 module.exports = require("os");
 
 /***/ }),
 
-/***/ 31:
+/***/ 34:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3638,6 +4077,7 @@ exports.HTTP_STATUS_CODE = {
   error: {
     client: {
       bad_request: 400,
+      // https://stackoverflow.com/questions/50143518/401-unauthorized-vs-403-forbidden-which-is-the-right-status-code-for-when-the-u
       unauthorized: 401,
       forbidden: 403,
       not_found: 404,
@@ -3653,33 +4093,6 @@ exports.HTTP_STATUS_CODE = {
 
 /***/ }),
 
-/***/ 33:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _fields__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(15);
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "STRICT_STANDARD_ERROR_FIELDS", function() { return _fields__WEBPACK_IMPORTED_MODULE_0__["d"]; });
-
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "QUASI_STANDARD_ERROR_FIELDS", function() { return _fields__WEBPACK_IMPORTED_MODULE_0__["c"]; });
-
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "COMMON_ERROR_FIELDS", function() { return _fields__WEBPACK_IMPORTED_MODULE_0__["a"]; });
-
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "COMMON_ERROR_FIELDS_EXTENDED", function() { return _fields__WEBPACK_IMPORTED_MODULE_0__["b"]; });
-
-/* harmony import */ var _util_create__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(75);
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "createError", function() { return _util_create__WEBPACK_IMPORTED_MODULE_1__["a"]; });
-
-/* harmony import */ var _util_normalize__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(74);
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "normalizeError", function() { return _util_normalize__WEBPACK_IMPORTED_MODULE_2__["a"]; });
-
-
-
-
-
-
-/***/ }),
-
 /***/ 35:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -3692,7 +4105,7 @@ __webpack_require__.d(__webpack_exports__, "b", function() { return /* binding *
 // UNUSED EXPORTS: exposeInternal, addDebugCommand, globalThis, createV1
 
 // EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/1-stdlib/globalthis-ponyfill/dist/src.es2019/index.js
-var src_es2019 = __webpack_require__(9);
+var src_es2019 = __webpack_require__(10);
 
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/2-foundation/practical-logger-minimal-noop/dist/src.es2019/index.js
 function src_es2019_NOP() {}
@@ -3762,6 +4175,33 @@ const {
 /***/ }),
 
 /***/ 37:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _fields__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(17);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "STRICT_STANDARD_ERROR_FIELDS", function() { return _fields__WEBPACK_IMPORTED_MODULE_0__["d"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "QUASI_STANDARD_ERROR_FIELDS", function() { return _fields__WEBPACK_IMPORTED_MODULE_0__["c"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "COMMON_ERROR_FIELDS", function() { return _fields__WEBPACK_IMPORTED_MODULE_0__["a"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "COMMON_ERROR_FIELDS_EXTENDED", function() { return _fields__WEBPACK_IMPORTED_MODULE_0__["b"]; });
+
+/* harmony import */ var _util_create__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(82);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "createError", function() { return _util_create__WEBPACK_IMPORTED_MODULE_1__["a"]; });
+
+/* harmony import */ var _util_normalize__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(81);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "normalizeError", function() { return _util_normalize__WEBPACK_IMPORTED_MODULE_2__["a"]; });
+
+
+
+
+
+
+/***/ }),
+
+/***/ 41:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3772,9 +4212,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.CHANNEL = void 0;
 
-const typescript_string_enums_1 = __webpack_require__(17);
+const typescript_string_enums_1 = __webpack_require__(8);
 
-const functions_interface_1 = __webpack_require__(51); /////////////////////////////////////////////////
+const functions_interface_1 = __webpack_require__(53); /////////////////////////////////////////////////
 
 
 exports.CHANNEL = (() => {
@@ -3790,7 +4230,7 @@ exports.CHANNEL = (() => {
 
 /***/ }),
 
-/***/ 41:
+/***/ 43:
 /***/ (function(module, exports) {
 
 module.exports = function(module) {
@@ -3819,14 +4259,276 @@ module.exports = function(module) {
 
 /***/ }),
 
-/***/ 49:
+/***/ 53:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+// ESM COMPAT FLAG
+__webpack_require__.r(__webpack_exports__);
+
+// EXPORTS
+__webpack_require__.d(__webpack_exports__, "LIB", function() { return /* reexport */ LIB; });
+__webpack_require__.d(__webpack_exports__, "HEADER_IMPERSONATE", function() { return /* reexport */ HEADER_IMPERSONATE; });
+__webpack_require__.d(__webpack_exports__, "Endpoint", function() { return /* reexport */ Endpoint; });
+__webpack_require__.d(__webpack_exports__, "SERVER_RESPONSE_VERSION", function() { return /* reexport */ SERVER_RESPONSE_VERSION; });
+__webpack_require__.d(__webpack_exports__, "HeadersV", function() { return /* reexport */ HeadersV; });
+__webpack_require__.d(__webpack_exports__, "fetch_oa", function() { return /* reexport */ fetch_oa; });
+__webpack_require__.d(__webpack_exports__, "ReleaseChannel", function() { return /* reexport */ ReleaseChannel; });
+__webpack_require__.d(__webpack_exports__, "get_allowed_origin", function() { return /* reexport */ get_allowed_origin; });
+__webpack_require__.d(__webpack_exports__, "get_api_base_url", function() { return /* reexport */ get_api_base_url; });
+__webpack_require__.d(__webpack_exports__, "create_server_response_body__blank", function() { return /* reexport */ create_server_response_body__blank; });
+__webpack_require__.d(__webpack_exports__, "create_server_response_body__error", function() { return /* reexport */ create_server_response_body__error; });
+__webpack_require__.d(__webpack_exports__, "create_server_response_body__data", function() { return /* reexport */ create_server_response_body__data; });
+__webpack_require__.d(__webpack_exports__, "is_server_response_body", function() { return /* reexport */ is_server_response_body; });
+
+// EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/typescript-string-enums/dist/index.js
+var dist = __webpack_require__(8);
+
+// CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/A-apps/online-adventur.es/functions-interface/dist/src.es2019/consts.js
+ /////////////////////////////////////////////////
+
+const LIB = '@online-adventur.es/functions-interface'; /////////////////////////////////////////////////
+
+const HEADER_IMPERSONATE = "X-OFFIRMO-IMPERSONATE".toLowerCase(); // tslint:disable-next-line: variable-name
+
+const Endpoint = Object(dist["Enum"])('whoami', 'report-error', 'key-value', // dev
+'echo', 'hello-world', 'hello-world-advanced', 'test-error-handling', 'temp');
+const SERVER_RESPONSE_VERSION = 1;
+// EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/fetch-ponyfill/fetch-node.js
+var fetch_node = __webpack_require__(75);
+var fetch_node_default = /*#__PURE__*/__webpack_require__.n(fetch_node);
+
+// EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/2-foundation/error-utils/dist/src.es2019/util--create.js
+var util_create = __webpack_require__(82);
+
+// EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/3-advanced--multi/soft-execution-context/dist/src.es2019/index.js + 20 modules
+var src_es2019 = __webpack_require__(15);
+
+// EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/3-advanced--isomorphic/state-utils/dist/src.es2019/utils.js
+var utils = __webpack_require__(105);
+
+// EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/3-advanced--multi/universal-debug-api-placeholder/dist/src.es2019/index.js + 2 modules
+var dist_src_es2019 = __webpack_require__(35);
+
+// CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/A-apps/online-adventur.es/functions-interface/dist/src.es2019/utils.js
+
+ /////////////////////////////////////////////////
+
+function get_allowed_origin(channel) {
+  switch (channel) {
+    case 'dev':
+      return 'http://localhost:8080';
+
+    case 'staging':
+      return 'https://offirmo-monorepo.netlify.app';
+
+    case 'prod':
+      return 'https://www.online-adventur.es';
+
+    default:
+      throw new Error(`[${LIB}] no allowed origin for channel "${channel}"!`);
+  }
+}
+
+function _get_api_base_url(channel) {
+  switch (channel) {
+    case 'dev':
+      return 'http://localhost:9000';
+
+    case 'staging':
+      return 'https://offirmo-monorepo.netlify.app/.netlify/functions';
+
+    case 'prod':
+      return 'https://www.online-adventur.es/.netlify/functions';
+
+    default:
+      if (channel === 'unknown') return 'http://test.test';
+      throw new Error(`[${LIB}] no base URL for channel "${channel}"!`);
+  }
+}
+
+function get_api_base_url(channel) {
+  return Object(dist_src_es2019["b" /* overrideHook */])('api-base-url', _get_api_base_url(channel));
+}
+function create_server_response_body__blank() {
+  return {
+    v: SERVER_RESPONSE_VERSION,
+    data: undefined,
+    error: undefined,
+    side: {},
+    meta: {}
+  };
+}
+function create_server_response_body__error(error) {
+  var _a, _b;
+
+  const body = create_server_response_body__blank();
+  body.error = {
+    message: error.message,
+    code: error.code,
+    logical_stack: (_b = (_a = error._temp) === null || _a === void 0 ? void 0 : _a.SEC) === null || _b === void 0 ? void 0 : _b.getLogicalStack()
+  };
+  return body;
+}
+function create_server_response_body__data(data) {
+  const body = create_server_response_body__blank();
+  body.data = data;
+  return body;
+}
+function is_server_response_body(body) {
+  return body && body.v && body.side && body.meta && (body.data || body.error);
+}
+// CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/A-apps/online-adventur.es/functions-interface/dist/src.es2019/fetch.js
+
+
+
+
+ /////////////////////////////////////////////////
+
+const {
+  fetch,
+  Response: ResponseV,
+  Headers: HeadersV
+} = fetch_node_default()();
+ /////////////////////////////////////////////////
+
+const _state = {
+  request_count: 0,
+  error_count: 0
+};
+async function fetch_oa({
+  SEC = Object(src_es2019["getRootSEC"])(),
+  url,
+  method = 'GET',
+  headers = {},
+  body,
+  timeout_ms = 10000
+} = {}) {
+  return SEC.xPromiseTry('fetch_oa', async ({
+    SEC,
+    logger,
+    CHANNEL
+  }) => {
+    const request_id = ++_state.request_count;
+    const channel = CHANNEL;
+    logger.trace(`fetch_oa() #${request_id}…`, {
+      method,
+      url,
+      body,
+      headers
+    });
+    const headers_from_SEC = SEC.getInjectedDependencies().shared_fetch_headers || {};
+    if (_state.error_count > 25) throw new Error(`fetch_oa(): too many errors in the past, circuit breaker!`); // TODO improve with debounce
+
+    url = [get_api_base_url(channel), url].join('/');
+    headers = { ...headers_from_SEC,
+      ...headers,
+      'Content-Type': 'application/json'
+    };
+    let fetch_response = undefined;
+    let response_for_logging;
+    let candidate_error = null;
+    return Promise.race([new Promise((resolve, reject) => setTimeout(() => {
+      reject(new Error('Timeout!'));
+    }, timeout_ms)), fetch(url, {
+      method,
+      headers,
+      body: JSON.stringify(body)
+    })]).then(response => {
+      logger.trace(`fetch_oa() #${request_id}: got fetch response`, {
+        method,
+        url,
+        response
+      });
+      response_for_logging = fetch_response = response.clone(); // reminder: we can't destructure response because .json() needs a binding to response
+
+      if (!response.ok) {
+        candidate_error = Object(util_create["a" /* createError */])(`HTTP error ${response.status} "${response.statusText}"!`, {
+          statusCode: response.status
+        });
+      } // even if the response has an error status, we still need to attempt decoding the json
+      // since it can hold error data
+
+
+      return response.json();
+    }).then(response => {
+      logger.trace(`fetch_oa() #${request_id}: got json body`, {
+        method,
+        url,
+        response
+      });
+      response_for_logging = response;
+      if (!response) throw candidate_error || new Error('No response data!');
+      const {
+        v,
+        error,
+        data,
+        side = {},
+        meta = {}
+      } = response;
+      if (!v) throw new Error('body doesnt have the expected OA response format!');
+      if (v !== 1) throw new Error('Invalid OA response format version!');
+
+      if (error) {
+        throw Object(util_create["a" /* createError */])('', error);
+      } // now that we handled the possible error in body, we can fall back to the auto one
+
+
+      if (!fetch_response.ok) {
+        throw candidate_error;
+      }
+
+      logger.trace(`fetch_oa() #${request_id}: got OA response body`, {
+        method,
+        url,
+        v,
+        error,
+        data,
+        side,
+        meta
+      });
+
+      if (!data) {
+        throw new Error('No response data!');
+      }
+
+      return Object(utils["c" /* enforce_immutability */])({
+        data,
+        side
+      });
+    }).catch(err => {
+      logger.warn(`fetch_it #${request_id} ended with an error!`, {
+        method,
+        url,
+        response: response_for_logging,
+        err,
+        err_message: err.message
+      });
+      _state.error_count++;
+      throw err;
+    });
+  });
+}
+// CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/A-apps/online-adventur.es/functions-interface/dist/src.es2019/types.js
+ // tslint:disable-next-line: variable-name
+
+const ReleaseChannel = Object(dist["Enum"])('prod', 'staging', 'dev');
+// CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/A-apps/online-adventur.es/functions-interface/dist/src.es2019/index.js
+
+
+
+
+
+/***/ }),
+
+/***/ 54:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const os = __webpack_require__(30);
-const tty = __webpack_require__(50);
-const hasFlag = __webpack_require__(103);
+const os = __webpack_require__(31);
+const tty = __webpack_require__(55);
+const hasFlag = __webpack_require__(112);
 
 const {env} = process;
 
@@ -3962,393 +4664,145 @@ module.exports = {
 
 /***/ }),
 
-/***/ 5:
-/***/ (function(module, exports) {
-
-module.exports = require("stream");
-
-/***/ }),
-
-/***/ 50:
+/***/ 55:
 /***/ (function(module, exports) {
 
 module.exports = require("tty");
 
 /***/ }),
 
-/***/ 51:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ 553:
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-// ESM COMPAT FLAG
-__webpack_require__.r(__webpack_exports__);
 
-// EXPORTS
-__webpack_require__.d(__webpack_exports__, "LIB", function() { return /* reexport */ LIB; });
-__webpack_require__.d(__webpack_exports__, "HEADER_IMPERSONATE", function() { return /* reexport */ HEADER_IMPERSONATE; });
-__webpack_require__.d(__webpack_exports__, "Endpoint", function() { return /* reexport */ Endpoint; });
-__webpack_require__.d(__webpack_exports__, "SERVER_RESPONSE_VERSION", function() { return /* reexport */ SERVER_RESPONSE_VERSION; });
-__webpack_require__.d(__webpack_exports__, "HeadersV", function() { return /* reexport */ HeadersV; });
-__webpack_require__.d(__webpack_exports__, "fetch_oa", function() { return /* reexport */ fetch_oa; });
-__webpack_require__.d(__webpack_exports__, "ReleaseChannel", function() { return /* reexport */ ReleaseChannel; });
-__webpack_require__.d(__webpack_exports__, "get_allowed_origin", function() { return /* reexport */ get_allowed_origin; });
-__webpack_require__.d(__webpack_exports__, "get_api_base_url", function() { return /* reexport */ get_api_base_url; });
-__webpack_require__.d(__webpack_exports__, "create_server_response_body__blank", function() { return /* reexport */ create_server_response_body__blank; });
-__webpack_require__.d(__webpack_exports__, "create_server_response_body__error", function() { return /* reexport */ create_server_response_body__error; });
-__webpack_require__.d(__webpack_exports__, "create_server_response_body__data", function() { return /* reexport */ create_server_response_body__data; });
 
-// EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/typescript-string-enums/dist/index.js
-var dist = __webpack_require__(17);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.BUILD_DATE = exports.NUMERIC_VERSION = exports.VERSION = void 0; // THIS FILE IS AUTO GENERATED!
 
-// CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/A-apps/online-adventur.es/functions-interface/dist/src.es2019/consts.js
- /////////////////////////////////////////////////
+exports.VERSION = '0.0.1';
+exports.NUMERIC_VERSION = 0.0001; // for easy comparisons
 
-const LIB = '@online-adventur.es/functions-interface'; /////////////////////////////////////////////////
-
-const HEADER_IMPERSONATE = "X-OFFIRMO-IMPERSONATE".toLowerCase(); // tslint:disable-next-line: variable-name
-
-const Endpoint = Object(dist["Enum"])('whoami', 'report-error', 'key-value', // dev
-'echo', 'hello-world', 'hello-world-advanced', 'test-error-handling', 'temp');
-const SERVER_RESPONSE_VERSION = 1;
-// EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/fetch-ponyfill/fetch-node.js
-var fetch_node = __webpack_require__(70);
-var fetch_node_default = /*#__PURE__*/__webpack_require__.n(fetch_node);
-
-// EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/3-advanced--multi/soft-execution-context/dist/src.es2019/index.js + 20 modules
-var src_es2019 = __webpack_require__(27);
-
-// EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/tiny-invariant/dist/tiny-invariant.esm.js
-var tiny_invariant_esm = __webpack_require__(2);
-
-// EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/icepick/icepick.js
-var icepick = __webpack_require__(72);
-var icepick_default = /*#__PURE__*/__webpack_require__.n(icepick);
-
-// EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/3-advanced--isomorphic/state-utils/dist/src.es2019/type-guards.js
-var type_guards = __webpack_require__(1);
-
-// EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/3-advanced--isomorphic/state-utils/dist/src.es2019/selectors.js
-var selectors = __webpack_require__(7);
-
-// CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/3-advanced--isomorphic/state-utils/dist/src.es2019/utils.js
-
-
-
-
-const enforce_immutability = state => icepick_default.a.freeze(state); // Use this in case of reducing a child state while unsure whether this child state has changed or not.
-// - the best case is to return 'previous' = no mutation
-// - if a child state's revision increased, increase ours and keep the mutation
-// - it's possible that an "update to now" was invoked, it's ok to ignore that if that's the only change
-// - this fn will intentionally NOT go deeper than 1st level, each state is responsible for itself!
-// - this fn will intentionally NOT handle time changes, this should be done separately at the end! (separate update_to_now call)
-
-function complete_or_cancel_eager_mutation_propagating_possible_child_mutation(previous, current, updated = previous, debug_id = 'unknown src') {
-  const PREFIX = `CoCEMPPCM(${debug_id})`;
-  Object(tiny_invariant_esm["default"])(previous, `${PREFIX}: should have previous`);
-  /*if (!previous)
-      return current*/
-
-  if (current === previous) return previous;
-  if (current === updated) return previous;
-
-  if (Object(type_guards["e" /* is_UTBundle */])(current)) {
-    // this is a more advanced state
-    Object(tiny_invariant_esm["default"])(Object(type_guards["e" /* is_UTBundle */])(previous), `${PREFIX}: previous also has bundle data structure!`);
-    Object(tiny_invariant_esm["default"])(Object(type_guards["e" /* is_UTBundle */])(updated), `${PREFIX}: updated also has bundle data structure!`);
-    const final_u_state = complete_or_cancel_eager_mutation_propagating_possible_child_mutation(previous[0], current[0], updated === null || updated === void 0 ? void 0 : updated[0]);
-    const final_t_state = complete_or_cancel_eager_mutation_propagating_possible_child_mutation(previous[1], current[1], updated === null || updated === void 0 ? void 0 : updated[1]);
-    if (final_u_state === previous[0] && final_t_state === previous[1]) return previous;
-    if (final_u_state === updated[0] && final_t_state === updated[1]) return previous;
-    return enforce_immutability([final_u_state, final_t_state]);
-  } else if (Object(type_guards["b" /* is_RootState */])(current)) {
-    // this is a more advanced state
-    Object(tiny_invariant_esm["default"])(Object(type_guards["b" /* is_RootState */])(previous), `${PREFIX}: previous also has root data structure!`);
-    Object(tiny_invariant_esm["default"])(Object(type_guards["b" /* is_RootState */])(updated), `${PREFIX}: updated also has root data structure!`);
-    const final_u_state = complete_or_cancel_eager_mutation_propagating_possible_child_mutation(previous.u_state, current.u_state, updated.u_state, debug_id + '.u_state');
-    const final_t_state = complete_or_cancel_eager_mutation_propagating_possible_child_mutation(previous.t_state, current.t_state, updated.t_state, debug_id + '.t_state');
-    if (final_u_state === previous.u_state && final_t_state === previous.t_state) return previous;
-    if (final_u_state === updated.u_state && final_t_state === updated.t_state) return previous;
-    return enforce_immutability({ ...current,
-      u_state: final_u_state,
-      t_state: final_t_state
-    });
-  } //let is_t_state = is_TState(current)
-
-
-  Object(tiny_invariant_esm["default"])(Object(type_guards["d" /* is_UState */])(current) || Object(type_guards["c" /* is_TState */])(current), `${PREFIX}: current has U/TState data structure!`); // unneeded except for helping TS type inference
-
-  Object(tiny_invariant_esm["default"])(Object(type_guards["d" /* is_UState */])(previous) && Object(type_guards["d" /* is_UState */])(updated) && Object(type_guards["d" /* is_UState */])(current) || Object(type_guards["c" /* is_TState */])(previous) && Object(type_guards["c" /* is_TState */])(updated) && Object(type_guards["c" /* is_TState */])(current), `${PREFIX}: current+previous+updated have the same U/TState data structure!`);
-  Object(tiny_invariant_esm["default"])(previous.revision === updated.revision, `${PREFIX}: previous & updated should have the same revision`);
-  Object(tiny_invariant_esm["default"])(current.revision >= previous.revision, `${PREFIX}: current >= previous revision`);
-  if (current.revision !== previous.revision) throw new Error(`${PREFIX}: revision already incremented! This call is not needed since you’re sure there was a change!`);
-  const typed_previous = previous;
-  const typed_updated = updated;
-  const typed_current = current;
-  let has_child_revision_increment = false; //let has_non_child_key_change = false
-  //let has_timestamp_change: boolean | undefined = undefined
-
-  for (const k in typed_current) {
-    const previous_has_revision = Object(type_guards["f" /* is_WithRevision */])(typed_updated[k]);
-    const current_has_revision = Object(type_guards["f" /* is_WithRevision */])(typed_current[k]);
-    Object(tiny_invariant_esm["default"])(previous_has_revision === current_has_revision, `${PREFIX}/${k}: revisioning should be coherent!`);
-
-    if (!current_has_revision) {
-      //let has_change = typed_updated[k] !== typed_current[k]
-      //has_non_child_key_change ||= has_change
-      Object(tiny_invariant_esm["default"])(typed_updated[k] === typed_current[k], `${PREFIX}/${k}: manual change on Base/UState non-child key seen! This call is not needed since you’re sure there was a change!`);
-    }
-
-    const previous_revision = Object(selectors["b" /* get_revision_loose */])(typed_previous[k]);
-    const updated_revision = Object(selectors["b" /* get_revision_loose */])(typed_updated[k]);
-    Object(tiny_invariant_esm["default"])(previous_revision === updated_revision, `${PREFIX}/${k}: previous & updated child should have the same revision`);
-    const current_revision = Object(selectors["b" /* get_revision_loose */])(typed_current[k]);
-
-    if (current_revision !== updated_revision) {
-      if (current_revision !== updated_revision + 1) {// NO! It may be normal for a sub to have been stimulated more than once,
-        // ex. gained 3 achievements
-        //throw new Error(...)
-      }
-
-      has_child_revision_increment = true;
-      break;
-    }
-  }
-
-  if (!has_child_revision_increment) return previous;
-  return enforce_immutability({ ...current,
-    revision: Object(selectors["a" /* get_revision */])(current) + 1
-  });
-} // check if the state is still in the revision we expect
-// ex. for an action, check it's still valid, ex. object already sold?
-
-function are_ustate_revision_requirements_met(state, requirements = {}) {
-  for (const k in requirements) {
-    Object(tiny_invariant_esm["default"])(state.u_state[k], `are_ustate_revision_requirements_met(): sub state not found: "${k}"!`);
-    const current_revision = state.u_state[k].revision;
-    Object(tiny_invariant_esm["default"])(Number.isInteger(current_revision), `are_ustate_revision_requirements_met(): sub state has no/invalid revision: "${k}"!`);
-    if (current_revision !== requirements[k]) return false;
-  }
-
-  return true;
-}
-// EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/3-advanced--multi/universal-debug-api-placeholder/dist/src.es2019/index.js + 2 modules
-var dist_src_es2019 = __webpack_require__(35);
-
-// CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/A-apps/online-adventur.es/functions-interface/dist/src.es2019/utils.js
-
- /////////////////////////////////////////////////
-
-function get_allowed_origin(channel) {
-  switch (channel) {
-    case 'dev':
-      return 'http://localhost:8080';
-
-    case 'staging':
-      return 'https://offirmo-monorepo.netlify.app';
-
-    case 'prod':
-      return 'https://www.online-adventur.es';
-
-    default:
-      throw new Error(`[${LIB}] no allowed origin for channel "${channel}"!`);
-  }
-}
-
-function _get_api_base_url(channel) {
-  switch (channel) {
-    case 'dev':
-      return 'http://localhost:9000';
-
-    case 'staging':
-      return 'https://offirmo-monorepo.netlify.app/.netlify/functions';
-
-    case 'prod':
-      return 'https://www.online-adventur.es/.netlify/functions';
-
-    default:
-      if (channel === 'unknown') return 'http://test.test';
-      throw new Error(`[${LIB}] no base URL for channel "${channel}"!`);
-  }
-}
-
-function get_api_base_url(channel) {
-  return Object(dist_src_es2019["b" /* overrideHook */])('api-base-url', _get_api_base_url(channel));
-}
-function create_server_response_body__blank() {
-  return {
-    v: SERVER_RESPONSE_VERSION,
-    data: undefined,
-    error: undefined,
-    side: {},
-    meta: {}
-  };
-}
-function create_server_response_body__error(error) {
-  var _a, _b;
-
-  const body = create_server_response_body__blank();
-  body.error = {
-    message: error.message,
-    code: error.code,
-    logical_stack: (_b = (_a = error._temp) === null || _a === void 0 ? void 0 : _a.SEC) === null || _b === void 0 ? void 0 : _b.getLogicalStack()
-  };
-  return body;
-}
-function create_server_response_body__data(data) {
-  const body = create_server_response_body__blank();
-  body.data = data;
-  return body;
-}
-// EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/2-foundation/error-utils/dist/src.es2019/util--create.js
-var util_create = __webpack_require__(75);
-
-// CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/A-apps/online-adventur.es/functions-interface/dist/src.es2019/fetch.js
-
-
-
-
-
-const {
-  fetch,
-  Response: ResponseV,
-  Headers: HeadersV
-} = fetch_node_default()();
-
-/*export {
-    fetch,
-    Request,
-    OAResponse,
-    Headers,
-}*/
-
-let request_count = 0; // for logging
-
-async function fetch_oa({
-  SEC = Object(src_es2019["getRootSEC"])(),
-  url,
-  method = 'GET',
-  headers = {},
-  body,
-  timeout_ms = 10000
-} = {}) {
-  return SEC.xPromiseTry('foo', async ({
-    SEC,
-    logger,
-    CHANNEL
-  }) => {
-    const request_id = ++request_count;
-    const channel = CHANNEL;
-    logger.trace(`fetch_it() #${request_id}…`, {
-      method,
-      url,
-      body,
-      headers
-    });
-    url = [get_api_base_url(channel), url].join('/');
-    headers = { ...headers,
-      'Content-Type': 'application/json'
-    };
-    let fetch_response = undefined;
-    let response_for_logging;
-    let candidate_error = null;
-    return Promise.race([new Promise((resolve, reject) => setTimeout(() => {
-      reject(new Error('Timeout!'));
-    }, timeout_ms)), fetch(url, {
-      method,
-      headers,
-      body: JSON.stringify(body)
-    })]).then(response => {
-      logger.trace(`fetch_it() #${request_id}: got fetch response`, {
-        method,
-        url,
-        response
-      });
-      response_for_logging = fetch_response = response.clone(); // reminder: we can't destructure response because .json() needs a binding to response
-
-      if (!response.ok) {
-        candidate_error = Object(util_create["a" /* createError */])(`HTTP error ${response.status} "${response.statusText}"!`, {
-          statusCode: response.status
-        });
-      } // even if the response has an error status, we still need to attempt decoding the json
-      // since it can hold error data
-
-
-      return response.json();
-    }).then(response => {
-      logger.trace(`fetch_it() #${request_id}: got json body`, {
-        method,
-        url,
-        response
-      });
-      response_for_logging = response;
-      if (!response) throw candidate_error || new Error('No response data!');
-      const {
-        v,
-        error,
-        data,
-        side = {},
-        meta = {}
-      } = response;
-      if (!v) throw new Error('body doesnt have the expected OA response format!');
-      if (v !== 1) throw new Error('Invalid OA response format version!');
-
-      if (error) {
-        throw Object(util_create["a" /* createError */])('', error);
-      } // now that we handled the possible error in body, we can fall back to the auto one
-
-
-      if (!fetch_response.ok) {
-        throw candidate_error;
-      }
-
-      logger.trace(`fetch_it() #${request_id}: got OA response body`, {
-        method,
-        url,
-        v,
-        error,
-        data,
-        side,
-        meta
-      });
-
-      if (!data) {
-        throw new Error('No response data!');
-      }
-
-      return enforce_immutability({
-        data,
-        side
-      });
-    }).catch(err => {
-      logger.warn(`fetch_it #${request_id} ended with an error!`, {
-        method,
-        url,
-        response: response_for_logging,
-        err,
-        err_message: err.message
-      });
-      throw err;
-    });
-  });
-}
-// CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/A-apps/online-adventur.es/functions-interface/dist/src.es2019/types.js
- // tslint:disable-next-line: variable-name
-
-const ReleaseChannel = Object(dist["Enum"])('prod', 'staging', 'dev');
-// CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/A-apps/online-adventur.es/functions-interface/dist/src.es2019/index.js
-
-
-
-
+exports.BUILD_DATE = '20201110_21h33';
 
 /***/ }),
 
-/***/ 53:
+/***/ 559:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.handler = void 0;
+
+const tslib_1 = __webpack_require__(79);
+/*
+process.env.UDA_OVERRIDE__LOGGER__UDA_INTERNAL_LOGLEVEL = '"silly"'
+process.env.UDA_OVERRIDE__LOGGER_UDA_LOGLEVEL = '"silly"'
+process.env.UDA_OVERRIDE__LOGGER_OA_DB_LOGLEVEL = '"silly"'
+process.env.UDA_OVERRIDE__LOGGER_OA_API_LOGLEVEL = '"silly"'
+process.env.UDA_OVERRIDE__KNEX_DEBUG = 'true'
+*/
+
+
+__webpack_require__(74);
+
+const functions_interface_1 = __webpack_require__(53);
+
+const netlify_1 = __webpack_require__(206);
+
+const build = tslib_1.__importStar(__webpack_require__(553));
+
+const utils_1 = __webpack_require__(59); ////////////////////////////////////
+
+
+exports.handler = async (event, badly_typed_context) => {
+  const context = badly_typed_context;
+  let netlify_user_data;
+
+  try {
+    netlify_user_data = netlify_1.get_netlify_user_data(context);
+  } catch (err) {
+    netlify_user_data = {
+      err: {
+        message: err.message
+      }
+    };
+  }
+
+  const all_the_things = {
+    badly_typed_context,
+    event,
+    derived: {
+      get_key_from_path: (() => {
+        try {
+          return utils_1.get_key_from_path(event, {
+            expected_segment_count: null
+          });
+        } catch (err) {
+          return err.message;
+        }
+      })(),
+      get_id_from_path: (() => {
+        try {
+          return utils_1.get_id_from_path(event, {
+            expected_segment_count: null
+          });
+        } catch (err) {
+          return err.message;
+        }
+      })()
+    },
+    netlify_user_data,
+    build,
+    // https://devdocs.io/node/process
+    process: {
+      //argv: process.argv,
+      //execArgv: process.execArgv,
+      //execPath: process.execPath,
+      arch: process.arch,
+      platform: process.platform,
+      //config: process.config,
+      //'cwd()': process.cwd(),
+      //title: process.title,
+      version: process.version,
+      //release: process.release,
+      versions: process.versions,
+      env: _filter_out_secrets(process.env)
+    }
+  };
+  console.log('will return:', all_the_things);
+  const body = functions_interface_1.create_server_response_body__data(all_the_things);
+  return {
+    statusCode: 200,
+    headers: {},
+    body: JSON.stringify(body, null, 2)
+  };
+};
+
+function _filter_out_secrets(env) {
+  return Object.entries(env).map(([k, v]) => {
+    const isSecret = k.toLowerCase().includes('secret') || k.toLowerCase().includes('token');
+    return [k, isSecret ? '🙈' : v];
+  }).reduce((acc, [k, v]) => {
+    acc[k] = v;
+    return acc;
+  }, {});
+}
+
+/***/ }),
+
+/***/ 58:
 /***/ (function(module, exports, __webpack_require__) {
 
 /* MIT license */
 /* eslint-disable no-mixed-operators */
-const cssKeywords = __webpack_require__(101);
+const cssKeywords = __webpack_require__(110);
 
 // NOTE: conversions should only return primitive values (i.e. arrays, or
 //       values that give correct `typeof` results).
@@ -5189,133 +5643,7 @@ convert.rgb.gray = function (rgb) {
 
 /***/ }),
 
-/***/ 532:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.BUILD_DATE = exports.NUMERIC_VERSION = exports.VERSION = void 0; // THIS FILE IS AUTO GENERATED!
-
-exports.VERSION = '0.0.1';
-exports.NUMERIC_VERSION = 0.0001; // for easy comparisons
-
-exports.BUILD_DATE = '20201102_03h10';
-
-/***/ }),
-
-/***/ 534:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.handler = void 0;
-
-const tslib_1 = __webpack_require__(73);
-/*
-process.env.UDA_OVERRIDE__LOGGER__UDA_INTERNAL_LOGLEVEL = '"silly"'
-process.env.UDA_OVERRIDE__LOGGER_UDA_LOGLEVEL = '"silly"'
-process.env.UDA_OVERRIDE__LOGGER_OA_DB_LOGLEVEL = '"silly"'
-process.env.UDA_OVERRIDE__LOGGER_OA_API_LOGLEVEL = '"silly"'
-process.env.UDA_OVERRIDE__KNEX_DEBUG = 'true'
-*/
-
-
-__webpack_require__(69);
-
-const functions_interface_1 = __webpack_require__(51);
-
-const netlify_1 = __webpack_require__(185);
-
-const build = tslib_1.__importStar(__webpack_require__(532));
-
-const utils_1 = __webpack_require__(54); ////////////////////////////////////
-
-
-exports.handler = async (event, badly_typed_context) => {
-  const context = badly_typed_context;
-  let netlify_user_data;
-
-  try {
-    netlify_user_data = netlify_1.get_netlify_user_data(context);
-  } catch (err) {
-    netlify_user_data = {
-      err: {
-        message: err.message
-      }
-    };
-  }
-
-  const all_the_things = {
-    badly_typed_context,
-    event,
-    derived: {
-      get_key_from_path: (() => {
-        try {
-          return utils_1.get_key_from_path(event, {
-            expected_segment_count: null
-          });
-        } catch (err) {
-          return err.message;
-        }
-      })(),
-      get_id_from_path: (() => {
-        try {
-          return utils_1.get_id_from_path(event, {
-            expected_segment_count: null
-          });
-        } catch (err) {
-          return err.message;
-        }
-      })()
-    },
-    netlify_user_data,
-    build,
-    // https://devdocs.io/node/process
-    process: {
-      //argv: process.argv,
-      //execArgv: process.execArgv,
-      //execPath: process.execPath,
-      arch: process.arch,
-      platform: process.platform,
-      //config: process.config,
-      //'cwd()': process.cwd(),
-      //title: process.title,
-      version: process.version,
-      //release: process.release,
-      versions: process.versions,
-      env: _filter_out_secrets(process.env)
-    }
-  };
-  console.log('will return:', all_the_things);
-  const body = functions_interface_1.create_server_response_body__data(all_the_things);
-  return {
-    statusCode: 200,
-    headers: {},
-    body: JSON.stringify(body, null, 2)
-  };
-};
-
-function _filter_out_secrets(env) {
-  return Object.entries(env).map(([k, v]) => {
-    const isSecret = k.toLowerCase().includes('secret') || k.toLowerCase().includes('token');
-    return [k, isSecret ? '🙈' : v];
-  }).reduce((acc, [k, v]) => {
-    acc[k] = v;
-    return acc;
-  }, {});
-}
-
-/***/ }),
-
-/***/ 54:
+/***/ 59:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5326,11 +5654,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.get_id_from_path = exports.get_key_from_path = exports.loosely_get_clean_path = exports.get_relevant_path_segments = exports.create_error = void 0;
 
-const http_1 = __webpack_require__(13);
+const http_1 = __webpack_require__(14);
 
-const error_utils_1 = __webpack_require__(33);
+const error_utils_1 = __webpack_require__(37);
 
-const consts_1 = __webpack_require__(31); // TODO extern
+const consts_1 = __webpack_require__(34); // TODO extern
 
 
 function create_error(message, details = {}, SEC) {
@@ -5352,17 +5680,17 @@ const NETLIFY_ROOT = '/.netlify/functions'; // return [function id]/the/rest
 
 function get_relevant_path_segments(event) {
   const original_path = event.path;
-  let path = original_path;
-  const has_trailing_slash = path.endsWith('/');
-  if (has_trailing_slash) path = path.slice(0, -1);
-  const has_useless_root = path.startsWith(NETLIFY_ROOT);
-  if (has_useless_root) path = path.slice(NETLIFY_ROOT.length);
-  const has_useless_prefix_slash = path.startsWith('/');
-  if (has_useless_prefix_slash) path = path.slice(1);
-  const segments = path.split('/');
-  console.log({
+  let normalized_path = original_path;
+  const has_trailing_slash = normalized_path.endsWith('/');
+  if (has_trailing_slash) normalized_path = normalized_path.slice(0, -1);
+  const has_useless_root = normalized_path.startsWith(NETLIFY_ROOT);
+  if (has_useless_root) normalized_path = normalized_path.slice(NETLIFY_ROOT.length);
+  const has_useless_prefix_slash = normalized_path.startsWith('/');
+  if (has_useless_prefix_slash) normalized_path = normalized_path.slice(1);
+  const segments = normalized_path.split('/');
+  console.log('get_relevant_path_segments()', {
     original_path,
-    path,
+    normalized_path,
     segments
   });
   return segments;
@@ -5435,7 +5763,14 @@ exports.get_id_from_path = get_id_from_path;
 
 /***/ }),
 
-/***/ 69:
+/***/ 6:
+/***/ (function(module, exports) {
+
+module.exports = require("stream");
+
+/***/ }),
+
+/***/ 74:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5451,7 +5786,7 @@ __webpack_require__.d(__webpack_exports__, "globalThis", function() { return /* 
 __webpack_require__.d(__webpack_exports__, "createV1", function() { return /* reexport */ v1_create; });
 
 // EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/1-stdlib/globalthis-ponyfill/dist/src.es2019/index.js
-var src_es2019 = __webpack_require__(9);
+var src_es2019 = __webpack_require__(10);
 
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/2-foundation/practical-logger-core/dist/src.es2019/consts.js
 const LIB = '@offirmo/practical-logger-core'; // level to a numerical value, for ordering and filtering.
@@ -6043,7 +6378,7 @@ function is_pure_json(js) {
   return false;
 }
 // EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/2-foundation/error-utils/dist/src.es2019/fields.js
-var fields = __webpack_require__(15);
+var fields = __webpack_require__(17);
 
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/2-foundation/print-error-to-ansi/dist/src.es2019/index.js
 /* eslint-disable no-console */
@@ -6447,111 +6782,13 @@ const {
 
 /***/ }),
 
-/***/ 7:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* unused harmony export get_schema_version */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return get_schema_version_loose; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return get_revision; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return get_revision_loose; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return get_timestamp; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return get_timestamp_loose; });
-/* unused harmony export get_base_loose */
-/* harmony import */ var tiny_invariant__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
-/* harmony import */ var _type_guards__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1);
-
-
-function get_schema_version(s) {
-  if (Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_UTBundle */ "e"])(s)) {
-    Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(get_schema_version(s[0]) === get_schema_version(s[1]), 'get_schema_version() matching U & T versions!');
-    return get_schema_version(s[0]);
-  }
-
-  if (Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_RootState */ "b"])(s)) {
-    Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(get_schema_version(s.u_state) === get_schema_version(s.t_state), 'get_schema_version() matching U & T versions!');
-    return get_schema_version(s.u_state);
-  }
-
-  Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_WithSchemaVersion */ "g"])(s), 'get_schema_version() structure!');
-  const {
-    schema_version
-  } = s;
-  Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(Number.isSafeInteger(schema_version), 'get_schema_version() safeInteger!');
-  return schema_version;
-}
-function get_schema_version_loose(s) {
-  if (Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* has_versioned_schema */ "a"])(s)) return get_schema_version(s); // specific fallbacks:
-  // loose legacy bundles
-
-  if (Array.isArray(s) && Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* has_versioned_schema */ "a"])(s[0])) return get_schema_version(s[0]); // final fallback
-
-  return 0;
-}
-function get_revision(s) {
-  if (Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_UTBundle */ "e"])(s)) {
-    return get_revision(s[0]) + get_revision(s[1]);
-  }
-
-  if (Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_RootState */ "b"])(s)) {
-    return get_revision(s.u_state) + get_revision(s.t_state);
-  }
-
-  Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_WithRevision */ "f"])(s), 'get_revision() structure');
-  const {
-    revision
-  } = s;
-  Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(Number.isSafeInteger(revision), 'get_revision() safeInteger');
-  return revision;
-}
-function get_revision_loose(s) {
-  if (Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_revisioned */ "i"])(s)) return get_revision(s); // specific fallbacks:
-  // loose legacy bundles
-
-  if (Array.isArray(s) && Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_revisioned */ "i"])(s[0])) return get_revision(s[0]) + get_revision_loose(s[1]); // final fallback
-
-  return 0;
-}
-function get_timestamp(s) {
-  if (Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_UTBundle */ "e"])(s)) {
-    return get_timestamp(s[1]);
-  }
-
-  if (Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_RootState */ "b"])(s)) {
-    return get_timestamp(s.t_state);
-  }
-
-  Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_WithTimestamp */ "h"])(s), 'get_timestamp() structure');
-  const {
-    timestamp_ms
-  } = s;
-  Object(tiny_invariant__WEBPACK_IMPORTED_MODULE_0__["default"])(Number.isSafeInteger(timestamp_ms), 'get_timestamp() safeInteger');
-  return timestamp_ms;
-}
-function get_timestamp_loose(s) {
-  if (Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_time_stamped */ "j"])(s)) return get_timestamp(s); // specific fallbacks:
-  // loose bundles
-
-  if (Array.isArray(s) && Object(_type_guards__WEBPACK_IMPORTED_MODULE_1__[/* is_time_stamped */ "j"])(s[1])) return get_timestamp(s[1]); // final fallback
-
-  return 0;
-}
-function get_base_loose(s) {
-  return {
-    schema_version: get_schema_version_loose(s),
-    revision: get_revision_loose(s)
-  };
-}
-
-/***/ }),
-
-/***/ 70:
+/***/ 75:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var fetch = __webpack_require__(135);
+var fetch = __webpack_require__(146);
 
 function wrapFetchForNode(fetch) {
   // Support schemaless URIs on the server for parity with the browser.
@@ -6589,7 +6826,7 @@ module.exports = function (context) {
 
 /***/ }),
 
-/***/ 71:
+/***/ 76:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7012,7 +7249,7 @@ module.exports = Emittery;
 
 /***/ }),
 
-/***/ 72:
+/***/ 77:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -7377,7 +7614,7 @@ if (false) {}
 
 /***/ }),
 
-/***/ 73:
+/***/ 79:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -7636,12 +7873,68 @@ function __classPrivateFieldSet(receiver, privateMap, value) {
 
 /***/ }),
 
-/***/ 74:
+/***/ 8:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+function Enum() {
+    var values = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        values[_i] = arguments[_i];
+    }
+    if (typeof values[0] === "string") {
+        var result = {};
+        for (var _a = 0, values_1 = values; _a < values_1.length; _a++) {
+            var value = values_1[_a];
+            result[value] = value;
+        }
+        return result;
+    }
+    else {
+        return values[0];
+    }
+}
+exports.Enum = Enum;
+(function (Enum) {
+    function ofKeys(e) {
+        var result = {};
+        for (var _i = 0, _a = Object.keys(e); _i < _a.length; _i++) {
+            var key = _a[_i];
+            result[key] = key;
+        }
+        return result;
+    }
+    Enum.ofKeys = ofKeys;
+    function keys(e) {
+        return Object.keys(e);
+    }
+    Enum.keys = keys;
+    function values(e) {
+        var result = [];
+        for (var _i = 0, _a = Object.keys(e); _i < _a.length; _i++) {
+            var key = _a[_i];
+            result.push(e[key]);
+        }
+        return result;
+    }
+    Enum.values = values;
+    function isType(e, value) {
+        return values(e).indexOf(value) !== -1;
+    }
+    Enum.isType = isType;
+})(Enum = exports.Enum || (exports.Enum = {}));
+//# sourceMappingURL=index.js.map
+
+/***/ }),
+
+/***/ 81:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return normalizeError; });
-/* harmony import */ var _fields__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(15);
+/* harmony import */ var _fields__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(17);
  // Anything can be thrown: undefined, string, number...)
 // But that's obviously not a good practice.
 // Normalize any thrown object into a true, normal error.
@@ -7675,12 +7968,12 @@ function normalizeError(err_like = {}) {
 
 /***/ }),
 
-/***/ 75:
+/***/ 82:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return createError; });
-/* harmony import */ var _fields__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(15);
+/* harmony import */ var _fields__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(17);
 
 function createError(message, attributes = {}, ctor = Error) {
   message = String(message || attributes.message || 'Unknown error!');
@@ -7715,292 +8008,10 @@ function createError(message, attributes = {}, ctor = Error) {
 
 /***/ }),
 
-/***/ 8:
+/***/ 9:
 /***/ (function(module, exports) {
 
 module.exports = require("url");
-
-/***/ }),
-
-/***/ 9:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* unused harmony export default */
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return getGlobalThis; });
-/* global globalThis, self, window, global */
-const lastResort = {};
-function getGlobalThis() {
-  // @ts-ignore
-  if (typeof globalThis !== 'undefined') return globalThis; // check node first https://github.com/ljharb/globalThis/issues/2
-  // @ts-ignore
-
-  if (typeof global !== 'undefined') return global; // @ts-ignore
-
-  if (typeof self !== 'undefined') return self; // @ts-ignore
-
-  if (typeof window !== 'undefined') return window;
-  if (typeof this !== 'undefined') return this;
-  return lastResort; // should never happen
-}
-
-
-/***/ }),
-
-/***/ 97:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return get_UTC_timestamp_ms; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "g", function() { return get_human_readable_UTC_timestamp_ms; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "h", function() { return get_human_readable_UTC_timestamp_seconds; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "f", function() { return get_human_readable_UTC_timestamp_minutes; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "e", function() { return get_human_readable_UTC_timestamp_days; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return get_ISO8601_extended_ms; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return get_ISO8601_simplified_minutes; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return get_ISO8601_simplified_day; });
-/////////////////////
-// ex. 1542780045627
-function get_UTC_timestamp_ms(now = new Date()) {
-  return +now;
-} /////////////////////
-// spec:
-// - human readable
-// - as short as possible
-// ex. 20181121
-// assumed side effect of being castable to a number
-
-
-function get_human_readable_UTC_timestamp_days(now = new Date()) {
-  const YYYY = now.getUTCFullYear();
-  const MM = String(now.getUTCMonth() + 1).padStart(2, '0');
-  const DD = String(now.getUTCDate()).padStart(2, '0');
-  return `${YYYY}${MM}${DD}`;
-} // ex. 20181121_06h00
-
-
-function get_human_readable_UTC_timestamp_minutes(now = new Date()) {
-  const hh = String(now.getUTCHours()).padStart(2, '0');
-  const mm = String(now.getUTCMinutes()).padStart(2, '0');
-  return get_human_readable_UTC_timestamp_days(now) + `_${hh}h${mm}`;
-} // ex. 20190608_04h23m15
-
-
-function get_human_readable_UTC_timestamp_seconds(now = new Date()) {
-  const ss = String(now.getUTCSeconds()).padStart(2, '0');
-  return get_human_readable_UTC_timestamp_minutes(now) + `m${ss}`;
-} // ex.      20181121_06h00m45s632
-// formerly 20181121_06h00+45.632
-
-
-function get_human_readable_UTC_timestamp_ms(now = new Date()) {
-  const mmm = String(now.getUTCMilliseconds()).padStart(3, '0');
-  return get_human_readable_UTC_timestamp_seconds(now) + `s${mmm}`;
-} /////////////////////
-// ISO 8601 Extended Format. The format is as follows: YYYY-MM-DDTHH:mm:ss.sssZ
-// http://www.ecma-international.org/ecma-262/5.1/#sec-15.9.1.15
-
-
-function get_ISO8601_extended_ms(now = new Date()) {
-  return now.toISOString();
-}
-
-function get_ISO8601_simplified_minutes(now = new Date()) {
-  return get_ISO8601_extended_ms(now).slice(0, 16);
-}
-
-function get_ISO8601_simplified_day(now = new Date()) {
-  return get_ISO8601_extended_ms(now).slice(0, 10);
-} // fun but unclear
-// https://space.stackexchange.com/questions/36628/utc-timestamp-format-for-launch-vehicles
-
-/*function get_space_timestamp_ms(now: Readonly<Date> = new Date()): string {
-    const YYYY = now.getUTCFullYear()
-    const MM = now.getUTCMonth()
-    const DD = ('0' + now.getUTCDate()).slice(-2)
-    const hh = ('0' + now.getUTCHours()).slice(-2)
-    const mm = ('0' + now.getUTCMinutes()).slice(-2)
-    const ss = ('0' + now.getUTCSeconds()).slice(-2)
-    const mmm = ('00' + now.getUTCMilliseconds()).slice(-3)
-
-    return `${DD} ${hh}:${mm}:${ss}.${mmm}`
-}*/
-/////////////////////
-
-
- /////////////////////
-
-/***/ }),
-
-/***/ 99:
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(module) {
-
-const wrapAnsi16 = (fn, offset) => (...args) => {
-	const code = fn(...args);
-	return `\u001B[${code + offset}m`;
-};
-
-const wrapAnsi256 = (fn, offset) => (...args) => {
-	const code = fn(...args);
-	return `\u001B[${38 + offset};5;${code}m`;
-};
-
-const wrapAnsi16m = (fn, offset) => (...args) => {
-	const rgb = fn(...args);
-	return `\u001B[${38 + offset};2;${rgb[0]};${rgb[1]};${rgb[2]}m`;
-};
-
-const ansi2ansi = n => n;
-const rgb2rgb = (r, g, b) => [r, g, b];
-
-const setLazyProperty = (object, property, get) => {
-	Object.defineProperty(object, property, {
-		get: () => {
-			const value = get();
-
-			Object.defineProperty(object, property, {
-				value,
-				enumerable: true,
-				configurable: true
-			});
-
-			return value;
-		},
-		enumerable: true,
-		configurable: true
-	});
-};
-
-/** @type {typeof import('color-convert')} */
-let colorConvert;
-const makeDynamicStyles = (wrap, targetSpace, identity, isBackground) => {
-	if (colorConvert === undefined) {
-		colorConvert = __webpack_require__(100);
-	}
-
-	const offset = isBackground ? 10 : 0;
-	const styles = {};
-
-	for (const [sourceSpace, suite] of Object.entries(colorConvert)) {
-		const name = sourceSpace === 'ansi16' ? 'ansi' : sourceSpace;
-		if (sourceSpace === targetSpace) {
-			styles[name] = wrap(identity, offset);
-		} else if (typeof suite === 'object') {
-			styles[name] = wrap(suite[targetSpace], offset);
-		}
-	}
-
-	return styles;
-};
-
-function assembleStyles() {
-	const codes = new Map();
-	const styles = {
-		modifier: {
-			reset: [0, 0],
-			// 21 isn't widely supported and 22 does the same thing
-			bold: [1, 22],
-			dim: [2, 22],
-			italic: [3, 23],
-			underline: [4, 24],
-			inverse: [7, 27],
-			hidden: [8, 28],
-			strikethrough: [9, 29]
-		},
-		color: {
-			black: [30, 39],
-			red: [31, 39],
-			green: [32, 39],
-			yellow: [33, 39],
-			blue: [34, 39],
-			magenta: [35, 39],
-			cyan: [36, 39],
-			white: [37, 39],
-
-			// Bright color
-			blackBright: [90, 39],
-			redBright: [91, 39],
-			greenBright: [92, 39],
-			yellowBright: [93, 39],
-			blueBright: [94, 39],
-			magentaBright: [95, 39],
-			cyanBright: [96, 39],
-			whiteBright: [97, 39]
-		},
-		bgColor: {
-			bgBlack: [40, 49],
-			bgRed: [41, 49],
-			bgGreen: [42, 49],
-			bgYellow: [43, 49],
-			bgBlue: [44, 49],
-			bgMagenta: [45, 49],
-			bgCyan: [46, 49],
-			bgWhite: [47, 49],
-
-			// Bright color
-			bgBlackBright: [100, 49],
-			bgRedBright: [101, 49],
-			bgGreenBright: [102, 49],
-			bgYellowBright: [103, 49],
-			bgBlueBright: [104, 49],
-			bgMagentaBright: [105, 49],
-			bgCyanBright: [106, 49],
-			bgWhiteBright: [107, 49]
-		}
-	};
-
-	// Alias bright black as gray (and grey)
-	styles.color.gray = styles.color.blackBright;
-	styles.bgColor.bgGray = styles.bgColor.bgBlackBright;
-	styles.color.grey = styles.color.blackBright;
-	styles.bgColor.bgGrey = styles.bgColor.bgBlackBright;
-
-	for (const [groupName, group] of Object.entries(styles)) {
-		for (const [styleName, style] of Object.entries(group)) {
-			styles[styleName] = {
-				open: `\u001B[${style[0]}m`,
-				close: `\u001B[${style[1]}m`
-			};
-
-			group[styleName] = styles[styleName];
-
-			codes.set(style[0], style[1]);
-		}
-
-		Object.defineProperty(styles, groupName, {
-			value: group,
-			enumerable: false
-		});
-	}
-
-	Object.defineProperty(styles, 'codes', {
-		value: codes,
-		enumerable: false
-	});
-
-	styles.color.close = '\u001B[39m';
-	styles.bgColor.close = '\u001B[49m';
-
-	setLazyProperty(styles.color, 'ansi', () => makeDynamicStyles(wrapAnsi16, 'ansi16', ansi2ansi, false));
-	setLazyProperty(styles.color, 'ansi256', () => makeDynamicStyles(wrapAnsi256, 'ansi256', ansi2ansi, false));
-	setLazyProperty(styles.color, 'ansi16m', () => makeDynamicStyles(wrapAnsi16m, 'rgb', rgb2rgb, false));
-	setLazyProperty(styles.bgColor, 'ansi', () => makeDynamicStyles(wrapAnsi16, 'ansi16', ansi2ansi, true));
-	setLazyProperty(styles.bgColor, 'ansi256', () => makeDynamicStyles(wrapAnsi256, 'ansi256', ansi2ansi, true));
-	setLazyProperty(styles.bgColor, 'ansi16m', () => makeDynamicStyles(wrapAnsi16m, 'rgb', rgb2rgb, true));
-
-	return styles;
-}
-
-// Make the export immutable
-Object.defineProperty(module, 'exports', {
-	enumerable: true,
-	get: assembleStyles
-});
-
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(41)(module)))
 
 /***/ })
 
