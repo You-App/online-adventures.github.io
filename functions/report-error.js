@@ -662,7 +662,7 @@ __webpack_require__.d(__webpack_exports__, "a", function() { return /* binding *
 // UNUSED EXPORTS: walk
 
 // EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/utils/node_modules/tslib/tslib.es6.js
-var tslib_es6 = __webpack_require__(23);
+var tslib_es6 = __webpack_require__(22);
 
 // EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/utils/esm/is.js
 var is = __webpack_require__(5);
@@ -824,7 +824,7 @@ function getFunctionName(fn) {
 }
 //# sourceMappingURL=stacktrace.js.map
 // EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/utils/esm/string.js
-var string = __webpack_require__(17);
+var string = __webpack_require__(16);
 
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/utils/esm/object.js
 
@@ -1362,7 +1362,7 @@ module.exports = require("fs");
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return addContextToFrame; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "i", function() { return stripUrlQueryAndFragment; });
 /* harmony import */ var _node__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(34);
-/* harmony import */ var _string__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(17);
+/* harmony import */ var _string__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(16);
 
 
 var fallbackGlobalObject = {};
@@ -1684,7 +1684,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const net_1 = __importDefault(__webpack_require__(90));
 const tls_1 = __importDefault(__webpack_require__(91));
-const url_1 = __importDefault(__webpack_require__(16));
+const url_1 = __importDefault(__webpack_require__(33));
 const assert_1 = __importDefault(__webpack_require__(40));
 const debug_1 = __importDefault(__webpack_require__(58));
 const agent_base_1 = __webpack_require__(150);
@@ -1865,6 +1865,16 @@ exports.save = save;
 exports.load = load;
 exports.useColors = useColors;
 exports.storage = localstorage();
+exports.destroy = (() => {
+	let warned = false;
+
+	return () => {
+		if (!warned) {
+			warned = true;
+			console.warn('Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.');
+		}
+	};
+})();
 
 /**
  * Colors.
@@ -2137,6 +2147,10 @@ exports.formatArgs = formatArgs;
 exports.save = save;
 exports.load = load;
 exports.useColors = useColors;
+exports.destroy = util.deprecate(
+	() => {},
+	'Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.'
+);
 
 /**
  * Colors.
@@ -2366,7 +2380,9 @@ const {formatters} = module.exports;
 formatters.o = function (v) {
 	this.inspectOpts.colors = this.useColors;
 	return util.inspect(v, this.inspectOpts)
-		.replace(/\s*\n\s*/g, ' ');
+		.split('\n')
+		.map(str => str.trim())
+		.join(' ');
 };
 
 /**
@@ -2697,13 +2713,6 @@ module.exports = require("console");
 /***/ }),
 
 /***/ 16:
-/***/ (function(module, exports) {
-
-module.exports = require("url");
-
-/***/ }),
-
-/***/ 17:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3992,14 +4001,15 @@ var scope_Scope = /** @class */ (function () {
      */
     Scope.prototype._notifyScopeListeners = function () {
         var _this = this;
+        // We need this check for this._notifyingListeners to be able to work on scope during updates
+        // If this check is not here we'll produce endless recursion when something is done with the scope
+        // during the callback.
         if (!this._notifyingListeners) {
             this._notifyingListeners = true;
-            setTimeout(function () {
-                _this._scopeListeners.forEach(function (callback) {
-                    callback(_this);
-                });
-                _this._notifyingListeners = false;
+            this._scopeListeners.forEach(function (callback) {
+                callback(_this);
             });
+            this._notifyingListeners = false;
         }
     };
     /**
@@ -4029,10 +4039,12 @@ var scope_Scope = /** @class */ (function () {
  * Retruns the global event processors.
  */
 function getGlobalEventProcessors() {
+    /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access  */
     var global = Object(misc["f" /* getGlobalObject */])();
     global.__SENTRY__ = global.__SENTRY__ || {};
     global.__SENTRY__.globalEventProcessors = global.__SENTRY__.globalEventProcessors || [];
     return global.__SENTRY__.globalEventProcessors;
+    /* eslint-enable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access */
 }
 /**
  * Add a EventProcessor to be kept globally.
@@ -5123,7 +5135,7 @@ function startTransaction(context, customSamplingContext) {
 }
 //# sourceMappingURL=index.js.map
 // EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/utils/node_modules/tslib/tslib.es6.js
-var tslib_es6 = __webpack_require__(23);
+var tslib_es6 = __webpack_require__(22);
 
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/utils/esm/polyfill.js
 var setPrototypeOf = Object.setPrototypeOf || ({ __proto__: [] } instanceof Array ? setProtoOf : mixinProperties);
@@ -5529,7 +5541,7 @@ var lru = __webpack_require__(106);
  * https://github.com/felixge/node-stack-trace/
  * @license MIT
  */
-/** Extracts StackFrames fron the Error */
+/** Extracts StackFrames from the Error */
 function parse(err) {
     if (!err.stack) {
         return [];
@@ -5907,6 +5919,9 @@ var api_API = /** @class */ (function () {
         var encodedOptions = [];
         encodedOptions.push("dsn=" + dsn.toString());
         for (var key in dialogOptions) {
+            if (key === 'dsn') {
+                continue;
+            }
             if (key === 'user') {
                 if (!dialogOptions.user) {
                     continue;
@@ -5983,8 +5998,6 @@ function eventToSentryRequest(event, api) {
     if (useEnvelope) {
         var envelopeHeaders = JSON.stringify({
             event_id: event.event_id,
-            // We need to add * 1000 since we divide it by 1000 by default but JS works with ms precision
-            // The reason we use timestampWithMs here is that all clocks across the SDK use the same clock
             sent_at: new Date().toISOString(),
         });
         var itemHeaders = JSON.stringify({
@@ -6085,11 +6098,11 @@ var promisebuffer_PromiseBuffer = /** @class */ (function () {
 
 //# sourceMappingURL=promisebuffer.js.map
 // EXTERNAL MODULE: external "url"
-var external_url_ = __webpack_require__(16);
+var external_url_ = __webpack_require__(33);
 
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/node/esm/version.js
 var SDK_NAME = 'sentry.javascript.node';
-var SDK_VERSION = '5.27.3';
+var SDK_VERSION = '5.28.0';
 //# sourceMappingURL=version.js.map
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/node/esm/transports/base.js
 
@@ -6194,7 +6207,7 @@ var base_BaseTransport = /** @class */ (function () {
 
 //# sourceMappingURL=base.js.map
 // EXTERNAL MODULE: external "http"
-var external_http_ = __webpack_require__(30);
+var external_http_ = __webpack_require__(29);
 
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/node/esm/transports/http.js
 
@@ -6598,7 +6611,7 @@ function node_modules_tslib_tslib_es6_classPrivateFieldSet(receiver, privateMap,
 }
 
 // EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/utils/esm/string.js
-var string = __webpack_require__(17);
+var string = __webpack_require__(16);
 
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/core/esm/integration.js
 
@@ -7400,7 +7413,7 @@ function initAndBind(clientClass, options) {
 }
 //# sourceMappingURL=sdk.js.map
 // EXTERNAL MODULE: external "domain"
-var external_domain_ = __webpack_require__(24);
+var external_domain_ = __webpack_require__(23);
 
 // EXTERNAL MODULE: external "util"
 var external_util_ = __webpack_require__(6);
@@ -7511,7 +7524,7 @@ var http_Http = /** @class */ (function () {
             return;
         }
         var wrappedHandlerMaker = _createWrappedHandlerMaker(this._breadcrumbs, this._tracing);
-        var httpModule = __webpack_require__(30);
+        var httpModule = __webpack_require__(29);
         Object(object["c" /* fill */])(httpModule, 'get', wrappedHandlerMaker);
         Object(object["c" /* fill */])(httpModule, 'request', wrappedHandlerMaker);
         // NOTE: Prior to Node 9, `https` used internals of `http` module, thus we don't patch it.
@@ -7745,13 +7758,12 @@ function forget(promise) {
 }
 //# sourceMappingURL=async.js.map
 // EXTERNAL MODULE: external "os"
-var external_os_ = __webpack_require__(20);
+var external_os_ = __webpack_require__(19);
 
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/node/esm/handlers.js
 
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 
 
 
@@ -7765,16 +7777,12 @@ var DEFAULT_SHUTDOWN_TIMEOUT = 2000;
  */
 function tracingHandler() {
     return function sentryTracingMiddleware(req, res, next) {
-        // TODO: At this point `req.route.path` (which we use in `extractTransaction`) is not available
-        // but `req.path` or `req.url` should do the job as well. We could unify this here.
-        var reqMethod = (req.method || '').toUpperCase();
-        var reqUrl = req.url && Object(misc["i" /* stripUrlQueryAndFragment */])(req.url);
         // If there is a trace header set, we extract the data from it (parentSpanId, traceId, and sampling decision)
         var traceparentData;
         if (req.headers && Object(is["h" /* isString */])(req.headers['sentry-trace'])) {
             traceparentData = extractTraceparentData(req.headers['sentry-trace']);
         }
-        var transaction = startTransaction(__assign({ name: reqMethod + " " + reqUrl, op: 'http.server' }, traceparentData));
+        var transaction = startTransaction(__assign({ name: extractRouteInfo(req, { path: true, method: true }), op: 'http.server' }, traceparentData));
         // We put the transaction on the scope so users can attach children to it
         hub_getCurrentHub().configureScope(function (scope) {
             scope.setSpan(transaction);
@@ -7786,6 +7794,7 @@ function tracingHandler() {
         res.once('finish', function () {
             // We schedule the immediate execution of the `finish` to let all the spans being closed first.
             setImmediate(function () {
+                addExpressReqToTransaction(transaction, req);
                 transaction.setHttpStatus(res.statusCode);
                 transaction.finish();
             });
@@ -7793,34 +7802,62 @@ function tracingHandler() {
         next();
     };
 }
+/**
+ * Set parameterized as transaction name e.g.: `GET /users/:id`
+ * Also adds more context data on the transaction from the request
+ */
+function addExpressReqToTransaction(transaction, req) {
+    if (!transaction)
+        return;
+    transaction.name = extractRouteInfo(req, { path: true, method: true });
+    transaction.setData('url', req.originalUrl);
+    transaction.setData('baseUrl', req.baseUrl);
+    transaction.setData('query', req.query);
+}
+/**
+ * Extracts complete generalized path from the request object.
+ * eg. /mountpoint/user/:id
+ */
+function extractRouteInfo(req, options) {
+    if (options === void 0) { options = {}; }
+    var _a, _b;
+    var method = (_a = req.method) === null || _a === void 0 ? void 0 : _a.toUpperCase();
+    var path;
+    if (req.baseUrl && req.route) {
+        path = "" + req.baseUrl + req.route.path;
+    }
+    else if (req.originalUrl || req.url) {
+        path = Object(misc["i" /* stripUrlQueryAndFragment */])(req.originalUrl || req.url || '');
+    }
+    else {
+        path = ((_b = req.route) === null || _b === void 0 ? void 0 : _b.path) || '';
+    }
+    var info = '';
+    if (options.method && method) {
+        info += method;
+    }
+    if (options.method && options.path) {
+        info += " ";
+    }
+    if (options.path && path) {
+        info += path;
+    }
+    return info;
+}
 /** JSDoc */
 function extractTransaction(req, type) {
-    try {
-        // Express.js shape
-        var request = req;
-        var routePath = void 0;
-        try {
-            routePath = external_url_["parse"](request.originalUrl || request.url).pathname;
+    var _a;
+    switch (type) {
+        case 'path': {
+            return extractRouteInfo(req, { path: true });
         }
-        catch (_oO) {
-            routePath = request.route.path;
+        case 'handler': {
+            return ((_a = req.route) === null || _a === void 0 ? void 0 : _a.stack[0].name) || '<anonymous>';
         }
-        switch (type) {
-            case 'path': {
-                return routePath;
-            }
-            case 'handler': {
-                return request.route.stack[0].name;
-            }
-            case 'methodPath':
-            default: {
-                var method = request.method.toUpperCase();
-                return method + " " + routePath;
-            }
+        case 'methodPath':
+        default: {
+            return extractRouteInfo(req, { path: true, method: true });
         }
-    }
-    catch (_oO) {
-        return undefined;
     }
 }
 /** Default user keys that'll be used to extract data from the request */
@@ -7879,10 +7916,7 @@ function parseRequest(event, req, options) {
         }
     }
     if (options.transaction && !event.transaction) {
-        var transaction = extractTransaction(req, options.transaction);
-        if (transaction) {
-            event.transaction = transaction;
-        }
+        event.transaction = extractTransaction(req, options.transaction);
     }
     return event;
 }
@@ -8267,7 +8301,7 @@ var linkederrors_LinkedErrors = /** @class */ (function () {
 
 //# sourceMappingURL=linkederrors.js.map
 // EXTERNAL MODULE: external "path"
-var external_path_ = __webpack_require__(22);
+var external_path_ = __webpack_require__(21);
 
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/node/esm/integrations/modules.js
 
@@ -8528,21 +8562,21 @@ if (esm_carrier.__SENTRY__) {
 
 /***/ }),
 
-/***/ 20:
+/***/ 19:
 /***/ (function(module, exports) {
 
 module.exports = require("os");
 
 /***/ }),
 
-/***/ 22:
+/***/ 21:
 /***/ (function(module, exports) {
 
 module.exports = require("path");
 
 /***/ }),
 
-/***/ 23:
+/***/ 22:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -8791,21 +8825,21 @@ function __classPrivateFieldSet(receiver, privateMap, value) {
 
 /***/ }),
 
-/***/ 24:
+/***/ 23:
 /***/ (function(module, exports) {
 
 module.exports = require("domain");
 
 /***/ }),
 
-/***/ 30:
+/***/ 29:
 /***/ (function(module, exports) {
 
 module.exports = require("http");
 
 /***/ }),
 
-/***/ 31:
+/***/ 30:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -9013,6 +9047,13 @@ var browserPerformanceTimeOrigin = (function () {
 })();
 //# sourceMappingURL=time.js.map
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(88)(module)))
+
+/***/ }),
+
+/***/ 33:
+/***/ (function(module, exports) {
+
+module.exports = require("url");
 
 /***/ }),
 
@@ -10057,7 +10098,7 @@ convert.rgb.gray = function (rgb) {
 
 "use strict";
 
-const os = __webpack_require__(20);
+const os = __webpack_require__(19);
 const tty = __webpack_require__(45);
 const hasFlag = __webpack_require__(85);
 
@@ -10406,7 +10447,7 @@ const SERVER_RESPONSE_VERSION = 1;
 
 const ReleaseChannel = Object(dist["Enum"])('prod', 'staging', 'dev');
 // EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/3-advanced--multi/universal-debug-api-placeholder/dist/src.es2019/index.js + 2 modules
-var src_es2019 = __webpack_require__(31);
+var src_es2019 = __webpack_require__(30);
 
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/A-apps/online-adventur.es/api-interface/dist/src.es2019/utils.js
 
@@ -12460,15 +12501,11 @@ function setup(env) {
 	createDebug.enable = enable;
 	createDebug.enabled = enabled;
 	createDebug.humanize = __webpack_require__(113);
+	createDebug.destroy = destroy;
 
 	Object.keys(env).forEach(key => {
 		createDebug[key] = env[key];
 	});
-
-	/**
-	* Active `debug` instances.
-	*/
-	createDebug.instances = [];
 
 	/**
 	* The currently active debug mode names, and names to skip.
@@ -12511,6 +12548,7 @@ function setup(env) {
 	*/
 	function createDebug(namespace) {
 		let prevTime;
+		let enableOverride = null;
 
 		function debug(...args) {
 			// Disabled?
@@ -12540,7 +12578,7 @@ function setup(env) {
 			args[0] = args[0].replace(/%([a-zA-Z%])/g, (match, format) => {
 				// If we encounter an escaped % then don't increase the array index
 				if (match === '%%') {
-					return match;
+					return '%';
 				}
 				index++;
 				const formatter = createDebug.formatters[format];
@@ -12563,29 +12601,26 @@ function setup(env) {
 		}
 
 		debug.namespace = namespace;
-		debug.enabled = createDebug.enabled(namespace);
 		debug.useColors = createDebug.useColors();
 		debug.color = createDebug.selectColor(namespace);
-		debug.destroy = destroy;
 		debug.extend = extend;
+		debug.destroy = createDebug.destroy; // XXX Temporary. Will be removed in the next major release.
+
+		Object.defineProperty(debug, 'enabled', {
+			enumerable: true,
+			configurable: false,
+			get: () => enableOverride === null ? createDebug.enabled(namespace) : enableOverride,
+			set: v => {
+				enableOverride = v;
+			}
+		});
 
 		// Env-specific initialization logic for debug instances
 		if (typeof createDebug.init === 'function') {
 			createDebug.init(debug);
 		}
 
-		createDebug.instances.push(debug);
-
 		return debug;
-	}
-
-	function destroy() {
-		const index = createDebug.instances.indexOf(this);
-		if (index !== -1) {
-			createDebug.instances.splice(index, 1);
-			return true;
-		}
-		return false;
 	}
 
 	function extend(namespace, delimiter) {
@@ -12624,11 +12659,6 @@ function setup(env) {
 			} else {
 				createDebug.names.push(new RegExp('^' + namespaces + '$'));
 			}
-		}
-
-		for (i = 0; i < createDebug.instances.length; i++) {
-			const instance = createDebug.instances[i];
-			instance.enabled = createDebug.enabled(instance.namespace);
 		}
 	}
 
@@ -12702,6 +12732,14 @@ function setup(env) {
 			return val.stack || val.message;
 		}
 		return val;
+	}
+
+	/**
+	* XXX DO NOT USE. This is a temporary stub function.
+	* XXX It WILL be removed in the next major release.
+	*/
+	function destroy() {
+		console.warn('Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.');
 	}
 
 	createDebug.enable(createDebug.load());
