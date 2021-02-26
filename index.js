@@ -56,6 +56,7 @@ if (redirect_request) {
 }
 
 // Global site tag (gtag.js) - Google Analytics
+// TODO rework
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
