@@ -20199,6 +20199,7 @@ __webpack_require__.d(__webpack_exports__, "init", function() { return /* reexpo
 __webpack_require__.d(__webpack_exports__, "lastEventId", function() { return /* reexport */ lastEventId; });
 __webpack_require__.d(__webpack_exports__, "flush", function() { return /* reexport */ flush; });
 __webpack_require__.d(__webpack_exports__, "close", function() { return /* reexport */ sdk_close; });
+__webpack_require__.d(__webpack_exports__, "getSentryRelease", function() { return /* reexport */ getSentryRelease; });
 __webpack_require__.d(__webpack_exports__, "SDK_NAME", function() { return /* reexport */ SDK_NAME; });
 __webpack_require__.d(__webpack_exports__, "Integrations", function() { return /* binding */ INTEGRATIONS; });
 __webpack_require__.d(__webpack_exports__, "Transports", function() { return /* reexport */ transports_namespaceObject; });
@@ -23222,7 +23223,7 @@ function startTransaction(context, customSamplingContext) {
 }
 //# sourceMappingURL=index.js.map
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/core/esm/version.js
-var SDK_VERSION = '6.2.5';
+var SDK_VERSION = '6.3.1';
 //# sourceMappingURL=version.js.map
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/utils/esm/polyfill.js
 var setPrototypeOf = Object.setPrototypeOf || ({ __proto__: [] } instanceof Array ? setProtoOf : mixinProperties);
@@ -24305,17 +24306,14 @@ function enhanceEventWithSdkInfo(event, sdkInfo) {
     if (!sdkInfo) {
         return event;
     }
-    event.sdk = event.sdk || {
-        name: sdkInfo.name,
-        version: sdkInfo.version,
-    };
+    event.sdk = event.sdk || {};
     event.sdk.name = event.sdk.name || sdkInfo.name;
     event.sdk.version = event.sdk.version || sdkInfo.version;
     event.sdk.integrations = core_node_modules_tslib_tslib_es6_spread((event.sdk.integrations || []), (sdkInfo.integrations || []));
     event.sdk.packages = core_node_modules_tslib_tslib_es6_spread((event.sdk.packages || []), (sdkInfo.packages || []));
     return event;
 }
-/** Creates a SentryRequest from an event. */
+/** Creates a SentryRequest from a Session. */
 function sessionToSentryRequest(session, api) {
     var sdkInfo = getSdkMetadataForEnvelopeHeader(api);
     var envelopeHeaders = JSON.stringify(core_node_modules_tslib_tslib_es6_assign({ sent_at: new Date().toISOString() }, (sdkInfo && { sdk: sdkInfo })));
@@ -24491,6 +24489,41 @@ var base_BaseTransport = /** @class */ (function () {
     BaseTransport.prototype.close = function (timeout) {
         return this._buffer.drain(timeout);
     };
+    /**
+     * Extracts proxy settings from client options and env variables.
+     *
+     * Honors `no_proxy` env variable with the highest priority to allow for hosts exclusion.
+     *
+     * An order of priority for available protocols is:
+     * `http`  => `options.httpProxy` | `process.env.http_proxy`
+     * `https` => `options.httpsProxy` | `options.httpProxy` | `process.env.https_proxy` | `process.env.http_proxy`
+     */
+    BaseTransport.prototype._getProxy = function (protocol) {
+        var e_1, _a;
+        var _b = process.env, no_proxy = _b.no_proxy, http_proxy = _b.http_proxy, https_proxy = _b.https_proxy;
+        var _c = this.options, httpProxy = _c.httpProxy, httpsProxy = _c.httpsProxy;
+        var proxy = protocol === 'http' ? httpProxy || http_proxy : httpsProxy || httpProxy || https_proxy || http_proxy;
+        if (!no_proxy) {
+            return proxy;
+        }
+        var _d = this._api.getDsn(), host = _d.host, port = _d.port;
+        try {
+            for (var _e = __values(no_proxy.split(',')), _f = _e.next(); !_f.done; _f = _e.next()) {
+                var np = _f.value;
+                if (host.endsWith(np) || (host + ":" + port).endsWith(np)) {
+                    return;
+                }
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (_f && !_f.done && (_a = _e.return)) _a.call(_e);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+        return proxy;
+    };
     /** Returns a build request option object used by request */
     BaseTransport.prototype._getRequestOptions = function (uri) {
         var headers = __assign(__assign({}, this._api.getRequestHeaders(SDK_NAME, SDK_VERSION)), this.options.headers);
@@ -24577,7 +24610,7 @@ var http_HTTPTransport = /** @class */ (function (_super) {
     function HTTPTransport(options) {
         var _this = _super.call(this, options) || this;
         _this.options = options;
-        var proxy = options.httpProxy || process.env.http_proxy;
+        var proxy = _this._getProxy('http');
         _this.module = external_http_;
         _this.client = proxy
             ? new (__webpack_require__(87))(proxy)
@@ -24612,7 +24645,7 @@ var https_HTTPSTransport = /** @class */ (function (_super) {
     function HTTPSTransport(options) {
         var _this = _super.call(this, options) || this;
         _this.options = options;
-        var proxy = options.httpsProxy || options.httpProxy || process.env.https_proxy || process.env.http_proxy;
+        var proxy = _this._getProxy('https');
         _this.module = external_https_;
         _this.client = proxy
             ? new (__webpack_require__(87))(proxy)
@@ -24916,12 +24949,12 @@ var baseclient_BaseClient = /** @class */ (function () {
      * @inheritDoc
      */
     BaseClient.prototype.captureSession = function (session) {
-        if (!session.release) {
-            logger.warn('Discarded session because of missing release');
+        if (!(typeof session.release === 'string')) {
+            logger.warn('Discarded session because of missing or non-string release');
         }
         else {
             this._sendSession(session);
-            // After sending, we set init false to inidcate it's not the first occurence
+            // After sending, we set init false to indicate it's not the first occurrence
             session.update({ init: false });
         }
     };
@@ -25167,10 +25200,10 @@ var baseclient_BaseClient = /** @class */ (function () {
      * @param event The event that will be filled with all integrations.
      */
     BaseClient.prototype._applyIntegrationsMetadata = function (event) {
-        var sdkInfo = event.sdk;
         var integrationsArray = Object.keys(this._integrations);
-        if (sdkInfo && integrationsArray.length > 0) {
-            sdkInfo.integrations = integrationsArray;
+        if (integrationsArray.length > 0) {
+            event.sdk = event.sdk || {};
+            event.sdk.integrations = core_node_modules_tslib_tslib_es6_spread((event.sdk.integrations || []), integrationsArray);
         }
     };
     /**
@@ -26428,14 +26461,9 @@ function init(options) {
         }
     }
     if (options.release === undefined) {
-        var global_1 = Object(misc["f" /* getGlobalObject */])();
-        // Prefer env var over global
-        if (process.env.SENTRY_RELEASE) {
-            options.release = process.env.SENTRY_RELEASE;
-        }
-        // This supports the variable that sentry-webpack-plugin injects
-        else if (global_1.SENTRY_RELEASE && global_1.SENTRY_RELEASE.id) {
-            options.release = global_1.SENTRY_RELEASE.id;
+        var detectedRelease = getSentryRelease();
+        if (detectedRelease !== undefined) {
+            options.release = detectedRelease;
         }
     }
     if (options.environment === undefined && process.env.SENTRY_ENVIRONMENT) {
@@ -26490,6 +26518,34 @@ function sdk_close(timeout) {
             return [2 /*return*/, Promise.reject(false)];
         });
     });
+}
+/**
+ * Returns a release dynamically from environment variables.
+ */
+function getSentryRelease() {
+    // Always read first as Sentry takes this as precedence
+    if (process.env.SENTRY_RELEASE) {
+        return process.env.SENTRY_RELEASE;
+    }
+    // This supports the variable that sentry-webpack-plugin injects
+    var global = Object(misc["f" /* getGlobalObject */])();
+    if (global.SENTRY_RELEASE && global.SENTRY_RELEASE.id) {
+        return global.SENTRY_RELEASE.id;
+    }
+    return (
+    // GitHub Actions - https://help.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables
+    process.env.GITHUB_SHA ||
+        // Netlify - https://docs.netlify.com/configure-builds/environment-variables/#build-metadata
+        process.env.COMMIT_REF ||
+        // Vercel - https://vercel.com/docs/v2/build-step#system-environment-variables
+        process.env.VERCEL_GIT_COMMIT_SHA ||
+        process.env.VERCEL_GITHUB_COMMIT_SHA ||
+        process.env.VERCEL_GITLAB_COMMIT_SHA ||
+        process.env.VERCEL_BITBUCKET_COMMIT_SHA ||
+        // Zeit (now known as Vercel)
+        process.env.ZEIT_GITHUB_COMMIT_SHA ||
+        process.env.ZEIT_GITLAB_COMMIT_SHA ||
+        process.env.ZEIT_BITBUCKET_COMMIT_SHA);
 }
 //# sourceMappingURL=sdk.js.map
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/node_modules/@sentry/tracing/esm/utils.js
@@ -41465,11 +41521,13 @@ var browserPerformanceTimeOrigin = (function () {
         return undefined;
     }
     var threshold = 3600 * 1000;
-    var timeOriginIsReliable = performance.timeOrigin && Math.abs(performance.timeOrigin + performance.now() - Date.now()) < threshold;
-    if (timeOriginIsReliable) {
-        _browserPerformanceTimeOriginMode = 'timeOrigin';
-        return performance.timeOrigin;
-    }
+    var performanceNow = performance.now();
+    var dateNow = Date.now();
+    // if timeOrigin isn't available set delta to threshold so it isn't used
+    var timeOriginDelta = performance.timeOrigin
+        ? Math.abs(performance.timeOrigin + performanceNow - dateNow)
+        : threshold;
+    var timeOriginIsReliable = timeOriginDelta < threshold;
     // While performance.timing.navigationStart is deprecated in favor of performance.timeOrigin, performance.timeOrigin
     // is not as widely supported. Namely, performance.timeOrigin is undefined in Safari as of writing.
     // Also as of writing, performance.timing is not available in Web Workers in mainstream browsers, so it is not always
@@ -41478,14 +41536,23 @@ var browserPerformanceTimeOrigin = (function () {
     // eslint-disable-next-line deprecation/deprecation
     var navigationStart = performance.timing && performance.timing.navigationStart;
     var hasNavigationStart = typeof navigationStart === 'number';
-    var navigationStartIsReliable = hasNavigationStart && Math.abs(navigationStart + performance.now() - Date.now()) < threshold;
-    if (navigationStartIsReliable) {
-        _browserPerformanceTimeOriginMode = 'navigationStart';
-        return navigationStart;
+    // if navigationStart isn't available set delta to threshold so it isn't used
+    var navigationStartDelta = hasNavigationStart ? Math.abs(navigationStart + performanceNow - dateNow) : threshold;
+    var navigationStartIsReliable = navigationStartDelta < threshold;
+    if (timeOriginIsReliable || navigationStartIsReliable) {
+        // Use the more reliable time origin
+        if (timeOriginDelta <= navigationStartDelta) {
+            _browserPerformanceTimeOriginMode = 'timeOrigin';
+            return performance.timeOrigin;
+        }
+        else {
+            _browserPerformanceTimeOriginMode = 'navigationStart';
+            return navigationStart;
+        }
     }
     // Either both timeOrigin and navigationStart are skewed or neither is available, fallback to Date.
     _browserPerformanceTimeOriginMode = 'dateNow';
-    return Date.now();
+    return dateNow;
 })();
 //# sourceMappingURL=time.js.map
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(145)(module)))
@@ -58668,12 +58735,25 @@ module.exports = Cursor
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+var safeIsNaN = Number.isNaN ||
+    function ponyfill(value) {
+        return typeof value === 'number' && value !== value;
+    };
+function isEqual(first, second) {
+    if (first === second) {
+        return true;
+    }
+    if (safeIsNaN(first) && safeIsNaN(second)) {
+        return true;
+    }
+    return false;
+}
 function areInputsEqual(newInputs, lastInputs) {
     if (newInputs.length !== lastInputs.length) {
         return false;
     }
     for (var i = 0; i < newInputs.length; i++) {
-        if (newInputs[i] !== lastInputs[i]) {
+        if (!isEqual(newInputs[i], lastInputs[i])) {
             return false;
         }
     }
@@ -59165,7 +59245,7 @@ __webpack_require__.d(__webpack_exports__, "GainType", function() { return /* re
 const VERSION = '0.66.2';
 const NUMERIC_VERSION = 0.6602; // for easy comparisons
 
-const BUILD_DATE = '20210421_11h59';
+const BUILD_DATE = '20210425_02h50';
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/A-apps--core/the-boring-rpg/state/dist/src.es2019/consts.js
 
 const LIB = '@tbrpg/state';
