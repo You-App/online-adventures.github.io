@@ -11,9 +11,31 @@
 		<meta name="monetization" content="$ilp.uphold.com/26PeD6EzMhYJ">
 
 		<!-- rsrc prio -->
-		<link rel="preload" as="script" href="index-2.19c683ee.js">
+		<link rel="preload" as="script" href="index-2.0fa8d453.js">
 
 		<style>/* super early styles while the page is loading */</style>
+
+		<script>const path_segment_after_last_slash = location.pathname.split('/').slice(-1)[0] || '';
+
+if (path_segment_after_last_slash) {
+  // current path doesn't end with a trailing slash
+  // that may be an issue if we are located by our parent folder (implicit file)
+  // https://searchfacts.com/url-trailing-slash/
+  // https://ahrefs.com/blog/trailing-slash/
+  const is_last_segment_a_html_file = path_segment_after_last_slash.endsWith('.html') || path_segment_after_last_slash.endsWith('.htm');
+
+  if (is_last_segment_a_html_file) {// all good ✔
+  } else {
+    // We are located by a folder without a trailing slash.
+    // We are opinionated towards a trailing slash to ease relative references.
+    // Redirect to the version with slash
+    // https://love2dev.com/blog/ways-to-use-javascript-redirect-to-another-page/
+    const new_path = location.pathname + '/'; // let's be careful to not loose any part of the URL
+
+    const new_url = location.origin + new_path + location.search + location.hash;
+    location.replace(new_url);
+  }
+}</script>
 
 		<script>console.groupCollapsed('⚔️🛡💰 Welcome to this browser RPG!!!');
 console.log({
@@ -47,5 +69,5 @@ window.gtag = window.gtag || function gtag() {
 		</div>
 	</body>
 
-	<script async="" importance="high" src="index-2.19c683ee.js"></script>
+	<script async="" importance="high" src="index-2.0fa8d453.js"></script>
 </html>
