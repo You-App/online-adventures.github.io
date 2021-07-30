@@ -57798,4 +57798,4 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   }, /*#__PURE__*/_react.default.createElement(_root.default, null)), document.getElementById('root'));
 });
 },{"react":"ccIB","react-dom":"x9tB","@offirmo-private/react-error-boundary":"arKJ","@offirmo/universal-debug-api-browser":"Vju9","@offirmo-private/async-utils":"oiJd","../services/sec":"f9Qa","./root":"ffkN","./index-2.css":"pYKq","@oh-my-rpg/assets--cursors/src/style.css":"qkXr"}]},{},["CvCW"], null)
-//# sourceMappingURL=index-2.0fa8d453.js.map
+//# sourceMappingURL=index-2.90c1729c.js.map
