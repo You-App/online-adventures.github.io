@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Hello World Google Analytics 4</title>
+	<title>Hello World gtag.js</title>
 
 	<!-- Global site tag (gtag.js) - Google Analytics -->
 	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-103238291-2"></script>
@@ -11,22 +11,30 @@
 		function gtag(){dataLayer.push(arguments)}
 		gtag('js', new Date())
 
-		gtag('config', 'UA-103238291-2')
+		gtag('config', 'UA-103238291-2') // UA
 		gtag('config', 'G-VG46HT6WBJ') // GA4
 
-		gtag('event', 'test', { 'method': 'oa' })
 		//gtag('event', 'view_video', { 'send_to': '<Some Property ID B>' })
 	</script>
 
 	<script>
 		window.dataLayer = window.dataLayer || []
-
 		dataLayer.push({
-			event: 'test',
-			eventCategory: 'Xcategory',
-			eventAction: 'Xaction',
-			eventLabel: 'Xlabel',
+			foo: {
+				bar: 42,
+			}
+		})
+	</script>
+
+	<script>
+		// send events
+		dataLayer.push({
+			event: 'event--DL',
+			eventCategory: 'DLcategory',
+			eventAction: 'DLaction',
+			eventLabel: 'DLlabel',
 		});
+		gtag('event--gtag', 'action--gtag', { param1: 'gtagParam1' })
 	</script>
 
 	<style>
