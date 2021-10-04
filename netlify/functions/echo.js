@@ -81,7 +81,7 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 543);
+/******/ 	return __webpack_require__(__webpack_require__.s = 544);
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -91,8 +91,8 @@
 
 "use strict";
 
-const ansiStyles = __webpack_require__(96);
-const {stdout: stdoutColor, stderr: stderrColor} = __webpack_require__(100);
+const ansiStyles = __webpack_require__(97);
+const {stdout: stdoutColor, stderr: stderrColor} = __webpack_require__(72);
 const {
 	stringReplaceAll,
 	stringEncaseCRLFWithFirstIndex
@@ -326,142 +326,103 @@ module.exports = chalk;
 /***/ 100:
 /***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
+const conversions = __webpack_require__(61);
 
-const os = __webpack_require__(32);
-const tty = __webpack_require__(72);
-const hasFlag = __webpack_require__(101);
+/*
+	This function routes a model to all other models.
 
-const {env} = process;
+	all functions that are routed have a property `.conversion` attached
+	to the returned synthetic function. This property is an array
+	of strings, each with the steps in between the 'from' and 'to'
+	color models (inclusive).
 
-let forceColor;
-if (hasFlag('no-color') ||
-	hasFlag('no-colors') ||
-	hasFlag('color=false') ||
-	hasFlag('color=never')) {
-	forceColor = 0;
-} else if (hasFlag('color') ||
-	hasFlag('colors') ||
-	hasFlag('color=true') ||
-	hasFlag('color=always')) {
-	forceColor = 1;
-}
+	conversions that are not possible simply are not included.
+*/
 
-if ('FORCE_COLOR' in env) {
-	if (env.FORCE_COLOR === 'true') {
-		forceColor = 1;
-	} else if (env.FORCE_COLOR === 'false') {
-		forceColor = 0;
-	} else {
-		forceColor = env.FORCE_COLOR.length === 0 ? 1 : Math.min(parseInt(env.FORCE_COLOR, 10), 3);
-	}
-}
+function buildGraph() {
+	const graph = {};
+	// https://jsperf.com/object-keys-vs-for-in-with-closure/3
+	const models = Object.keys(conversions);
 
-function translateLevel(level) {
-	if (level === 0) {
-		return false;
+	for (let len = models.length, i = 0; i < len; i++) {
+		graph[models[i]] = {
+			// http://jsperf.com/1-vs-infinity
+			// micro-opt, but this is simple.
+			distance: -1,
+			parent: null
+		};
 	}
 
-	return {
-		level,
-		hasBasic: true,
-		has256: level >= 2,
-		has16m: level >= 3
+	return graph;
+}
+
+// https://en.wikipedia.org/wiki/Breadth-first_search
+function deriveBFS(fromModel) {
+	const graph = buildGraph();
+	const queue = [fromModel]; // Unshift -> queue -> pop
+
+	graph[fromModel].distance = 0;
+
+	while (queue.length) {
+		const current = queue.pop();
+		const adjacents = Object.keys(conversions[current]);
+
+		for (let len = adjacents.length, i = 0; i < len; i++) {
+			const adjacent = adjacents[i];
+			const node = graph[adjacent];
+
+			if (node.distance === -1) {
+				node.distance = graph[current].distance + 1;
+				node.parent = current;
+				queue.unshift(adjacent);
+			}
+		}
+	}
+
+	return graph;
+}
+
+function link(from, to) {
+	return function (args) {
+		return to(from(args));
 	};
 }
 
-function supportsColor(haveStream, streamIsTTY) {
-	if (forceColor === 0) {
-		return 0;
+function wrapConversion(toModel, graph) {
+	const path = [graph[toModel].parent, toModel];
+	let fn = conversions[graph[toModel].parent][toModel];
+
+	let cur = graph[toModel].parent;
+	while (graph[cur].parent) {
+		path.unshift(graph[cur].parent);
+		fn = link(conversions[graph[cur].parent][cur], fn);
+		cur = graph[cur].parent;
 	}
 
-	if (hasFlag('color=16m') ||
-		hasFlag('color=full') ||
-		hasFlag('color=truecolor')) {
-		return 3;
-	}
-
-	if (hasFlag('color=256')) {
-		return 2;
-	}
-
-	if (haveStream && !streamIsTTY && forceColor === undefined) {
-		return 0;
-	}
-
-	const min = forceColor || 0;
-
-	if (env.TERM === 'dumb') {
-		return min;
-	}
-
-	if (process.platform === 'win32') {
-		// Windows 10 build 10586 is the first Windows release that supports 256 colors.
-		// Windows 10 build 14931 is the first release that supports 16m/TrueColor.
-		const osRelease = os.release().split('.');
-		if (
-			Number(osRelease[0]) >= 10 &&
-			Number(osRelease[2]) >= 10586
-		) {
-			return Number(osRelease[2]) >= 14931 ? 3 : 2;
-		}
-
-		return 1;
-	}
-
-	if ('CI' in env) {
-		if (['TRAVIS', 'CIRCLECI', 'APPVEYOR', 'GITLAB_CI', 'GITHUB_ACTIONS', 'BUILDKITE'].some(sign => sign in env) || env.CI_NAME === 'codeship') {
-			return 1;
-		}
-
-		return min;
-	}
-
-	if ('TEAMCITY_VERSION' in env) {
-		return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env.TEAMCITY_VERSION) ? 1 : 0;
-	}
-
-	if (env.COLORTERM === 'truecolor') {
-		return 3;
-	}
-
-	if ('TERM_PROGRAM' in env) {
-		const version = parseInt((env.TERM_PROGRAM_VERSION || '').split('.')[0], 10);
-
-		switch (env.TERM_PROGRAM) {
-			case 'iTerm.app':
-				return version >= 3 ? 3 : 2;
-			case 'Apple_Terminal':
-				return 2;
-			// No default
-		}
-	}
-
-	if (/-256(color)?$/i.test(env.TERM)) {
-		return 2;
-	}
-
-	if (/^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(env.TERM)) {
-		return 1;
-	}
-
-	if ('COLORTERM' in env) {
-		return 1;
-	}
-
-	return min;
+	fn.conversion = path;
+	return fn;
 }
 
-function getSupportLevel(stream) {
-	const level = supportsColor(stream, stream && stream.isTTY);
-	return translateLevel(level);
-}
+module.exports = function (fromModel) {
+	const graph = deriveBFS(fromModel);
+	const conversion = {};
 
-module.exports = {
-	supportsColor: getSupportLevel,
-	stdout: translateLevel(supportsColor(true, tty.isatty(1))),
-	stderr: translateLevel(supportsColor(true, tty.isatty(2)))
+	const models = Object.keys(graph);
+	for (let len = models.length, i = 0; i < len; i++) {
+		const toModel = models[i];
+		const node = graph[toModel];
+
+		if (node.parent === null) {
+			// No possible conversion, or this node is the source model.
+			continue;
+		}
+
+		conversion[toModel] = wrapConversion(toModel, graph);
+	}
+
+	return conversion;
 };
+
 
 
 /***/ }),
@@ -752,7 +713,7 @@ function getGlobalThis() {
 
 /***/ }),
 
-/***/ 219:
+/***/ 220:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -763,9 +724,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.get_netlify_user_data = exports.DEV_MOCK_NETLIFY_USER = void 0;
 
+const error_utils_1 = __webpack_require__(41);
+
 const consts_1 = __webpack_require__(40);
 
-const channel_1 = __webpack_require__(53); /////////////////////////////////////////////////
+const channel_1 = __webpack_require__(54); /////////////////////////////////////////////////
 
 
 function _ensure_netlify_logged_in(context) {
@@ -790,7 +753,8 @@ exports.DEV_MOCK_NETLIFY_USER = {
 function get_netlify_user_data(context) {
   try {
     _ensure_netlify_logged_in(context);
-  } catch (err) {
+  } catch (_err) {
+    const err = (0, error_utils_1.normalizeError)(_err);
     err.statusCode = consts_1.HTTP_STATUS_CODE.error.client.unauthorized;
 
     if (err.message.includes('No/bad/outdated token') && channel_1.CHANNEL === 'dev') {
@@ -860,7 +824,7 @@ const COMMON_ERROR_FIELDS_EXTENDED = new Set([// first inherit from previous
 
 /***/ }),
 
-/***/ 314:
+/***/ 315:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -874,7 +838,7 @@ exports.BUILD_DATE = exports.NUMERIC_VERSION = exports.VERSION = void 0; // THIS
 exports.VERSION = '0.0.1';
 exports.NUMERIC_VERSION = 0.0001; // for easy comparisons
 
-exports.BUILD_DATE = '20210818_07h11';
+exports.BUILD_DATE = '20211004_03h11';
 
 /***/ }),
 
@@ -926,14 +890,43 @@ exports.HTTP_STATUS_CODE = {
 
 /***/ }),
 
-/***/ 43:
+/***/ 41:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _fields__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(24);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "STRICT_STANDARD_ERROR_FIELDS", function() { return _fields__WEBPACK_IMPORTED_MODULE_0__["d"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "QUASI_STANDARD_ERROR_FIELDS", function() { return _fields__WEBPACK_IMPORTED_MODULE_0__["c"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "COMMON_ERROR_FIELDS", function() { return _fields__WEBPACK_IMPORTED_MODULE_0__["a"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "COMMON_ERROR_FIELDS_EXTENDED", function() { return _fields__WEBPACK_IMPORTED_MODULE_0__["b"]; });
+
+/* harmony import */ var _util_create__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(82);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "createError", function() { return _util_create__WEBPACK_IMPORTED_MODULE_1__["a"]; });
+
+/* harmony import */ var _util_normalize__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(83);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "hasErrorShape", function() { return _util_normalize__WEBPACK_IMPORTED_MODULE_2__["a"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "normalizeError", function() { return _util_normalize__WEBPACK_IMPORTED_MODULE_2__["b"]; });
+
+
+
+
+
+
+/***/ }),
+
+/***/ 44:
 /***/ (function(module, exports) {
 
 module.exports = require("http");
 
 /***/ }),
 
-/***/ 44:
+/***/ 45:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1014,7 +1007,7 @@ const {
 
 /***/ }),
 
-/***/ 52:
+/***/ 53:
 /***/ (function(module, exports) {
 
 module.exports = function(module) {
@@ -1043,7 +1036,7 @@ module.exports = function(module) {
 
 /***/ }),
 
-/***/ 53:
+/***/ 54:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1072,7 +1065,7 @@ exports.CHANNEL = (() => {
 
 /***/ }),
 
-/***/ 543:
+/***/ 544:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1083,7 +1076,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.handler = void 0;
 
-const tslib_1 = __webpack_require__(90);
+const tslib_1 = __webpack_require__(91);
 /*
 process.env.UDA_OVERRIDE__LOGGER__UDA_INTERNAL_LOGLEVEL = '"silly"'
 process.env.UDA_OVERRIDE__LOGGER_UDA_LOGLEVEL = '"silly"'
@@ -1097,9 +1090,9 @@ __webpack_require__(60);
 
 const api_interface_1 = __webpack_require__(67);
 
-const netlify_1 = __webpack_require__(219);
+const netlify_1 = __webpack_require__(220);
 
-const build = tslib_1.__importStar(__webpack_require__(314));
+const build = (0, tslib_1.__importStar)(__webpack_require__(315));
 
 const utils_1 = __webpack_require__(69); ////////////////////////////////////
 
@@ -1109,11 +1102,11 @@ const handler = async (event, badly_typed_context) => {
   let netlify_user_data;
 
   try {
-    netlify_user_data = netlify_1.get_netlify_user_data(context);
+    netlify_user_data = (0, netlify_1.get_netlify_user_data)(context);
   } catch (err) {
     netlify_user_data = {
       err: {
-        message: err.message
+        message: err === null || err === void 0 ? void 0 : err.message
       }
     };
   }
@@ -1124,20 +1117,20 @@ const handler = async (event, badly_typed_context) => {
     derived: {
       get_key_from_path: (() => {
         try {
-          return utils_1.get_key_from_path(event, {
+          return (0, utils_1.get_key_from_path)(event, {
             expected_segment_count: null
           });
         } catch (err) {
-          return err.message;
+          return err === null || err === void 0 ? void 0 : err.message;
         }
       })(),
       get_id_from_path: (() => {
         try {
-          return utils_1.get_id_from_path(event, {
+          return (0, utils_1.get_id_from_path)(event, {
             expected_segment_count: null
           });
         } catch (err) {
-          return err.message;
+          return err === null || err === void 0 ? void 0 : err.message;
         }
       })()
     },
@@ -1160,7 +1153,7 @@ const handler = async (event, badly_typed_context) => {
     }
   };
   console.log('will return:', all_the_things);
-  const body = api_interface_1.create_server_response_body__data(all_the_things);
+  const body = (0, api_interface_1.create_server_response_body__data)(all_the_things);
   return {
     statusCode: 200,
     headers: {},
@@ -1179,33 +1172,6 @@ function _filter_out_secrets(env) {
     return acc;
   }, {});
 }
-
-/***/ }),
-
-/***/ 55:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _fields__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(24);
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "STRICT_STANDARD_ERROR_FIELDS", function() { return _fields__WEBPACK_IMPORTED_MODULE_0__["d"]; });
-
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "QUASI_STANDARD_ERROR_FIELDS", function() { return _fields__WEBPACK_IMPORTED_MODULE_0__["c"]; });
-
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "COMMON_ERROR_FIELDS", function() { return _fields__WEBPACK_IMPORTED_MODULE_0__["a"]; });
-
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "COMMON_ERROR_FIELDS_EXTENDED", function() { return _fields__WEBPACK_IMPORTED_MODULE_0__["b"]; });
-
-/* harmony import */ var _util_create__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(81);
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "createError", function() { return _util_create__WEBPACK_IMPORTED_MODULE_1__["a"]; });
-
-/* harmony import */ var _util_normalize__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(82);
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "normalizeError", function() { return _util_normalize__WEBPACK_IMPORTED_MODULE_2__["a"]; });
-
-
-
-
-
 
 /***/ }),
 
@@ -1520,6 +1486,8 @@ const DEFAULTS_PRETTIFY_OPTIONS = {
     return o.stylize_suspicious(String(u));
   },
   prettify_symbol: (s, st) => {
+    var _a;
+
     const {
       o
     } = st;
@@ -1527,7 +1495,7 @@ const DEFAULTS_PRETTIFY_OPTIONS = {
     try {
       return '' + o.stylize_global('Symbol') + o.stylize_syntax('(') + (s.description ? o.prettify_string(s.description, st) : '') + o.stylize_syntax(')');
     } catch (err) {
-      return o.stylize_error(`[error prettifying:${err.message}/ps]`);
+      return o.stylize_error(`[error prettifying:${(_a = err) === null || _a === void 0 ? void 0 : _a.message}/ps]`);
     }
   },
   // objects
@@ -1572,6 +1540,8 @@ const DEFAULTS_PRETTIFY_OPTIONS = {
     .join(o.stylize_syntax(',')) + o.stylize_syntax(']');
   },
   prettify_property_name: (p, st) => {
+    var _a;
+
     const {
       o
     } = st;
@@ -1592,12 +1562,14 @@ const DEFAULTS_PRETTIFY_OPTIONS = {
           return o.stylize_syntax('[') + o.prettify_symbol(p, st) + o.stylize_syntax(']');
       }
     } catch (err) {
-      return o.stylize_error(`[error prettifying:${err.message}/ppn]`);
+      return o.stylize_error(`[error prettifying:${(_a = err) === null || _a === void 0 ? void 0 : _a.message}/ppn]`);
     }
   },
   prettify_object: (obj, st, {
     skip_constructor = false
   } = {}) => {
+    var _a, _b, _c;
+
     if (DEBUG) console.log('prettify_object', obj);
     const {
       o
@@ -1617,7 +1589,7 @@ const DEFAULTS_PRETTIFY_OPTIONS = {
 
           }
         } catch (err) {
-          return o.stylize_error(`[error prettifying:${err.message}/po.g]`);
+          return o.stylize_error(`[error prettifying:${(_a = err) === null || _a === void 0 ? void 0 : _a.message}/po.g]`);
         }
       }
 
@@ -1680,7 +1652,7 @@ const DEFAULTS_PRETTIFY_OPTIONS = {
             }
           }
         } catch (err) {
-          return o.stylize_error(`[error prettifying:${err.message}/po.c]`);
+          return o.stylize_error(`[error prettifying:${(_b = err) === null || _b === void 0 ? void 0 : _b.message}/po.c]`);
         }
       }
 
@@ -1709,12 +1681,14 @@ const DEFAULTS_PRETTIFY_OPTIONS = {
         return o.prettify_property_name(k, st) + o.stylize_syntax(': ') + o.prettify_any(v, st);
       }).join(o.stylize_syntax(',')) + o.stylize_syntax('}');
     } catch (err) {
-      return o.stylize_error(`[error prettifying:${err.message}/po]`);
+      return o.stylize_error(`[error prettifying:${(_c = err) === null || _c === void 0 ? void 0 : _c.message}/po]`);
     }
   },
 
   // root
   prettify_any(any, st) {
+    var _a;
+
     if (DEBUG) console.log('prettify_any', any);
     const {
       o
@@ -1759,7 +1733,7 @@ const DEFAULTS_PRETTIFY_OPTIONS = {
           return `[unsupported type:${typeof any}]`;
       }
     } catch (err) {
-      return o.stylize_error(`[error prettifying:${err.message}/pa]`);
+      return o.stylize_error(`[error prettifying:${(_a = err) === null || _a === void 0 ? void 0 : _a.message}/pa]`);
     }
   }
 
@@ -1804,11 +1778,13 @@ function create_state(options) {
 }
 
 function prettify_any(js, options = {}) {
+  var _a;
+
   try {
     const st = create_state(get_options(options));
     return st.o.prettify_any(js, st);
   } catch (err) {
-    return `[error prettifying:${err.message}]`;
+    return `[error prettifying:${(_a = err) === null || _a === void 0 ? void 0 : _a.message}]`;
   }
 }
 function prettify_json(js, options = {}) {
@@ -2234,7 +2210,7 @@ const {
 
 /* MIT license */
 /* eslint-disable no-mixed-operators */
-const cssKeywords = __webpack_require__(98);
+const cssKeywords = __webpack_require__(99);
 
 // NOTE: conversions should only return primitive values (i.e. arrays, or
 //       values that give correct `typeof` results).
@@ -3113,7 +3089,7 @@ const SERVER_RESPONSE_VERSION = 1;
 
 const ReleaseChannel = Object(dist["Enum"])('prod', 'staging', 'dev');
 // EXTERNAL MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/3-advanced--multi/universal-debug-api-placeholder/dist/src.es2019/index.js + 2 modules
-var src_es2019 = __webpack_require__(44);
+var src_es2019 = __webpack_require__(45);
 
 // CONCATENATED MODULE: /Users/offirmo/work/src/off/offirmo-monorepo/B-apps--support/online-adventur.es/api-interface/dist/src.es2019/utils.js
 
@@ -3201,9 +3177,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.get_id_from_path = exports.get_key_from_path = exports.loosely_get_clean_path = exports.get_relevant_path_segments = exports.create_error = void 0;
 
-const http_1 = __webpack_require__(43);
+const http_1 = __webpack_require__(44);
 
-const error_utils_1 = __webpack_require__(55);
+const error_utils_1 = __webpack_require__(41);
 
 const consts_1 = __webpack_require__(40); // TODO extern
 
@@ -3217,7 +3193,7 @@ function create_error(message, details = {}, SEC) {
   } //console.log('CE', SEC.getLogicalStack(), '\n', SEC.getShortLogicalStack())
 
 
-  const err = SEC ? SEC.createError(String(message), details) : error_utils_1.createError(String(message), details);
+  const err = SEC ? SEC.createError(String(message), details) : (0, error_utils_1.createError)(String(message), details);
   err.framesToPop++;
   return err;
 }
@@ -3312,13 +3288,156 @@ exports.get_id_from_path = get_id_from_path;
 /***/ }),
 
 /***/ 72:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+const os = __webpack_require__(32);
+const tty = __webpack_require__(73);
+const hasFlag = __webpack_require__(101);
+
+const {env} = process;
+
+let forceColor;
+if (hasFlag('no-color') ||
+	hasFlag('no-colors') ||
+	hasFlag('color=false') ||
+	hasFlag('color=never')) {
+	forceColor = 0;
+} else if (hasFlag('color') ||
+	hasFlag('colors') ||
+	hasFlag('color=true') ||
+	hasFlag('color=always')) {
+	forceColor = 1;
+}
+
+if ('FORCE_COLOR' in env) {
+	if (env.FORCE_COLOR === 'true') {
+		forceColor = 1;
+	} else if (env.FORCE_COLOR === 'false') {
+		forceColor = 0;
+	} else {
+		forceColor = env.FORCE_COLOR.length === 0 ? 1 : Math.min(parseInt(env.FORCE_COLOR, 10), 3);
+	}
+}
+
+function translateLevel(level) {
+	if (level === 0) {
+		return false;
+	}
+
+	return {
+		level,
+		hasBasic: true,
+		has256: level >= 2,
+		has16m: level >= 3
+	};
+}
+
+function supportsColor(haveStream, streamIsTTY) {
+	if (forceColor === 0) {
+		return 0;
+	}
+
+	if (hasFlag('color=16m') ||
+		hasFlag('color=full') ||
+		hasFlag('color=truecolor')) {
+		return 3;
+	}
+
+	if (hasFlag('color=256')) {
+		return 2;
+	}
+
+	if (haveStream && !streamIsTTY && forceColor === undefined) {
+		return 0;
+	}
+
+	const min = forceColor || 0;
+
+	if (env.TERM === 'dumb') {
+		return min;
+	}
+
+	if (process.platform === 'win32') {
+		// Windows 10 build 10586 is the first Windows release that supports 256 colors.
+		// Windows 10 build 14931 is the first release that supports 16m/TrueColor.
+		const osRelease = os.release().split('.');
+		if (
+			Number(osRelease[0]) >= 10 &&
+			Number(osRelease[2]) >= 10586
+		) {
+			return Number(osRelease[2]) >= 14931 ? 3 : 2;
+		}
+
+		return 1;
+	}
+
+	if ('CI' in env) {
+		if (['TRAVIS', 'CIRCLECI', 'APPVEYOR', 'GITLAB_CI', 'GITHUB_ACTIONS', 'BUILDKITE'].some(sign => sign in env) || env.CI_NAME === 'codeship') {
+			return 1;
+		}
+
+		return min;
+	}
+
+	if ('TEAMCITY_VERSION' in env) {
+		return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env.TEAMCITY_VERSION) ? 1 : 0;
+	}
+
+	if (env.COLORTERM === 'truecolor') {
+		return 3;
+	}
+
+	if ('TERM_PROGRAM' in env) {
+		const version = parseInt((env.TERM_PROGRAM_VERSION || '').split('.')[0], 10);
+
+		switch (env.TERM_PROGRAM) {
+			case 'iTerm.app':
+				return version >= 3 ? 3 : 2;
+			case 'Apple_Terminal':
+				return 2;
+			// No default
+		}
+	}
+
+	if (/-256(color)?$/i.test(env.TERM)) {
+		return 2;
+	}
+
+	if (/^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(env.TERM)) {
+		return 1;
+	}
+
+	if ('COLORTERM' in env) {
+		return 1;
+	}
+
+	return min;
+}
+
+function getSupportLevel(stream) {
+	const level = supportsColor(stream, stream && stream.isTTY);
+	return translateLevel(level);
+}
+
+module.exports = {
+	supportsColor: getSupportLevel,
+	stdout: translateLevel(supportsColor(true, tty.isatty(1))),
+	stderr: translateLevel(supportsColor(true, tty.isatty(2)))
+};
+
+
+/***/ }),
+
+/***/ 73:
 /***/ (function(module, exports) {
 
 module.exports = require("tty");
 
 /***/ }),
 
-/***/ 81:
+/***/ 82:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3360,13 +3479,49 @@ function createError(message, attributes = {}, ctor = Error) {
 
 /***/ }),
 
-/***/ 82:
+/***/ 83:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return normalizeError; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return hasErrorShape; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return normalizeError; });
 /* harmony import */ var _fields__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(24);
- // Normalize any thrown object into a true, normal error.
+
+const DEBUG = false;
+const WARN = true;
+
+const _demo_error = new Error('[Test!]');
+
+function hasErrorShape(err_like) {
+  if (typeof (err_like === null || err_like === void 0 ? void 0 : err_like.message) !== 'string' || !(err_like === null || err_like === void 0 ? void 0 : err_like.message)) {
+    DEBUG && console.error('hasErrorShape() BAD message', {
+      type: typeof (err_like === null || err_like === void 0 ? void 0 : err_like.message),
+      expected_type: typeof (_demo_error === null || _demo_error === void 0 ? void 0 : _demo_error.message),
+      err_like
+    });
+    return false;
+  }
+
+  if (typeof (err_like === null || err_like === void 0 ? void 0 : err_like.name) !== 'string' || !(err_like === null || err_like === void 0 ? void 0 : err_like.name)) {
+    DEBUG && console.error('hasErrorShape() BAD name', {
+      type: typeof (err_like === null || err_like === void 0 ? void 0 : err_like.name),
+      expected_type: typeof (_demo_error === null || _demo_error === void 0 ? void 0 : _demo_error.name),
+      err_like
+    });
+    return false;
+  }
+
+  if (typeof (err_like === null || err_like === void 0 ? void 0 : err_like.stack) !== 'string') {
+    DEBUG && console.error('hasErrorShape() BAD stack', {
+      type: typeof (err_like === null || err_like === void 0 ? void 0 : err_like.stack),
+      expected_type: typeof (_demo_error === null || _demo_error === void 0 ? void 0 : _demo_error.stack),
+      err_like
+    });
+    return false;
+  }
+
+  return true;
+} // Normalize any thrown object into a true, normal error.
 // NOTE: will *always* recreate the error. TODO evaluate if possible to improve?
 // Anything can be thrown: undefined, string, number...
 // But that's obviously not a good practice.
@@ -3376,25 +3531,88 @@ function createError(message, attributes = {}, ctor = Error) {
 // - seen: non-enumerable props
 // So we want to ensure a true, safe, writable error object.
 
-function normalizeError(err_like = {}) {
-  var _a, _b; // Yes, we always re-create in case
+function normalizeError(err_like = undefined, {
+  alwaysRecreate = false
+} = {}) {
+  const has_minimal_error_shape = hasErrorShape(err_like);
+
+  if (has_minimal_error_shape && !alwaysRecreate) {
+    // shortcut for most of the time
+    return err_like;
+  }
+
+  if (!has_minimal_error_shape) {
+    WARN && console.warn(`WARNING: normalizeError() saw a non-Error thing thrown!`, {
+      err_like
+    });
+  }
+
+  if (err_like === undefined || err_like === null) {
+    // we can't get prototype from those, shortcut it:
+    return new Error(`[non-error: "${err_like}" thrown!]`);
+  } // just for a clearer message
 
 
-  const p = Object.getPrototypeOf(err_like); // should we restrict to global standard constructors? TBD
+  if (typeof err_like === 'string') {
+    return new Error(`[non-error of type "${typeof err_like}" thrown: "${err_like}"!]`);
+  } else if (typeof err_like !== 'object') {
+    // we can't get prototype from those, shortcut it:
+    return new Error(`[non-error of type "${typeof err_like}" thrown!]`);
+  }
 
-  const constructor = ((_b = (_a = p === null || p === void 0 ? void 0 : p.constructor) === null || _a === void 0 ? void 0 : _a.name) === null || _b === void 0 ? void 0 : _b.endsWith('Error')) ? p.constructor : Error; // https://stackoverflow.com/questions/1606797/use-of-apply-with-new-operator-is-this-possible
+  try {
+    const should_recreate = alwaysRecreate || !has_minimal_error_shape;
+    const true_err = should_recreate ? (() => {
+      const true_err = (() => {
+        var _a, _b, _c;
 
-  const true_err = new (Function.prototype.bind.call(constructor, null, err_like.message || `(non-error caught: "${err_like}")`))(); // properly attach fields if they exist
+        let message = ((_a = err_like) === null || _a === void 0 ? void 0 : _a.message // even no error shape may have a message prop
+        ) ? String(err_like.message) : `[object with no error shape thrown!]`;
 
-  _fields__WEBPACK_IMPORTED_MODULE_0__[/* COMMON_ERROR_FIELDS_EXTENDED */ "b"].forEach(prop => {
-    if (err_like[prop]) true_err[prop] = err_like[prop];
-  });
-  return true_err;
+        try {
+          const current_prototype = Object.getPrototypeOf(err_like); // should we restrict to global standard constructors? TBD
+
+          const wanted_constructor = ((_c = (_b = current_prototype === null || current_prototype === void 0 ? void 0 : current_prototype.constructor) === null || _b === void 0 ? void 0 : _b.name) === null || _c === void 0 ? void 0 : _c.endsWith('Error')) ? current_prototype.constructor : Error; // https://stackoverflow.com/questions/1606797/use-of-apply-with-new-operator-is-this-possible
+
+          const candidate = new (Function.prototype.bind.call(wanted_constructor, null, message))();
+          if (!hasErrorShape(candidate)) throw new Error('[re-created but still !has_minimal_error_shape: will be caught below]');
+          return candidate;
+        } catch (_err) {
+          DEBUG && console.error('NE1', _err); // the constructor didn't work or didn't yield a proper error, fallback to a normal, safe Error
+
+          const true_err = new Error(message);
+          return true_err;
+        }
+      })(); // properly re-attach fields if they exist
+
+
+      _fields__WEBPACK_IMPORTED_MODULE_0__[/* COMMON_ERROR_FIELDS_EXTENDED */ "b"].forEach(prop => {
+        if (prop === 'message' || prop === 'name') {
+          // those props are from the constructor, don't copy them
+          return;
+        }
+
+        if (err_like[prop]) {
+          // TODO consider deep copies?
+          true_err[prop] = err_like[prop];
+        }
+      });
+      return true_err;
+    })() : err_like;
+    return true_err;
+  } catch (_err) {
+    DEBUG && console.error('NE2', _err);
+    WARN && console.warn(`WARNING: normalizeError() saw a dangerous thing thrown!`, {
+      err_like
+    }); // if we're here, that means that err_like is *very* fancy, better not probe out further.
+
+    return new Error(`[non-error: <fancy object> thrown!]`);
+  }
 }
 
 /***/ }),
 
-/***/ 90:
+/***/ 91:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3666,7 +3884,7 @@ function __classPrivateFieldSet(receiver, state, value, kind, f) {
 
 /***/ }),
 
-/***/ 96:
+/***/ 97:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3712,7 +3930,7 @@ const setLazyProperty = (object, property, get) => {
 let colorConvert;
 const makeDynamicStyles = (wrap, targetSpace, identity, isBackground) => {
 	if (colorConvert === undefined) {
-		colorConvert = __webpack_require__(97);
+		colorConvert = __webpack_require__(98);
 	}
 
 	const offset = isBackground ? 10 : 0;
@@ -3834,15 +4052,15 @@ Object.defineProperty(module, 'exports', {
 	get: assembleStyles
 });
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(52)(module)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(53)(module)))
 
 /***/ }),
 
-/***/ 97:
+/***/ 98:
 /***/ (function(module, exports, __webpack_require__) {
 
 const conversions = __webpack_require__(61);
-const route = __webpack_require__(99);
+const route = __webpack_require__(100);
 
 const convert = {};
 
@@ -3926,7 +4144,7 @@ module.exports = convert;
 
 /***/ }),
 
-/***/ 98:
+/***/ 99:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4082,110 +4300,6 @@ module.exports = {
 	"yellow": [255, 255, 0],
 	"yellowgreen": [154, 205, 50]
 };
-
-
-/***/ }),
-
-/***/ 99:
-/***/ (function(module, exports, __webpack_require__) {
-
-const conversions = __webpack_require__(61);
-
-/*
-	This function routes a model to all other models.
-
-	all functions that are routed have a property `.conversion` attached
-	to the returned synthetic function. This property is an array
-	of strings, each with the steps in between the 'from' and 'to'
-	color models (inclusive).
-
-	conversions that are not possible simply are not included.
-*/
-
-function buildGraph() {
-	const graph = {};
-	// https://jsperf.com/object-keys-vs-for-in-with-closure/3
-	const models = Object.keys(conversions);
-
-	for (let len = models.length, i = 0; i < len; i++) {
-		graph[models[i]] = {
-			// http://jsperf.com/1-vs-infinity
-			// micro-opt, but this is simple.
-			distance: -1,
-			parent: null
-		};
-	}
-
-	return graph;
-}
-
-// https://en.wikipedia.org/wiki/Breadth-first_search
-function deriveBFS(fromModel) {
-	const graph = buildGraph();
-	const queue = [fromModel]; // Unshift -> queue -> pop
-
-	graph[fromModel].distance = 0;
-
-	while (queue.length) {
-		const current = queue.pop();
-		const adjacents = Object.keys(conversions[current]);
-
-		for (let len = adjacents.length, i = 0; i < len; i++) {
-			const adjacent = adjacents[i];
-			const node = graph[adjacent];
-
-			if (node.distance === -1) {
-				node.distance = graph[current].distance + 1;
-				node.parent = current;
-				queue.unshift(adjacent);
-			}
-		}
-	}
-
-	return graph;
-}
-
-function link(from, to) {
-	return function (args) {
-		return to(from(args));
-	};
-}
-
-function wrapConversion(toModel, graph) {
-	const path = [graph[toModel].parent, toModel];
-	let fn = conversions[graph[toModel].parent][toModel];
-
-	let cur = graph[toModel].parent;
-	while (graph[cur].parent) {
-		path.unshift(graph[cur].parent);
-		fn = link(conversions[graph[cur].parent][cur], fn);
-		cur = graph[cur].parent;
-	}
-
-	fn.conversion = path;
-	return fn;
-}
-
-module.exports = function (fromModel) {
-	const graph = deriveBFS(fromModel);
-	const conversion = {};
-
-	const models = Object.keys(graph);
-	for (let len = models.length, i = 0; i < len; i++) {
-		const toModel = models[i];
-		const node = graph[toModel];
-
-		if (node.parent === null) {
-			// No possible conversion, or this node is the source model.
-			continue;
-		}
-
-		conversion[toModel] = wrapConversion(toModel, graph);
-	}
-
-	return conversion;
-};
-
 
 
 /***/ })
