@@ -477,11 +477,11 @@ hr {
 	--o⋄color--fg⁚ancillary: var(--o⋄color__dolt__medium-grey);
 }
 
-.o⋄color⁚main {
+.o⋄colorꘌmain {
 	color: var(--o⋄color--fg⁚main);
 }
 
-.o⋄color⁚secondary {
+.o⋄colorꘌsecondary {
 	color: var(--o⋄color--fg⁚secondary);
 }
 
@@ -757,4 +757,3 @@ hr {
 body {
 	border: 2px solid red !important;
 }
-

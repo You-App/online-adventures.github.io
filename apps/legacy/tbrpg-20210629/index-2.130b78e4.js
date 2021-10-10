@@ -6945,7 +6945,7 @@ var on_node_exit = function (_a) {
       break;
 
     case 'weak':
-      classes.push('o⋄color⁚secondary');
+      classes.push('o⋄colorꘌsecondary');
       is_inline = true;
       break;
 
@@ -8740,11 +8740,11 @@ var global = arguments[3];
 
   collectChildrenReverseFilter.filterName = 'collectChildren';
   /*
-  
+
   LCS implementation that supports arrays or strings
-  
+
   reference: http://en.wikipedia.org/wiki/Longest_common_subsequence_problem
-  
+
   */
 
   var defaultMatch = function defaultMatch(array1, array2, index1, index2) {
@@ -56434,26 +56434,26 @@ var at, // The index of the current character
             text:    text
         };
     },
-    
+
     next = function (c) {
         // If a c parameter is provided, verify that it matches the current character.
         if (c && c !== ch) {
             error("Expected '" + c + "' instead of '" + ch + "'");
         }
-        
+
         // Get the next character. When there are no more characters,
         // return the empty string.
-        
+
         ch = text.charAt(at);
         at += 1;
         return ch;
     },
-    
+
     number = function () {
         // Parse a number value.
         var number,
             string = '';
-        
+
         if (ch === '-') {
             string = '-';
             next('-');
@@ -56487,14 +56487,14 @@ var at, // The index of the current character
             return number;
         }
     },
-    
+
     string = function () {
         // Parse a string value.
         var hex,
             i,
             string = '',
             uffff;
-        
+
         // When parsing for string values, we must look for " and \ characters.
         if (ch === '"') {
             while (next()) {
@@ -56651,7 +56651,7 @@ value = function () {
 
 module.exports = function (source, reviver) {
     var result;
-    
+
     text = source;
     at = 0;
     ch = ' ';
@@ -56706,7 +56706,7 @@ function quote(string) {
     // backslash characters, then we can safely slap some quotes around it.
     // Otherwise we must also replace the offending characters with safe escape
     // sequences.
-    
+
     escapable.lastIndex = 0;
     return escapable.test(string) ? '"' + string.replace(escapable, function (a) {
         var c = meta[a];
@@ -56724,47 +56724,47 @@ function str(key, holder) {
         mind = gap,
         partial,
         value = holder[key];
-    
+
     // If the value has a toJSON method, call it to obtain a replacement value.
     if (value && typeof value === 'object' &&
             typeof value.toJSON === 'function') {
         value = value.toJSON(key);
     }
-    
+
     // If we were called with a replacer function, then call the replacer to
     // obtain a replacement value.
     if (typeof rep === 'function') {
         value = rep.call(holder, key, value);
     }
-    
+
     // What happens next depends on the value's type.
     switch (typeof value) {
         case 'string':
             return quote(value);
-        
+
         case 'number':
             // JSON numbers must be finite. Encode non-finite numbers as null.
             return isFinite(value) ? String(value) : 'null';
-        
+
         case 'boolean':
         case 'null':
             // If the value is a boolean or null, convert it to a string. Note:
             // typeof null does not produce 'null'. The case is included here in
             // the remote chance that this gets fixed someday.
             return String(value);
-            
+
         case 'object':
             if (!value) return 'null';
             gap += indent;
             partial = [];
-            
+
             // Array.isArray
             if (Object.prototype.toString.apply(value) === '[object Array]') {
                 length = value.length;
                 for (i = 0; i < length; i += 1) {
                     partial[i] = str(i, value) || 'null';
                 }
-                
+
                 // Join all of the elements together, separated with commas, and
                 // wrap them in brackets.
                 v = partial.length === 0 ? '[]' : gap ?
@@ -56773,7 +56773,7 @@ function str(key, holder) {
                 gap = mind;
                 return v;
             }
-            
+
             // If the replacer is an array, use it to select the members to be
             // stringified.
             if (rep && typeof rep === 'object') {
@@ -56799,7 +56799,7 @@ function str(key, holder) {
                     }
                 }
             }
-            
+
         // Join all of the member texts together, separated with commas,
         // and wrap them in braces.
 
@@ -56815,7 +56815,7 @@ module.exports = function (value, replacer, space) {
     var i;
     gap = '';
     indent = '';
-    
+
     // If the space parameter is a number, make an indent string containing that
     // many spaces.
     if (typeof space === 'number') {
@@ -56835,7 +56835,7 @@ module.exports = function (value, replacer, space) {
     && (typeof replacer !== 'object' || typeof replacer.length !== 'number')) {
         throw new Error('JSON.stringify');
     }
-    
+
     // Make a fake root object containing our value under the key of ''.
     // Return the result of stringifying the value.
     return str('', {'': value});
@@ -72219,7 +72219,7 @@ class NotificationItem extends React.Component {
 
     if (notification.title) {
       title = (
-        React.createElement("h4", {className: "notification-title", style:  this._styles.title}, 
+        React.createElement("h4", {className: "notification-title", style:  this._styles.title},
           notification.title
         )
       );
@@ -72229,17 +72229,17 @@ class NotificationItem extends React.Component {
       if (this.props.allowHTML) {
         message = (
           React.createElement("div", {
-            className: "notification-message", 
-            style:  this._styles.messageWrapper, 
+            className: "notification-message",
+            style:  this._styles.messageWrapper,
             dangerouslySetInnerHTML:  _allowHTML(notification.message) }
           )
         );
       } else {
         message = (
           React.createElement("div", {
-            className: "notification-message", 
+            className: "notification-message",
             style:  this._styles.messageWrapper
-          }, 
+          },
             notification.message
           )
         );
@@ -72253,11 +72253,11 @@ class NotificationItem extends React.Component {
     ) {
       dismiss = (
         React.createElement("span", {
-          className: "notification-dismiss", 
-          onClick:  this._dismiss, 
-          style:  this._styles.dismiss, 
-          "aria-hidden":  true 
-        }, 
+          className: "notification-dismiss",
+          onClick:  this._dismiss,
+          style:  this._styles.dismiss,
+          "aria-hidden":  true
+        },
           "×"
         )
       );
@@ -72266,14 +72266,14 @@ class NotificationItem extends React.Component {
     if (notification.action) {
       actionButton = (
         React.createElement("div", {
-          className: "notification-action-wrapper", 
+          className: "notification-action-wrapper",
           style:  this._styles.actionWrapper
-        }, 
+        },
           React.createElement("button", {
-            className: "notification-action-button", 
-            onClick:  this._defaultAction, 
+            className: "notification-action-button",
+            onClick:  this._defaultAction,
             style:  this._styles.action
-          }, 
+          },
             notification.action.label
           )
         )
@@ -72286,16 +72286,16 @@ class NotificationItem extends React.Component {
 
     return (
       React.createElement("div", {
-        className:  className, 
-        onClick:  this._handleNotificationClick, 
-        onMouseEnter:  this._handleMouseEnter, 
-        onMouseLeave:  this._handleMouseLeave, 
-        style:  notificationStyle, 
+        className:  className,
+        onClick:  this._handleNotificationClick,
+        onMouseEnter:  this._handleMouseEnter,
+        onMouseLeave:  this._handleMouseLeave,
+        style:  notificationStyle,
         role: "alert"
-      }, 
-        title, 
-        message, 
-        dismiss, 
+      },
+        title,
+        message,
+        dismiss,
         actionButton
       )
     );
@@ -72356,13 +72356,13 @@ class NotificationContainer extends React.Component {
     notifications = this.props.notifications.map((notification) => {
       return (
         React.createElement(NotificationItem, {
-          ref:  'notification-' + notification.uid, 
-          key:  notification.uid, 
-          notification:  notification, 
-          getStyles:  this.props.getStyles, 
-          onRemove:  this.props.onRemove, 
-          noAnimation:  this.props.noAnimation, 
-          allowHTML:  this.props.allowHTML, 
+          ref:  'notification-' + notification.uid,
+          key:  notification.uid,
+          notification:  notification,
+          getStyles:  this.props.getStyles,
+          onRemove:  this.props.onRemove,
+          noAnimation:  this.props.noAnimation,
+          allowHTML:  this.props.allowHTML,
           children:  this.props.children}
         )
       );
@@ -72370,9 +72370,9 @@ class NotificationContainer extends React.Component {
 
     return (
       React.createElement("div", {
-        className:  'notifications-' + this.props.position, 
+        className:  'notifications-' + this.props.position,
         style:  this._style
-      }, 
+      },
         notifications
       )
     );
@@ -72914,13 +72914,13 @@ class NotificationSystem extends React.Component {
 
         return (
           React.createElement(NotificationContainer, {
-            ref:  'container-' + position, 
-            key:  position, 
-            position:  position, 
-            notifications:  _notifications, 
-            getStyles:  this._getStyles, 
-            onRemove:  this._didNotificationRemoved, 
-            noAnimation:  this.props.noAnimation, 
+            ref:  'container-' + position,
+            key:  position,
+            position:  position,
+            notifications:  _notifications,
+            getStyles:  this._getStyles,
+            onRemove:  this._didNotificationRemoved,
+            noAnimation:  this.props.noAnimation,
             allowHTML:  this.props.allowHTML}
           )
         );
@@ -72928,7 +72928,7 @@ class NotificationSystem extends React.Component {
     }
 
     return (
-      React.createElement("div", {className: "notifications-wrapper", style:  this.wrapper() }, 
+      React.createElement("div", {className: "notifications-wrapper", style:  this.wrapper() },
         containers
       )
     );
@@ -73645,7 +73645,7 @@ const NODE_TYPE_TO_COMPONENT = {
 };
 exports.NODE_TYPE_TO_COMPONENT = NODE_TYPE_TO_COMPONENT;
 const NODE_TYPE_TO_EXTRA_CLASSES = {
-  [_richTextFormat.NodeType.weak]: ['o⋄color⁚secondary']
+  [_richTextFormat.NodeType.weak]: ['o⋄colorꘌsecondary']
 }; // a clever key is critically needed in general, but even more critical
 // for lists, whom default keys "1, 2, 3" is dangerous if the list is re-ordered.
 // Thus we attempt to enrich the default key ($id) from various hints.
@@ -74452,7 +74452,7 @@ exports.default = matches;
 var matchesImpl;
 /**
  * Checks if a given element matches a selector.
- * 
+ *
  * @param node the element
  * @param selector the selector
  */
@@ -74479,7 +74479,7 @@ exports.default = qsa;
 var toArray = Function.prototype.bind.call(Function.prototype.call, [].slice);
 /**
  * Runs `querySelectorAll` on a given element.
- * 
+ *
  * @param element the element
  * @param selector the selector
  */
@@ -78115,7 +78115,7 @@ exports.default = contains;
 
 /**
  * Checks if an element contains another given element.
- * 
+ *
  * @param context the context element
  * @param node the element to check
  */
@@ -78176,7 +78176,7 @@ try {
 }
 /**
  * An `addEventListener` ponyfill, supports the `once` option
- * 
+ *
  * @param node the element
  * @param eventName the event name
  * @param handle the handler
@@ -78217,7 +78217,7 @@ exports.default = void 0;
 
 /**
  * A `removeEventListener` ponyfill
- * 
+ *
  * @param node the element
  * @param eventName the event name
  * @param handle the handler
@@ -78331,7 +78331,7 @@ exports.default = ownerDocument;
 
 /**
  * Returns the owner document of a given element.
- * 
+ *
  * @param node the element
  */
 function ownerDocument(node) {
@@ -79245,7 +79245,7 @@ exports.default = hasClass;
 
 /**
  * Checks if a given element has a CSS class.
- * 
+ *
  * @param element the element
  * @param className the CSS class name
  */
@@ -79267,7 +79267,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 /**
  * Adds a CSS class to a given element.
- * 
+ *
  * @param element the element
  * @param className the CSS class name
  */
@@ -79287,7 +79287,7 @@ function replaceClassName(origClass, classToRemove) {
 }
 /**
  * Removes a CSS class from a given element.
- * 
+ *
  * @param element the element
  * @param className the CSS class name
  */
@@ -79316,7 +79316,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 /**
  * Returns the owner window of a given element.
- * 
+ *
  * @param node the element
  */
 function ownerWindow(node) {
@@ -79337,7 +79337,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 /**
  * Returns one or all computed style properties of an element.
- * 
+ *
  * @param node the element
  * @param psuedoElement the style property
  */
@@ -83574,7 +83574,7 @@ var global = arguments[3];
 
           var listener = function() {
             self._state = 'loaded';
-            
+
             // Begin playback.
             playHtml5();
 
@@ -85175,7 +85175,7 @@ var global = arguments[3];
 
 /*!
  *  Spatial Plugin - Adds support for stereo and 3D audio where Web Audio is supported.
- *  
+ *
  *  howler.js v2.2.2
  *  howlerjs.com
  *

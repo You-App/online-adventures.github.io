@@ -708,11 +708,11 @@ html, body {
 	--o⋄color⁚boz__purple:   hsl(269, 83%, 77%);
 }
 
-.o⋄color⁚main {
+.o⋄colorꘌmain {
 	color: var(--o⋄color⁚fg--main);
 }
 
-.o⋄color⁚secondary {
+.o⋄colorꘌsecondary {
 	color: var(--o⋄color⁚fg--secondary);
 }
 
@@ -720,7 +720,7 @@ html, body {
 	color: var(--o⋄color⁚fg--ancillary);
 }
 
-.o⋄border-color⁚ancillary {
+.o⋄border-colorꘌancillary {
 	border-color: var(--o⋄color⁚fg--ancillary);
 }
 
@@ -1118,7 +1118,7 @@ button.o⋄button--inline {
 	padding: 0;
 }
 /* TODO should we really use px? */
-.o⋄padꘌ5 {
+.o⋄paddingꘌsmall {
 	padding: 5px;
 }
 .o⋄padꘌ7 {

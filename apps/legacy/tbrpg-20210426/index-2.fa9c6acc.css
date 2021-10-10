@@ -835,7 +835,7 @@ TODO steal themes from:
 	--o⋄color__boz__purple:   hsl(269, 83%, 77%);
 }
 
-.o⋄color⁚main {
+.o⋄colorꘌmain {
 	color: var(--o⋄color--fg⁚main);
 }
 
@@ -1594,7 +1594,7 @@ http://www.rw-designer.com/cursor-set/my-ultimate-sword-collection
   font-variant: normal;
   text-transform: none;
   line-height: 1;
-  
+
   /* Enable Ligatures ================ */
   letter-spacing: 0;
   -webkit-font-feature-settings: "liga";

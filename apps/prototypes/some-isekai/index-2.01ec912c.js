@@ -33479,7 +33479,7 @@ var on_node_exit = function (_a) {
       break;
 
     case 'weak':
-      classes.push('o⋄color⁚secondary');
+      classes.push('o⋄colorꘌsecondary');
       is_inline = true;
       break;
 
@@ -33931,7 +33931,7 @@ const NODE_TYPE_TO_COMPONENT = {
 };
 exports.NODE_TYPE_TO_COMPONENT = NODE_TYPE_TO_COMPONENT;
 const NODE_TYPE_TO_EXTRA_CLASSES = {
-  [_richTextFormat.NodeType.weak]: ['o⋄color⁚secondary']
+  [_richTextFormat.NodeType.weak]: ['o⋄colorꘌsecondary']
 };
 exports.NODE_TYPE_TO_EXTRA_CLASSES = NODE_TYPE_TO_EXTRA_CLASSES;
 const warn_kvp = (0, _memoizeOne.default)(() => console.warn(`${LIB} TODO KVP`)); // a clever key is critically needed in general, but even more critical
@@ -34739,7 +34739,7 @@ exports.default = matches;
 var matchesImpl;
 /**
  * Checks if a given element matches a selector.
- * 
+ *
  * @param node the element
  * @param selector the selector
  */
@@ -34766,7 +34766,7 @@ exports.default = qsa;
 var toArray = Function.prototype.bind.call(Function.prototype.call, [].slice);
 /**
  * Runs `querySelectorAll` on a given element.
- * 
+ *
  * @param element the element
  * @param selector the selector
  */
@@ -38482,7 +38482,7 @@ exports.default = contains;
 
 /**
  * Checks if an element contains another given element.
- * 
+ *
  * @param context the context element
  * @param node the element to check
  */
@@ -38543,7 +38543,7 @@ try {
 }
 /**
  * An `addEventListener` ponyfill, supports the `once` option
- * 
+ *
  * @param node the element
  * @param eventName the event name
  * @param handle the handler
@@ -38584,7 +38584,7 @@ exports.default = void 0;
 
 /**
  * A `removeEventListener` ponyfill
- * 
+ *
  * @param node the element
  * @param eventName the event name
  * @param handle the handler
@@ -38698,7 +38698,7 @@ exports.default = ownerDocument;
 
 /**
  * Returns the owner document of a given element.
- * 
+ *
  * @param node the element
  */
 function ownerDocument(node) {
@@ -39612,7 +39612,7 @@ exports.default = hasClass;
 
 /**
  * Checks if a given element has a CSS class.
- * 
+ *
  * @param element the element
  * @param className the CSS class name
  */
@@ -39634,7 +39634,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 /**
  * Adds a CSS class to a given element.
- * 
+ *
  * @param element the element
  * @param className the CSS class name
  */
@@ -39654,7 +39654,7 @@ function replaceClassName(origClass, classToRemove) {
 }
 /**
  * Removes a CSS class from a given element.
- * 
+ *
  * @param element the element
  * @param className the CSS class name
  */
@@ -39683,7 +39683,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 /**
  * Returns the owner window of a given element.
- * 
+ *
  * @param node the element
  */
 function ownerWindow(node) {
@@ -39704,7 +39704,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 /**
  * Returns one or all computed style properties of an element.
- * 
+ *
  * @param node the element
  * @param psuedoElement the style property
  */
@@ -45557,11 +45557,11 @@ var global = arguments[3];
 
   collectChildrenReverseFilter.filterName = 'collectChildren';
   /*
-  
+
   LCS implementation that supports arrays or strings
-  
+
   reference: http://en.wikipedia.org/wiki/Longest_common_subsequence_problem
-  
+
   */
 
   var defaultMatch = function defaultMatch(array1, array2, index1, index2) {
