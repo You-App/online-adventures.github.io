@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en" class="o⋄top-container">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta http-equiv="Content-Language" content="en">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<title>Immortal Clicker</title>
+	<meta name="title" content="Immortal Clicker">
+	<meta name="description" content="Defy the Heavens to become an Immortal! Or do you like being an ant?">
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="https://metatags.io/">
+	<meta property="og:title" content="Immortal Clicker">
+	<meta property="og:description" content="Defy the Heavens to become an Immortal! Or do you like being an ant?">
+	<meta property="og:image"
+	      content="https://metatags.io/assets/meta-tags-16a33a6a8531e519cc0936fbba0ad904e52d35f34a46c97a2c9f6f7dd7d336f2.png">
+	<meta property="twitter:card" content="summary_large_image">
+	<meta property="twitter:url" content="https://metatags.io/">
+	<meta property="twitter:title" content="Immortal Clicker">
+	<meta property="twitter:description" content="Defy the Heavens to become an Immortal! Or do you like being an ant?">
+	<meta property="twitter:image"
+	      content="https://metatags.io/assets/meta-tags-16a33a6a8531e519cc0936fbba0ad904e52d35f34a46c97a2c9f6f7dd7d336f2.png">
+	<meta name="author" content="Offirmo">
+	<meta name="monetization" content="$ilp.uphold.com/26PeD6EzMhYJ">
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.4c58af95.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.20983980.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.f3f5b83f.png">
+	<link rel="manifest" href="/favicons/site.webmanifest">
+	<link rel="mask-icon" href="/safari-pinned-tab.35f81b57.svg" color="#b91d47">
+	<link rel="icon shortcut" href="/favicon.92c1d7f5.ico">
+	<meta name="msapplication-TileColor" content="#b91d47">
+	<meta name="msapplication-config" content="/favicons/browserconfig.xml">
+	<meta name="theme-color" content="#000000">
+	<style>:root {
+		--bg: black;
+		--fg: #fafafa;
+		--font: -apple-system, BlinkMacSystemFont, "lucida grande", roboto, noto, ubuntu, sans-serif
+	}
+
+	html, body {
+		width: 100%;
+		background-color: var(--bg);
+		color: var(--fg);
+		font-family: var(--font);
+		margin: 0;
+		padding: 0
+	}
+
+	iframe {
+		width: 100%;
+		background-color: #fff;
+		border: 0;
+		position: absolute
+	}
+
+	.o⋄top-container {
+		height: 100%;
+		flex-direction: column;
+		display: flex
+	}
+
+	.blinking {
+		animation: blinkingText 1.2s ease-in-out infinite
+	}
+
+	@keyframes blinkingText {
+		0% {
+			opacity: 1
+		}
+		33% {
+			opacity: 0
+		}
+	}
+
+	.progressive {
+		display: none
+	}
+
+	#loader {
+		width: 100%;
+		background-color: var(--bg);
+		background-position: 50%;
+		background-size: cover;
+		position: absolute
+	}
+
+	#loader > div {
+		text-align: center;
+		background-color: #00000080;
+		border-radius: .3em;
+		margin: auto auto 10%;
+		padding: 1em;
+		font-size: x-large
+	}</style>
+	<script>!function (t = !0) {
+		const n = location.pathname.split('/').slice(-1)[0] || ''
+		if (!n) return
+		const i = n.endsWith('.html') || n.endsWith('.htm')
+		let o = location.pathname
+		if (i) {
+			if ('index.html' !== n) return
+			if (t) return
+			o = location.pathname.split('/').slice(0, -1).join('/') + '/'
+		} else o = location.pathname + '/'
+		const a = location.origin + o + location.search + location.hash
+		location.replace(a)
+	}()</script>
+</head>
+<body class="o⋄body⁚full-viewport o⋄top-container">
+<noscript>You need to enable JavaScript to run this app.</noscript>
+<iframe class="o⋄top-container progressive" importance="high" loading="eager" scrolling="no"><p>Error. Your app should
+	be here.</p>
+	<p>Check your add blocker?</p></iframe>
+<div id="loader" class="o⋄top-container">
+	<div><p id="legend"></p>
+		<p class="blinking">Loading…</p> <label class="progressive">
+			<progress></progress>
+			0% </label></div>
+</div>
+</body>
+<script>window.user_settings = {}</script>
+<script>const PROP = 'oᐧloader', DEFAULT_RSRC_ID = 'overall', LIB = 'iframe-loading', logger = (() => {
+	try {
+		return window._debug.v1.getLogger({name: LIB})
+	} catch {
+	}
+	return window.localStorage.getItem(`🛠UDA.override.logger.${LIB}.logLevel`) ? console : {
+		log() {
+		}, info() {
+		}, warn() {
+		}, error() {
+		},
+	}
+})(), user_settings = window.user_settings || {}
+logger.log('[IL] starting…', {location: location, user_settings: user_settings})
+let state = {
+	settings: {
+		bg_color: 'black',
+		fg_color: 'hsl(0, 0%, 98%)',
+		bg_picture: null,
+		app_queryparams: [user_settings.app_queryparams, user_settings.app_url && new URLSearchParams(user_settings.app_url.split('?')[1]).toString(), new URLSearchParams(location.search).toString()].filter((e => !!e)).join('&'),
+		legend: void 0,
+		expected_rsrc_count: 1, ...user_settings,
+		app_url: (() => {
+			let e = user_settings.app_url || './index-2.html'
+			return e = e.split('?')[0], e
+		})(),
+	}, is_rsrc_loaded: {overall: !1}, error: null,
+}
+const LS_KEY_CACHED_CONFIG = `XOF.${LIB}.config_cache.url(${state.settings.app_url})`
+
+function get_load_infos(e) {
+	const t = Object.keys(e.is_rsrc_loaded), r = t.reduce(((t, r) => t + (e.is_rsrc_loaded[r] ? 1 : 0)), 0),
+		o = t.length, n = Math.max(e.settings.expected_rsrc_count, o)
+	return {expected_full_count: n, current_count: o, current_loaded_count: r, is_loaded: r === n}
+}
+
+function on_error(e, t) {
+	return logger.error('[IL] on error', {error: t, state: e}), e = {...e, error: t}
+}
+
+function update_settings(e, t) {
+	return e = {...e, settings: {...e.settings, ...t}}
+}
+
+function on_rsrc_loaded(e, t = 'overall') {
+	return e = {...e, is_rsrc_loaded: {...e.is_rsrc_loaded, [t]: !0}}
+}
+
+function render(e, t) {
+	const r = document.getElementsByTagName('iframe')[0], o = document.getElementById('loader'),
+		n = document.getElementById('legend'),
+		s = (document.getElementsByTagName('progress')[0], document.getElementsByTagName('label')[0]),
+		a = window.frames[0], g = get_load_infos(e)
+	if (logger.log('[IL] rendering…', {caller: t, state: e, load_infos: g}), g.is_loaded || e.error) {
+		try {
+			window.document.title = a.document.title
+		} catch {
+		}
+		if ('block' !== r.style.display) {
+			function l() {
+				o.style.display = 'none'
+			}
+
+			logger.log('[IL] !!! LOADED !!!'), r.style.display = 'block', s.display = 'none', o.style.pointerEvents = 'none'
+			try {
+				o.animate([{opacity: 1}, {opacity: 0}], {duration: 700, easing: 'ease-out', fill: 'forwards'})
+				setTimeout(l, 700)
+			} catch (c) {
+				logger.warn('[IL] [optional feature] Web Animation API error:', c), l()
+			}
+		}
+		return
+	}
+	if (!r.src) {
+		logger.log('[IL] 1st render!')
+		const d = new URLSearchParams(e.settings.app_queryparams)
+		d.set(PROP, !0), d.sort(), r.src = e.settings.app_url + '?' + d.toString(), r.onload = e => logger.log('[IL] iframe loaded', {args: e}), r.onerror = e => logger.warn('[IL] iframe something wrong happened', {args: e}), document.addEventListener('deviceready', (() => {
+			'splashscreen' in navigator && setTimeout((() => {
+				logger.log('[IL] hiding cordova loader'), navigator.splashscreen.hide()
+			}), 10)
+		}), !1), logger.log(`[IL] Now waiting for the iframe to load "${r.src}"`)
+	}
+	if (e.settings.legend && (n.innerText = e.settings.legend), document.documentElement.style.setProperty('--fg', e.settings.fg_color), document.documentElement.style.setProperty('--bg', e.settings.bg_color), e.settings.bg_picture) {
+		const [_, u = '50%', m = '50%'] = e.settings.bg_picture
+		o.style.backgroundImage = _, o.style.backgroundPositionX = u, o.style.backgroundPositionY = m
+	}
+	let i = null
+	try {
+		i = a.document.title
+	} catch {
+	}
+	window.document.title = i || e.settings.legend || ''
+}
+
+window[PROP] ? logger.error('[IL] Error! iframe-loading recursion!') : window[PROP] = {
+	configure({
+		          legend: e,
+		          expected_rsrc_count: t,
+		          bg_color: r,
+		          fg_color: o,
+		          bg_picture: n,
+		          ...s
+	          } = {}) {
+		Object.keys(s).length > 0 && logger.error('[IL] configure_loader() unrecognized params:', s)
+		try {
+			localStorage.setItem(LS_KEY_CACHED_CONFIG, JSON.stringify({
+				legend: e,
+				expected_rsrc_count: t,
+				bg_color: r,
+				fg_color: o,
+				bg_picture: n,
+			}))
+		} catch {
+		}
+		e = e || state.settings.legend, t = t || state.settings.expected_rsrc_count, r = r || state.settings.bg_color, o = o || state.settings.fg_color, n = n || state.settings.bg_picture, state = update_settings(state, {
+			legend: e,
+			expected_rsrc_count: t,
+			bg_color: r,
+			fg_color: o,
+			bg_picture: n,
+		}), render(state, 'configure')
+	}, on_rsrc_loaded(e) {
+		state = on_rsrc_loaded(state, e), render(state, 'on_rsrc_loaded')
+	},
+}
+try {
+	const e = JSON.parse(localStorage.getItem(LS_KEY_CACHED_CONFIG))
+	e && (logger.log('[IL] found cached config, restoring…', {cached_config: e}), window[PROP].configure(e))
+} catch (e) {
+	logger.warn(e)
+} finally {
+	render(state, 'initial')
+}
+setTimeout((() => {
+	let e = get_load_infos(state).is_loaded || state.settings.legend ? 20 : 10
+	setTimeout((() => {
+		get_load_infos(state).is_loaded || (state = on_error(state, new Error('Timeout waiting for sub-frame load!')), render(state))
+	}), 1e3 * e)
+}), 1e4), window.addEventListener('message', (({data: e, origin: t, source: r}) => {
+	if (!e[PROP]) return
+	logger.log(`[IL] 📥 PM ["${PROP}"] received`, e[PROP])
+	const {method: o, args: n} = e[PROP]
+	window[PROP][o](...n)
+}), !1)</script>
+<script type="module"></script>
+</html>
