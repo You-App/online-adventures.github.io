@@ -1,2 +1,7 @@
-This is a hobby site.
-Just tell me if there is anything that could be a risk for the community.
+# securitytxt.org/
+
+This is a hobby website.
+
+Just tell me if there is anything that could be harmful for the community.
+
+Contact: https://github.com/online-adventures/online-adventures.github.io/issues
