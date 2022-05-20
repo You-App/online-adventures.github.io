@@ -1,0 +1,13 @@
+name: online-adventur.es -- database -- prod
+id: 'ari:cloud:compass:f573c9bb-4501-4b4c-86b4-824294723394:component/e6136df2-6e76-402f-a939-712397cae8c3/47b389d7-71fe-4846-b0b1-eb98ab1fc9ad'
+description: Database shared across online-adventur.es/
+ownerId: 'ari:cloud:teams::team/1a735968-945f-4b9e-a3af-cb087112c840'
+fields: {}
+links:
+  - name: ''
+    type: DASHBOARD
+    url: 'https://dashboard.heroku.com/apps/online-adventures-prod/resources'
+relationships: {}
+
+# Learn more about formatting compass.yml:
+# https://go.atlassian.com/compass-yml-format

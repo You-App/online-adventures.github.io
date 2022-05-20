@@ -1,0 +1,17 @@
+name: online-adventur.es -- Netlify functions -- PROD
+id: 'ari:cloud:compass:f573c9bb-4501-4b4c-86b4-824294723394:component/e6136df2-6e76-402f-a939-712397cae8c3/03fa3a6e-5679-4728-bd8a-f044114a3dca'
+description: Backend API shared across online-adventur.es
+ownerId: 'ari:cloud:teams::team/1a735968-945f-4b9e-a3af-cb087112c840'
+fields:
+   tier: 2
+links:
+   - name: ''
+     type: REPOSITORY
+     url: 'https://github.com/online-adventures/online-adventures.github.io/tree/master/netlify/functions'
+   - name: ''
+     type: DASHBOARD
+     url: 'https://app.netlify.com/sites/online-adventures/functions'
+relationships: {}
+
+# Learn more about formatting compass.yml:
+# https://go.atlassian.com/compass-yml-format

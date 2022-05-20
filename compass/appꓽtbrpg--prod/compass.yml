@@ -1,0 +1,16 @@
+name: The Boring RPG -- PROD
+id: 'ari:cloud:compass:f573c9bb-4501-4b4c-86b4-824294723394:component/e6136df2-6e76-402f-a939-712397cae8c3/b02f370a-b60c-485a-9dab-de89f164cc42'
+description: browser game
+ownerId: 'ari:cloud:teams::team/1a735968-945f-4b9e-a3af-cb087112c840'
+fields: {}
+links:
+  - name: ''
+    type: REPOSITORY
+    url: 'https://github.com/Offirmo/offirmo-monorepo'
+  - name: ''
+    type: DOCUMENT
+    url: 'https://github.com/Offirmo/offirmo-monorepo/tree/master/stack--2022/0-CONTRIBUTING'
+relationships: {}
+
+# Learn more about formatting compass.yml:
+# https://go.atlassian.com/compass-yml-format

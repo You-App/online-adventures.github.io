@@ -1,0 +1,10 @@
+name: www.online-adventur.es/
+id: 'ari:cloud:compass:f573c9bb-4501-4b4c-86b4-824294723394:component/e6136df2-6e76-402f-a939-712397cae8c3/70e735b0-cb07-4b84-955f-5404280688e0'
+description: Root website
+ownerId: 'ari:cloud:teams::team/1a735968-945f-4b9e-a3af-cb087112c840'
+fields: {}
+links: []
+relationships: {}
+
+# Learn more about formatting compass.yml:
+# https://go.atlassian.com/compass-yml-format
